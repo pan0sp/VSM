@@ -239,7 +239,7 @@ button { cursor: pointer; }
 .tab {
   border: 0;
   background: transparent;
-  padding: 8px 12px 9px;
+  padding: 8px 10px 9px;
   font-weight: 600;
   font-size: 13px;
   color: var(--ink-2);
@@ -377,6 +377,68 @@ input[type="color"].sw.custom::-moz-color-swatch { box-shadow: inset 0 0 0 2px v
 .btn.warn { color: var(--accent); }
 .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
 
+/* Diagram options */
+.seg.small button { padding: 4px 10px; font-family: var(--f-body); font-size: 12px; }
+.chk { display: grid; grid-template-columns: auto 1fr; gap: 9px; align-items: start; font-size: 13px; cursor: pointer; }
+.chk input { margin-top: 3px; accent-color: var(--accent); }
+.chk small { display: block; color: var(--ink-2); font-size: 11.5px; line-height: 1.3; }
+
+/* Data flows */
+.cov { display: grid; gap: 6px; }
+.cov-bar { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.cov-bar span { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .3s ease; }
+.cov-tx { font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.cov-tx b { color: var(--ink); }
+.ai { border: 1px solid var(--rule); border-radius: 10px; padding: 12px; background: var(--surface-2); }
+.ai textarea { border: 1px solid var(--rule); background: var(--surface); border-radius: 7px; padding: 7px 9px; width: 100%; resize: vertical; font-size: 13px; }
+.ai textarea:focus { border-color: var(--accent); outline: none; }
+.fch { border-top: 1px solid var(--rule); }
+.fch > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 9px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 7px 0; }
+.fch > summary::-webkit-details-marker { display: none; }
+.fch .dot { width: 9px; height: 9px; border-radius: 50%; }
+.fch .nm { font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fch .nm small { display: block; font-weight: 400; color: var(--ink-2); font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; }
+.fch .cnt { font-family: var(--f-mono); font-size: 11px; color: var(--ink-2); border: 1px solid var(--rule); border-radius: 99px; padding: 0 7px; }
+.fch .cnt.zero { color: var(--accent); border-color: var(--accent); }
+.fch.sel > summary .nm { color: var(--accent); }
+.fed { display: grid; gap: 5px; padding: 0 0 10px; }
+.fhd { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 6px; align-items: center; font-size: 11.5px; color: var(--ink-2); padding: 2px 0 2px; }
+.fhd span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fhd .a { text-align: right; }
+.fhd .ar { font-family: var(--f-mono); }
+.frow { display: grid; grid-template-columns: 30px minmax(0, 1fr) 26px; gap: 5px; align-items: center; }
+.fdir {
+  height: 28px;
+  border: 1px solid var(--rule);
+  background: var(--surface-2);
+  border-radius: 6px;
+  font-family: var(--f-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 0;
+}
+.fdir:hover { border-color: var(--accent); }
+.frow input, .fadd input {
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 12.5px;
+  min-width: 0;
+  width: 100%;
+}
+.frow input:focus, .fadd input:focus { border-color: var(--accent); outline: none; }
+.frow .x { border: 0; background: none; color: var(--ink-2); font-size: 16px; line-height: 1; padding: 0; height: 26px; }
+.frow .x:hover { color: var(--accent); }
+.fadd { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px; }
+.fadd button { border: 1px solid var(--rule); background: var(--surface); border-radius: 6px; font-size: 12.5px; font-weight: 600; padding: 4px 10px; }
+.fempty { font-size: 12.5px; color: var(--ink-2); }
+ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 3px; margin: 0; }
+.io li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 6px; font-size: 13px; }
+.io .ar { font-family: var(--f-mono); color: var(--ink-2); text-align: center; }
+.io .via { color: var(--ink-2); font-size: 11.5px; display: block; }
+
 /* Recursion map */
 .tree, .tree ul { list-style: none; margin: 0; padding: 0; }
 .tree ul { margin-left: 13px; padding-left: 12px; border-left: 1px dashed var(--rule); }
@@ -501,6 +563,7 @@ input[type="color"].sw.custom::-moz-color-swatch { box-shadow: inset 0 0 0 2px v
 }
 .tip .k { font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-2); letter-spacing: .05em; text-transform: uppercase; display: block; }
 .tip b { font-weight: 650; }
+.tip .tf { display: block; margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--rule); color: var(--ink-2); font-size: 12px; }
 
 .overlay-tl { position: absolute; top: 12px; left: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; z-index: 2; max-width: calc(100% - 24px); }
 .level-chip {
@@ -744,7 +807,8 @@ input[type="color"].sw.custom::-moz-color-swatch { box-shadow: inset 0 0 0 2px v
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
       </button>
       <button class="tab" role="tab" id="tab-model" aria-controls="pane-model" aria-selected="true">Model</button>
-      <button class="tab" role="tab" id="tab-map" aria-controls="pane-map" aria-selected="false">Recursion map</button>
+      <button class="tab" role="tab" id="tab-flows" aria-controls="pane-flows" aria-selected="false">Flows</button>
+      <button class="tab" role="tab" id="tab-map" aria-controls="pane-map" aria-selected="false">Recursion</button>
       <button class="tab" role="tab" id="tab-guide" aria-controls="pane-guide" aria-selected="false">Guide</button>
     </div>
 
@@ -765,10 +829,24 @@ input[type="color"].sw.custom::-moz-color-swatch { box-shadow: inset 0 0 0 2px v
           <select class="inp" id="preset" aria-label="Apply a labels preset to this level">
             <option value="">Choose…</option>
             <option value="canonical">Canonical (Beer)</option>
+            <option value="example">Model company with data flows</option>
             <option value="hospital">Example: regional hospital</option>
             <option value="software">Example: software company</option>
           </select>
         </div>
+      </div>
+
+      <div class="block">
+        <div class="eyebrow">Diagram</div>
+        <div class="row">
+          <span>System 2 centre</span>
+          <div class="seg small" role="group" aria-label="Where the System 2 centre sits">
+            <button id="s2Inside" type="button" aria-pressed="true" title="Inside the metasystem, as usually drawn">Inside</button>
+            <button id="s2Bridge" type="button" aria-pressed="false" title="On the metasystem boundary, bridging management and operations">Bridge</button>
+          </div>
+        </div>
+        <label class="chk"><input type="checkbox" id="extS4cmd"><span>S4 to command channel<small>Extension: anticipatory link into the resource bargain</small></span></label>
+        <label class="chk"><input type="checkbox" id="extS14"><span>S1 ↔ S4 direct<small>Extension: operations and intelligence talk directly</small></span></label>
       </div>
 
       <div class="block">
@@ -787,6 +865,36 @@ input[type="color"].sw.custom::-moz-color-swatch { box-shadow: inset 0 0 0 2px v
           <button class="btn warn" id="resetAll" type="button">Reset everything</button>
         </div>
         <div class="src" id="saveNote">Changes are saved in this browser.</div>
+      </div>
+    </section>
+
+    <section class="pane" id="pane-flows" role="tabpanel" aria-labelledby="tab-flows" hidden>
+      <div class="block">
+        <div class="eyebrow" id="flowsEyebrow">Data flows · Level 0</div>
+        <div class="cov">
+          <div class="cov-bar"><span id="covFill"></span></div>
+          <div class="cov-tx" id="covTx"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="btnExample" type="button">Load model company</button>
+          <button class="btn" id="btnSuggest" type="button">Fill gaps with standard flows</button>
+          <button class="btn warn" id="btnClearFlows" type="button">Clear flows</button>
+        </div>
+        <div class="src" id="flowsNote">Each channel can carry named flows. Their direction drives the moving dots in the model.</div>
+      </div>
+      <div class="block ai" id="aiBlock">
+        <div class="eyebrow">Map an organization with Claude</div>
+        <label class="fld"><span>Describe the organization: what it does, its main units, who it serves, how work is coordinated</span>
+          <textarea id="aiBrief" rows="5" placeholder="A regional food co-op with three grocery stores, a bakery and a delivery service…"></textarea></label>
+        <div class="btn-row">
+          <button class="btn primary" id="aiRun" type="button" disabled>Map this level</button>
+          <button class="btn" id="aiStop" type="button" hidden>Stop</button>
+        </div>
+        <div class="src" id="aiStatus" aria-live="polite">Checking whether Claude is available here…</div>
+      </div>
+      <div class="block">
+        <div class="eyebrow">Channels and their flows</div>
+        <div id="flowList"></div>
       </div>
     </section>
 
@@ -814,6 +922,18 @@ input[type="color"].sw.custom::-moz-color-swatch { box-shadow: inset 0 0 0 2px v
           <div class="leg"><svg viewBox="0 0 34 26"><path d="M17 2l11 11-11 11L6 13z" fill="#cf8a1f" fill-opacity=".14" stroke="#cf8a1f" stroke-width="1.5"/></svg><div><b>Rhombus</b><span>Metasystem: the management of the whole, enclosing 3, 4 and 5</span></div></div>
           <div class="leg"><svg viewBox="0 0 34 26"><path d="M3 13h24" stroke="#d43d33" stroke-width="2"/><path d="M24 9l5 4-5 4" fill="none" stroke="#d43d33" stroke-width="2"/></svg><div><b>Algedonic channel</b><span>Alarm signals from operations straight to System 5</span></div></div>
         </div>
+      </div>
+      <div class="block">
+        <h3>Channels in this model</h3>
+        <p>System 5 connects to System 4 and monitors the 3–4 homeostat; it has no direct line to System 3. System 3 reaches each operation only through its management square, which is that operation's own metasystem, on the command channel. The 3* audit is the sporadic exception Beer drew reaching into the operations.</p>
+        <p>Two extensions can be switched on or off in the Model panel. One runs from System 4 into the command channel, reading the resource bargain as anticipatory. The other links the operations directly with System 4. Neither appears in the commonly reproduced diagram.</p>
+        <p>The System 2 centre sits inside the metasystem. The Bridge option draws it on the boundary instead and, in 3D, puts all of System 2 on its own plane between the operations and the metasystem. It is an interpretive option, prompted by a Stanford Medicine study (<i>Nature Neuroscience</i>, September 2026) reporting that the forebrain and midbrain arise from one progenitor lineage and the hindbrain from another.</p>
+      </div>
+      <div class="block">
+        <h3>Data flows and recursion</h3>
+        <p>The Flows tab names what travels along each channel and in which direction; the moving dots follow those directions. The coverage bar shows how many channels carry something. An empty channel is worth asking about: in a real organization it often marks a missing function.</p>
+        <p>Load the model company to see a bicycle maker mapped across three levels. Fill gaps with standard flows gives any level a neutral starting point. In a Claude artifact you can also describe an organization and let Claude map it, then map each operation one level down from the inspector.</p>
+        <p>When you open an operation, its environment becomes the total environment one level down and its management square becomes the metasystem, following Beer's recursion.</p>
       </div>
       <div class="block">
         <h3>How the 3D view uses depth</h3>
@@ -879,6 +999,8 @@ input[type="color"].sw.custom::-moz-color-swatch { box-shadow: inset 0 0 0 2px v
         </div>
       </div>
       <p class="summary" id="iSummary"></p>
+      <div class="isec" id="iFlowSec"><h4>Data flows</h4><div id="iFlows"></div></div>
+      <div class="isec" id="iIOSec"><h4>Information in and out</h4><ul class="io" id="iIO"></ul></div>
       <div id="iRecur"></div>
       <div class="isec" id="iLinksSec"><h4>Connected</h4><ul class="links" id="iLinks"></ul></div>
       <div class="isec" id="iPracticeSec"><h4>In practice</h4><ul id="iPractice"></ul></div>
@@ -955,7 +1077,7 @@ const KB = {
   },
   s2c: {
     kind: 'System 2', role: 'Coordination centre',
-    summary: 'The regulatory centre of System 2 links the coordination channel to System 3. It holds the overall picture of schedules and shared services, so that System 3 can see where oscillation is building and tune the rules, without intervening in each operation.',
+    summary: 'The regulatory centre of System 2 sits inside the metasystem and links the coordination channel to System 3. It holds the overall picture of schedules and shared services, so that System 3 can see where oscillation is building and tune the rules, without intervening in each operation. The bridge view (Model panel) draws it on the metasystem boundary instead, as the region joining management and operations.',
     practice: ['A central planning office, a patient-flow hub, an engineering programme office'],
     questions: ['Who maintains the shared rules, and how are they changed?', 'Does System 3 rely on this centre, or bypass it?'],
     watch: ['A coordination centre that grows into a second line of management']
@@ -990,7 +1112,7 @@ const KB = {
   },
   meta: {
     kind: 'Metasystem', role: 'Management of the whole',
-    summary: 'The metasystem is the management of the whole system: Systems 2, 3, 4 and 5 together, drawn here as Beer\'s rhombus around 3, 4 and 5. It exists to serve the operations, providing the cohesion and adaptation they cannot provide for themselves. "Meta" means a higher logical order, not a higher status.',
+    summary: 'The metasystem is the management of the whole system: Systems 2, 3, 4 and 5 together, drawn here as Beer\'s rhombus around 3, 4, 5 and the System 2 centre. It exists to serve the operations, providing the cohesion and adaptation they cannot provide for themselves. "Meta" means a higher logical order, not a higher status.',
     practice: ['The leadership and support functions taken together'],
     questions: ['Does the metasystem add value the operations recognize?', 'Is its variety enough to manage the operations without smothering them?'],
     watch: ['A metasystem that serves itself rather than the operations']
@@ -1068,17 +1190,31 @@ const KB = {
   },
   s45: {
     kind: 'Channel', role: 'Policy and intelligence',
-    summary: 'System 5 and System 4 inform each other: identity and policy shape what System 4 looks for, and what System 4 finds can challenge identity. With the policy and control link, this lets System 5 monitor the 3–4 homeostat.',
+    summary: 'System 5 and System 4 inform each other: identity and policy shape what System 4 looks for, and what System 4 finds can challenge identity.',
     practice: ['Board strategy sessions, horizon reports to the board'],
     questions: ['Does what System 4 learns ever change policy?'],
     watch: ['A board captured by the latest opportunity']
   },
-  s35: {
-    kind: 'Channel', role: 'Policy and control',
-    summary: 'System 5 and System 3 inform each other: policy constrains how the operations are managed, and System 3 reports the state of the whole. System 5 uses this and the link to System 4 to judge the balance between present and future.',
-    practice: ['Executive reports to the board, policy directives'],
-    questions: ['Does System 5 hear the present through System 3 only, or through other channels too?'],
-    watch: ['System 5 managing operations through this channel']
+  s5h: {
+    kind: 'Channel', role: 'System 5 and the 3–4 homeostat',
+    summary: 'System 5 does not manage System 3 directly. It monitors the conversation between System 3 and System 4, and steps in only when the two cannot settle the balance between the present and the future on their own.',
+    practice: ['Board reviews of plans against current capacity', 'Strategy days where operations and strategy present together'],
+    questions: ['How does System 5 hear both sides of the 3–4 debate?', 'When did it last have to arbitrate, and how?'],
+    watch: ['System 5 bypassing the homeostat and instructing System 3']
+  },
+  s4cmd: {
+    kind: 'Channel', role: 'System 4 to the command channel',
+    summary: 'An extension: System 4 feeds the command channel directly, so forecasts and plans shape the resource bargain before it reaches the operations. Read this way, the command channel is anticipatory rather than only reactive. It is not part of the commonly reproduced diagram; switch it off in the Model panel to see the canonical form.',
+    practice: ['Demand forecasts feeding next quarter\'s budgets', 'Planned capability changes built into targets'],
+    questions: ['Which forecasts change what the operations are asked to do?', 'How far ahead does the resource bargain look?'],
+    watch: ['Plans imposed through the command channel without System 3\'s view of current capacity']
+  },
+  s14: {
+    kind: 'Channel', role: 'Operations and System 4',
+    summary: 'An extension: a direct link between the operations and System 4. The operations sit closest to customers and suppliers, so they see early signals about the future; System 4 can test ideas with them. Switch it off in the Model panel to see the canonical form.',
+    practice: ['Field insights from front-line staff', 'Pilots and prototype trials run inside an operation'],
+    questions: ['How do signals noticed in the operations reach System 4?', 'Where does System 4 test its ideas before they become plans?'],
+    watch: ['System 4 working from desk research alone']
   },
   s4f: {
     kind: 'Channel', role: 'Environmental scanning',
@@ -1156,83 +1292,115 @@ function edgePoint(el, dx, dy) {
   return [s.cx + ux * best, s.cy + uy * best];
 }
 
-function buildLayout(n) {
+function buildLayout(n, opts) {
+  opts = opts || layoutOpts();
   const els = [], chans = [], byId = {};
   const yOp = i => -OP_GAP * i;
   const yLast = yOp(n - 1);
   const add = o => { o.outline = outlineOf(o.shape); els.push(o); byId[o.id] = o; return o; };
-  const envTop = 78, envBottom = yLast - 17;
+  const envTop = 80, envBottom = yLast - 17;
   const envCy = (envTop + envBottom) / 2, envRy = (envTop - envBottom) / 2;
+  const bridge = opts.s2 === 'bridge';
+  const S2L = bridge ? LAYER.mid : LAYER.meta;     // the bridge view puts all of System 2 between the two planes
+  const ops = Array.from({ length: n }, (_, i) => i);
 
   add({ id: 'env', type: 'envTotal', group: 'env', container: true, layer: LAYER.env, zoff: -6, z2: -0.6,
-    shape: { kind: 'blob', cx: -47, cy: envCy, rx: 20.5, ry: envRy, p: 3.4, amp: 0.03, seed: 2.1 },
+    shape: { kind: 'blob', cx: -57, cy: envCy, rx: 20.5, ry: envRy, p: 3.4, amp: 0.03, seed: 2.1 },
     label: { dx: 0, dy: envTop - envCy - 6, w: 32, big: true } });
   add({ id: 'fut', type: 'envFuture', group: 'env', layer: LAYER.env, z2: -0.45,
-    shape: { kind: 'blob', cx: -46, cy: 52, rx: 15, ry: 12.5, p: 2.2, amp: 0.07, seed: 7.3 },
+    shape: { kind: 'blob', cx: -56, cy: 57, rx: 15, ry: 12.5, p: 2.2, amp: 0.07, seed: 7.3 },
     label: { dx: 0, dy: 0, w: 24 } });
-  for (let i = 0; i < n; i++) {
+  ops.forEach(i => {
     const y = yOp(i);
     add({ id: 'e' + i, type: 'envOp', group: 'env', idx: i, layer: LAYER.env, z2: -0.45,
-      shape: { kind: 'blob', cx: -50, cy: y, rx: 12, ry: 9.5, p: 2.3, amp: 0.08, seed: 11.7 + i * 3.1 },
+      shape: { kind: 'blob', cx: -60, cy: y, rx: 12, ry: 9.5, p: 2.3, amp: 0.08, seed: 11.7 + i * 3.1 },
       label: { dx: 0, dy: 0, w: 20 } });
     add({ id: 'o' + i, type: 'op', group: 'ops', idx: i, layer: LAYER.ops, z2: 0,
-      shape: { kind: 'circle', cx: -14, cy: y, r: 8.5 }, label: { dx: 0, dy: 0, w: 16, nestDy: 6.2 } });
+      shape: { kind: 'circle', cx: -18, cy: y, r: 8.5 }, label: { dx: 0, dy: 0, w: 16, nestDy: 6.2 } });
     add({ id: 'm' + i, type: 'mgmt', group: 'ops', idx: i, layer: LAYER.ops, z2: 0,
-      shape: { kind: 'square', cx: 12, cy: y + 7, s: 10 }, label: { dx: 0, dy: 0, w: 14 } });
-    add({ id: 'a' + i, type: 's2', group: 'meta', idx: i, layer: LAYER.meta, z2: 0,
-      shape: { kind: 'tri', cx: 30, cy: y + 7, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
-  }
+      shape: { kind: 'square', cx: 9, cy: y + 7, s: 10 }, label: { dx: 0, dy: 0, w: 14 } });
+    add({ id: 'a' + i, type: 's2', group: 'meta', idx: i, layer: S2L, z2: 0,
+      shape: { kind: 'tri', cx: 27, cy: y + 7, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
+  });
   add({ id: 'meta', type: 'meta', group: 'meta', container: true, layer: LAYER.meta, z2: -0.3,
-    shape: { kind: 'rhombus', cx: 12, cy: 50, hw: 24, hh: 37 }, label: { dx: 0, dy: 37 + 4, w: 30, big: true, nameOnly: true } });
-  add({ id: 's2', type: 's2c', group: 'meta', layer: LAYER.meta, z2: 0,
-    shape: { kind: 'tri', cx: 30, cy: 33, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
-  add({ id: 's3', type: 's3', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 12, cy: 33, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
+    shape: { kind: 'rhombus', cx: 14, cy: 52, hw: 35, hh: 39 }, label: { dx: 0, dy: 39 + 4, w: 30, big: true, nameOnly: true } });
+  // System 2's regulatory centre: inside the metasystem (as usually drawn) or on its boundary as a bridge
+  add({ id: 's2', type: 's2c', group: 'meta', layer: S2L, z2: 0.05,
+    shape: { kind: 'tri', cx: 27, cy: bridge ? 27.5 : 37, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
+  add({ id: 's3', type: 's3', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: 37, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
   add({ id: 's3s', type: 's3s', group: 'meta', layer: LAYER.meta, z2: 0,
-    shape: { kind: 'tri', cx: -6, cy: 26, w: 9, h: 8, dir: 'down' }, label: { dx: -6, dy: 0, w: 14, align: 'r', codeIn: true } });
-  add({ id: 's4', type: 's4', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 12, cy: 50, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
-  add({ id: 's5', type: 's5', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 12, cy: 67, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
+    shape: { kind: 'tri', cx: -7, cy: 28, w: 9, h: 8, dir: 'down' }, label: { dx: -6, dy: 0, w: 14, align: 'r', codeIn: true } });
+  add({ id: 's4', type: 's4', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: 53.5, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
+  add({ id: 's5', type: 's5', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: 70, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
 
   const at = (id, dx, dy) => edgePoint(byId[id], dx, dy);
   const P = (xy, L) => ({ x: xy[0], y: xy[1], L });
-  const chan = (id, type, ends, paths, idx) => { chans.push({ id, type, ends, paths, idx, group: 'chan' }); };
+  const deg = d => [Math.cos(d * Math.PI / 180), Math.sin(d * Math.PI / 180)];
+  // poles: the two sides a flow can run between; each path runs from side A to side B (sgn +1) or back (sgn -1)
+  const chan = (id, type, ends, poles, paths, extra) => {
+    paths.forEach(p => { if (p.sgn == null) p.sgn = 1; });
+    chans.push(Object.assign({ id, type, ends, poles, paths, group: 'chan' }, extra || {}));
+  };
   const E = LAYER.env, O = LAYER.ops, M = LAYER.meta, MID = LAYER.mid;
-  const c35 = Math.cos(35 * Math.PI / 180), s35 = Math.sin(35 * Math.PI / 180);
-  const c20 = Math.cos(-20 * Math.PI / 180), s20 = Math.sin(-20 * Math.PI / 180);
+  const allO = ops.map(i => 'o' + i), allM = ops.map(i => 'm' + i), allA = ops.map(i => 'a' + i);
 
-  for (let i = 0; i < n; i++) {
-    chan('eo' + i, 'eo', ['e' + i, 'o' + i], [{ pts: [P(at('e' + i, 1, 0), E), P(at('o' + i, -1, 0), O)], arrows: 'both' }], i);
-    chan('om' + i, 'om', ['o' + i, 'm' + i], [{ pts: [P(at('o' + i, c35, s35), O), P(at('m' + i, -1, -0.2), O)], arrows: 'both' }], i);
-    chan('ms' + i, 'ms2', ['m' + i, 'a' + i], [{ pts: [P(at('m' + i, 1, 0), O), P(at('a' + i, -1, 0), M)], arrows: 'both' }], i);
+  ops.forEach(i => {
+    const y = yOp(i);
+    chan('eo' + i, 'eo', ['e' + i, 'o' + i], [['e' + i], ['o' + i]], [{ pts: [P(at('e' + i, 1, 0), E), P(at('o' + i, -1, 0), O)], arrows: 'both' }], { idx: i });
+    chan('om' + i, 'om', ['o' + i, 'm' + i], [['o' + i], ['m' + i]], [{ pts: [P(at('o' + i, ...deg(25)), O), P(at('m' + i, -1, -0.4), O)], arrows: 'both' }], { idx: i });
+    chan('ms' + i, 'ms2', ['m' + i, 'a' + i], [['m' + i], ['a' + i]], [{ pts: [P(at('m' + i, 1, 0), O), P(at('a' + i, -1, 0), S2L)], arrows: 'both' }], { idx: i });
     if (i < n - 1) {
-      chan('ee' + i, 'ee', ['e' + i, 'e' + (i + 1)], [{ pts: [P(at('e' + i, 0, -1), E), P(at('e' + (i + 1), 0, 1), E)], mode: 'wave', amp: 1.8, arrows: 'both' }], i);
-      chan('oo' + i, 'oo', ['o' + i, 'o' + (i + 1)], [{ pts: [P(at('o' + i, 0, -1), O), P(at('o' + (i + 1), 0, 1), O)], mode: 'wave', amp: 1.8, arrows: 'both' }], i);
+      chan('ee' + i, 'ee', ['e' + i, 'e' + (i + 1)], [['e' + i], ['e' + (i + 1)]], [{ pts: [P(at('e' + i, 0, -1), E), P(at('e' + (i + 1), 0, 1), E)], mode: 'wave', amp: 1.8, arrows: 'both' }], { idx: i });
+      chan('oo' + i, 'oo', ['o' + i, 'o' + (i + 1)], [['o' + i], ['o' + (i + 1)]], [{ pts: [P(at('o' + i, 0, -1), O), P(at('o' + (i + 1), 0, 1), O)], mode: 'wave', amp: 1.8, arrows: 'both' }], { idx: i });
     }
-  }
-  const s2paths = [{ pts: [P(at('s2', 0, -1), M), P(at('a0', 0, 1), M)], arrows: 'both' }];
-  for (let i = 0; i < n - 1; i++) s2paths.push({ pts: [P(at('a' + i, 0, -1), M), P(at('a' + (i + 1), 0, 1), M)], arrows: 'both' });
-  chan('c2', 's2ch', ['s2'].concat(Array.from({ length: n }, (_, i) => 'a' + i)), s2paths);
-  chan('c23', 's2s3', ['s3', 's2'], [{ pts: [P(at('s3', 1, 0), M), P(at('s2', -1, 0), M)], arrows: 'both' }]);
+  });
 
-  const cmdPaths = [{ pts: [P(at('s3', 0, -1), M), P(at('m0', 0, 1), O)], arrows: 'both' }];
+  // System 2: coordination channel and its link to System 3
+  const s2paths = [{ pts: [P(at('s2', 0, -1), S2L), P(at('a0', 0, 1), S2L)], arrows: 'both' }];
+  for (let i = 0; i < n - 1; i++) s2paths.push({ pts: [P(at('a' + i, 0, -1), S2L), P(at('a' + (i + 1), 0, 1), S2L)], arrows: 'both' });
+  chan('c2', 's2ch', ['s2'].concat(allA), [['s2'], allA], s2paths);
+  chan('c23', 's2s3', ['s3', 's2'], [['s3'], ['s2']], [bridge
+    ? { pts: [P(at('s3', 1, -0.6), M), P([17.5, 33.7], M), P(at('s2', -1, 0), S2L)], corner: 2, arrows: 'both' }
+    : { pts: [P(at('s3', 1, 0), M), P(at('s2', -1, 0), M)], arrows: 'both' }]);
+
+  // the vertical command channel: resource bargain, corporate intervention, accountability
+  const cmdTop = at('s3', 0, -1), cmdBot = at('m0', 0, 1);
+  const cmdPaths = [{ pts: [P(cmdTop, M), P(cmdBot, O)], arrows: 'both' }];
   for (let i = 0; i < n - 1; i++) cmdPaths.push({ pts: [P(at('m' + i, 0, -1), O), P(at('m' + (i + 1), 0, 1), O)], arrows: 'both' });
-  chan('cmd', 'cmd', ['s3'].concat(Array.from({ length: n }, (_, i) => 'm' + i)), cmdPaths);
+  chan('cmd', 'cmd', ['s3'].concat(allM), [['s3'], allM], cmdPaths);
 
+  // System 3*: sporadic audit, reaching past local management into the operations
   const audPaths = [
-    { pts: [P(at('s3', -1, -0.55), M), P(at('s3s', 4.5, 4), M)], arrows: 'both' },
-    { pts: [P(at('s3s', 0, -1), M), P([-1, 17], MID), P([-1, yLast - 3], MID)], corner: 3, arrows: 'none' }
+    { pts: [P(at('s3', -1, -0.73), M), P(at('s3s', 4.5, 4), M)], arrows: 'both' },
+    { pts: [P(at('s3s', 0, -1), M), P([-5, 21], 6), P([-5, yLast - 4], 6)], corner: 2.5, arrows: 'none' }
   ];
-  for (let i = 0; i < n; i++) audPaths.push({ pts: [P([-1, yOp(i) - 3], MID), P(at('o' + i, c20, s20), O)], arrows: 'end' });
-  chan('aud', 'audit', ['s3', 's3s'].concat(Array.from({ length: n }, (_, i) => 'o' + i)), audPaths);
+  ops.forEach(i => audPaths.push({ pts: [P([-5, yOp(i) - 4], 6), P(at('o' + i, ...deg(-28)), O)], arrows: 'end' }));
+  chan('aud', 'audit', ['s3', 's3s'].concat(allO), [['s3'], allO], audPaths);
 
-  chan('h34', 's34', ['s3', 's4'], [
-    { pts: [P(at('s3', -3.5, 5.5), M), P([3.6, 41.5], M), P(at('s4', -3.5, -5.5), M)], mode: 'quad', arrows: 'end' },
-    { pts: [P(at('s4', 3.5, -5.5), M), P([20.4, 41.5], M), P(at('s3', 3.5, 5.5), M)], mode: 'quad', arrows: 'end' }
+  // 3-4 homeostat, and System 5 monitoring it (System 5 does not reach System 3 directly)
+  chan('h34', 's34', ['s3', 's4'], [['s3'], ['s4']], [
+    { pts: [P(at('s3', -3.5, 5.5), M), P([0.5, 45.25], M), P(at('s4', -3.5, -5.5), M)], mode: 'quad', arrows: 'end', oneWay: true },
+    { pts: [P(at('s4', 3.5, -5.5), M), P([17.5, 45.25], M), P(at('s3', 3.5, 5.5), M)], mode: 'quad', arrows: 'end', oneWay: true, sgn: -1 }
   ]);
-  chan('c45', 's45', ['s4', 's5'], [{ pts: [P(at('s4', 0, 1), M), P(at('s5', 0, -1), M)], arrows: 'both' }]);
-  chan('c35', 's35', ['s3', 's5'], [{ pts: [P(at('s5', 1, -0.6), M), P([30, 50], M), P(at('s3', 1, 0.55), M)], mode: 'quad', arrows: 'both' }]);
-  chan('c4f', 's4f', ['s4', 'fut'], [{ pts: [P(at('s4', -1, 0), M), P(at('fut', 1, -0.1), E)], arrows: 'both' }]);
-  chan('alg', 'alg', ['o' + (n - 1), 's5'], [{
-    pts: [P(at('o' + (n - 1), 0, -1), O), P([-14, yLast - 13], O), P([50, yLast - 13], O), P([50, 70], M), P(at('s5', 1, 0.55), M)],
+  chan('c45', 's45', ['s4', 's5'], [['s4'], ['s5']], [{ pts: [P(at('s4', 0, 1), M), P(at('s5', 0, -1), M)], arrows: 'both' }]);
+  chan('s5h', 's5h', ['s5', 'h34'], [['s5'], ['h34']], [{ pts: [P(at('s5', 1, -0.36), M), P([18.5, 68], M), P([18.5, 45.25], M), P([15.1, 45.25], M)], corner: 2, arrows: 'both' }]);
+  chan('c4f', 's4f', ['s4', 'fut'], [['s4'], ['fut']], [{ pts: [P(at('s4', -1, 0.36), M), P(at('fut', 1, 0), E)], arrows: 'both' }]);
+
+  // extensions: S4 feeding the command channel, and a direct S1-S4 link
+  if (opts.s4cmd) {
+    const jy = 23, jL = M + (O - M) * (cmdTop[1] - jy) / (cmdTop[1] - cmdBot[1]);
+    chan('s4cmd', 's4cmd', ['s4', 'cmd'], [['s4'], ['cmd']], [{ pts: [P(at('s4', 1, -0.45), M), P([21, 51], M), P([21, jy], M), P([cmdTop[0], jy], jL)], corner: 2.5, arrows: 'end' }], { ext: true });
+  }
+  if (opts.s14) {
+    const tx = -30.5, top = 50.5;
+    const s14paths = [{ pts: [P([tx, yLast + 2.2], 5), P([tx, top], 5), P(at('s4', -1, -0.55), M)], corner: 3, arrows: 'end' }];
+    ops.forEach(i => s14paths.push({ pts: [P(at('o' + i, ...deg(165)), O), P([tx, yOp(i) + 2.2], 5)], arrows: 'none' }));
+    chan('s14', 's14', allO.concat(['s4']), [allO, ['s4']], s14paths, { ext: true });
+  }
+
+  const last = 'o' + (n - 1);
+  chan('alg', 'alg', [last, 's5'], [allO, ['s5']], [{
+    pts: [P(at(last, 0, -1), O), P([-18, yLast - 13], O), P([54, yLast - 13], O), P([54, 72.5], M), P(at('s5', 1, 0.45), M)],
     corner: 3.5, arrows: 'end'
   }]);
 
@@ -1300,7 +1468,8 @@ const GROUP_INFO = {
 const STORE_KEY = 'vsm-explorer:v1';
 
 let db = null; // { seq, rootId, currentId, levels: {} }
-let prefs = { view: '3d', flows: !reduceMotion, nested: false, spread: 1, side: true };
+let prefs = { view: '3d', flows: !reduceMotion, nested: false, spread: 1, side: true, s2mode: 'inside', extS4cmd: true, extS14: true };
+function layoutOpts() { return { s2: prefs.s2mode === 'bridge' ? 'bridge' : 'inside', s4cmd: prefs.extS4cmd !== false, s14: prefs.extS14 !== false }; }
 
 function newLevel(parent, elId) {
   db.seq += 1;
@@ -1310,7 +1479,7 @@ function newLevel(parent, elId) {
     id, depth: parent ? parent.depth + 1 : 0, tag,
     parent: parent ? { level: parent.id, el: elId } : null,
     name: parent ? null : 'Organization',
-    opCount: 3, labels: {}, colors: {}, notes: {},
+    opCount: 3, labels: {}, colors: {}, notes: {}, flows: {},
     groupColors: Object.assign({}, parent ? parent.groupColors : DEFAULT_GROUP_COLORS),
     children: {}
   };
@@ -1342,6 +1511,10 @@ function codeOf(lv, id) {
 
 function defaultLabel(lv, id) {
   let m;
+  if ((id === 'env' || id === 'meta') && lv.parent && (m = /^o(\d+)$/.exec(lv.parent.el))) {
+    const p = db.levels[lv.parent.level];
+    if (p) return labelOf(p, (id === 'env' ? 'e' : 'm') + m[1]);
+  }
   const t = i => opTag(lv, i);
   if ((m = /^o(\d+)$/.exec(id))) return 'Operation ' + t(+m[1]);
   if ((m = /^m(\d+)$/.exec(id))) return 'Management ' + t(+m[1]);
@@ -1356,7 +1529,8 @@ function defaultLabel(lv, id) {
     env: 'Total environment', fut: 'Future environment', meta: 'Metasystem',
     s2: 'Coordination centre', s3: 'Control', s3s: 'Audit', s4: 'Intelligence', s5: 'Policy',
     c2: 'Coordination channel', c23: 'Coordination–control link', cmd: 'Command channel', aud: 'Audit channel',
-    h34: '3–4 homeostat', c45: 'Policy–intelligence link', c35: 'Policy–control link', c4f: 'Environmental scanning', alg: 'Algedonic channel'
+    h34: '3–4 homeostat', c45: 'Policy–intelligence link', s5h: 'Policy–homeostat link', c4f: 'Environmental scanning', alg: 'Algedonic channel',
+    s4cmd: 'Anticipatory link to command', s14: 'Operations–intelligence link'
   })[id] || id;
 }
 
@@ -1396,6 +1570,7 @@ function load() {
       if (data && data.db && data.db.levels && data.db.levels[data.db.rootId]) {
         db = data.db;
         if (!db.levels[db.currentId]) db.currentId = db.rootId;
+        Object.values(db.levels).forEach(l => { l.flows = l.flows || {}; l.notes = l.notes || {}; l.labels = l.labels || {}; });
         Object.assign(prefs, data.prefs || {});
         return true;
       }
@@ -1439,6 +1614,142 @@ const PRESETS = {
     }
   }
 };
+
+
+/* =====================================================================
+   Data flows: named flows on channels, standard patterns, model company
+   ===================================================================== */
+const POLE_GROUPS = { o: 'Operations', m: 'Local managements', a: 'Coordination units' };
+function poleName(lv, pole) {
+  if (pole.length === 1) return labelOf(lv, pole[0]);
+  return POLE_GROUPS[pole[0].charAt(0)] || pole.map(id => labelOf(lv, id)).join(', ');
+}
+const flowsOf = (lv, chId) => (lv.flows && lv.flows[chId]) || [];
+const FULL_OPTS = { s2: 'inside', s4cmd: true, s14: true };
+
+/* A neutral starting point for any level: what typically travels on each kind of channel */
+function standardFlows(lv, ch) {
+  const f = (name, dir) => ({ name, dir });
+  const A = poleName(lv, ch.poles[0]), B = poleName(lv, ch.poles[1]);
+  switch (ch.type) {
+    case 'eo': return [f('Demand and orders from ' + A, 'ab'), f('Products and services to ' + A, 'ba'), f('Feedback and complaints', 'ab')];
+    case 'ee': return [f('Shared customers and suppliers', 'both')];
+    case 'om': return [f('Output, quality and exceptions', 'ab'), f('Local plans and priorities', 'ba')];
+    case 'oo': return [f('Shared resources and hand-offs', 'both')];
+    case 'ms2': return [f('Capacity and schedule requests', 'ab'), f('Agreed schedule and shared rules', 'ba')];
+    case 's2ch': return [f('Shared schedule', 'ab'), f('Status of shared resources', 'both')];
+    case 's2s3': return [f('Coordination rules and priorities', 'ab'), f('Capacity and conflict reports', 'ba')];
+    case 'cmd': return [f('Resources and targets', 'ab'), f('Policies and legal requirements', 'ab'), f('Performance and accountability reports', 'ba')];
+    case 'audit': return [f('Audits and spot checks', 'ab'), f('Audit findings', 'ba')];
+    case 's34': return [f('Current capability and constraints', 'ab'), f('Plans, forecasts and proposals', 'ba')];
+    case 's45': return [f('Strategic options', 'ab'), f('Identity and policy guidance', 'ba')];
+    case 's5h': return [f('Review of present against future', 'both')];
+    case 's4f': return [f('Research and market intelligence', 'ba'), f('Experiments and outreach', 'ab')];
+    case 's4cmd': return [f('Forecasts shaping the next resource bargain', 'ab')];
+    case 's14': return [f('Signals from the front line', 'ab'), f('Ideas to trial in operations', 'ba')];
+    case 'alg': return [f('Alarms that bypass normal reporting', 'ab')];
+  }
+  return [];
+}
+
+/* The model company: Level 0 mapped by hand, sub-levels follow the recursion with standard flows */
+const EXAMPLE = {
+  name: 'Larchmere Cycles (example)',
+  brief: 'Larchmere Cycles designs, builds and services bicycles. It has three divisions: City bikes (a plant building commuter, cargo and folding bikes), E-bikes (commuter, mountain and fleet e-bikes) and a Service network (city workshops, mobile repair vans and fleet maintenance contracts). A small head office runs strategy and R&D, finance, quality and the shared parts stock. The founding family and an independent chair form the board.',
+  ops: [
+    { o: 'City bikes', e: 'Commuters and bike shops', m: 'City bikes plant manager', a: 'Frame line schedule' },
+    { o: 'E-bikes', e: 'E-bike riders and dealers', m: 'E-bikes division head', a: 'Battery and motor allocation' },
+    { o: 'Service network', e: 'Riders needing repairs', m: 'Service network manager', a: 'Workshop booking system' }
+  ],
+  labels: {
+    env: 'Cycling market and community', fut: 'E-mobility, city policy, battery rules', meta: 'Larchmere leadership',
+    s2: 'Operations planning office', s3: 'Chief operating officer', s3s: 'Quality and safety audits', s4: 'Product strategy and R&D', s5: 'Board and founding family'
+  },
+  notes: {
+    s5: 'Founding family and an independent chair hold the purpose: durable bikes for everyday riding.',
+    s4: 'Six people: market research, drivetrain R&D and partnerships with cities.',
+    s3: 'Runs the monthly resource bargain with the three division heads.',
+    s3s: 'Quarterly quality audits plus unannounced safety walks on every line.',
+    s2: 'Keeps the master schedule and the shared parts stock in balance.'
+  },
+  flows: {
+    eo0: [['Dealer orders', 'ab'], ['Delivered bikes', 'ba'], ['Warranty claims', 'ab']],
+    eo1: [['Online and dealer orders', 'ab'], ['E-bikes delivered', 'ba'], ['Ride and battery telemetry', 'ab']],
+    eo2: [['Repair bookings', 'ab'], ['Serviced bikes returned', 'ba'], ['Customer satisfaction scores', 'ab']],
+    ee0: [['Shared dealer network', 'both']],
+    ee1: [['E-bike riders needing service', 'ab']],
+    om0: [['Daily output and defect rates', 'ab'], ['Shift plans and build priorities', 'ba']],
+    om1: [['Line output and battery test results', 'ab'], ['Build priorities', 'ba']],
+    om2: [['Jobs completed and backlog', 'ab'], ['Technician rota', 'ba']],
+    oo0: [['Shared frames and paint shop', 'both']],
+    oo1: [['Spare parts and diagnostic know-how', 'ab']],
+    ms0: [['Line capacity and slot requests', 'ab'], ['Confirmed frame schedule', 'ba']],
+    ms1: [['Battery and motor needs', 'ab'], ['Allocated components', 'ba']],
+    ms2: [['Workshop capacity', 'ab'], ['Booked jobs', 'ba']],
+    c2: [['Master production schedule', 'ab'], ['Shared parts stock levels', 'both']],
+    c23: [['Scheduling rules and priorities', 'ab'], ['Capacity utilization report', 'ba']],
+    cmd: [['Annual budgets and targets', 'ab'], ['Group policies and legal requirements', 'ab'], ['Monthly P&L and KPIs', 'ba']],
+    aud: [['Audit visits and spot checks', 'ab'], ['Quality and safety findings', 'ba']],
+    h34: [['Capacity and capability constraints', 'ab'], ['Product roadmap and demand forecast', 'ba']],
+    c45: [['Strategic options and scenarios', 'ab'], ['Mission and risk appetite', 'ba']],
+    s5h: [['Board review of plan against capacity', 'both']],
+    c4f: [['Market and technology research', 'ba'], ['Prototype trials with city partners', 'ab']],
+    s4cmd: [['Next-quarter demand forecast for budgets', 'ab']],
+    s14: [['Dealer and rider field insights', 'ab'], ['Prototype test requests', 'ba']],
+    alg: [['Safety stop and critical recall alert', 'ab']]
+  },
+  children: [
+    { ops: [
+        { o: 'Commuter range', e: 'Daily commuters', m: 'Commuter range lead', a: 'Commuter build slots' },
+        { o: 'Cargo bikes', e: 'Families and couriers', m: 'Cargo bikes lead', a: 'Cargo build slots' },
+        { o: 'Folding bikes', e: 'Train and bus travellers', m: 'Folding bikes lead', a: 'Folding build slots' }],
+      labels: { fut: 'Urban cycling trends', s2: 'Plant scheduling desk', s3: 'Production manager', s3s: 'Line quality checks', s4: 'City bikes product team', s5: 'City bikes plant manager' },
+      flows: 'standard' },
+    { ops: [
+        { o: 'Commuter e-bikes', e: 'Urban e-bike riders', m: 'Commuter e-bike lead', a: 'Commuter build slots' },
+        { o: 'E-mountain bikes', e: 'Trail riders', m: 'E-MTB lead', a: 'E-MTB build slots' },
+        { o: 'Fleet e-bikes', e: 'Delivery and rental fleets', m: 'Fleet build lead', a: 'Fleet order slots' }],
+      labels: { fut: 'Battery rules and e-mobility trends', s2: 'E-bike planning desk', s3: 'E-bikes operations manager', s3s: 'Battery safety checks', s4: 'E-drive engineering', s5: 'E-bikes division head' },
+      flows: 'standard',
+      children: [null, null, { ops: [
+        { o: 'Delivery fleet builds', e: 'Courier companies', m: 'Delivery fleet lead', a: 'Courier order queue' },
+        { o: 'Rental fleet builds', e: 'Bike rental operators', m: 'Rental fleet lead', a: 'Rental order queue' }],
+        labels: { fut: 'Shared mobility contracts', s2: 'Fleet order desk', s3: 'Fleet production lead', s3s: 'Fleet handover checks', s4: 'Fleet product manager', s5: 'Fleet build lead' },
+        flows: 'standard' }] },
+    { ops: [
+        { o: 'City workshops', e: 'Urban riders', m: 'Workshop managers', a: 'Workshop booking calendar' },
+        { o: 'Mobile repair vans', e: 'Riders at home and work', m: 'Mobile fleet supervisor', a: 'Van routing' },
+        { o: 'Fleet maintenance', e: 'Rental and delivery fleets', m: 'Fleet contracts lead', a: 'Fleet service schedule' }],
+      labels: { fut: 'Right-to-repair rules, new drive systems', s2: 'Service dispatch desk', s3: 'Service operations lead', s3s: 'Workmanship checks', s4: 'Service design', s5: 'Service network manager' },
+      flows: 'standard' }
+  ]
+};
+
+function deleteSubtree(lv) {
+  Object.values(lv.children || {}).forEach(cid => { const c = db.levels[cid]; if (c) { deleteSubtree(c); delete db.levels[cid]; } });
+  lv.children = {};
+}
+/* Fill a level from a spec: labels, notes, flows and, recursively, its sub-levels */
+function applySpec(lv, spec) {
+  lv.opCount = clamp(spec.ops.length, MIN_OPS, MAX_OPS);
+  lv.labels = {};
+  lv.notes = Object.assign({}, spec.notes || {});
+  spec.ops.slice(0, lv.opCount).forEach((o, i) => {
+    if (o.o) lv.labels['o' + i] = o.o;
+    if (o.e) lv.labels['e' + i] = o.e;
+    if (o.m) lv.labels['m' + i] = o.m;
+    if (o.a) lv.labels['a' + i] = o.a;
+  });
+  Object.keys(spec.labels || {}).forEach(k => { if (spec.labels[k]) lv.labels[k] = spec.labels[k]; });
+  if (!lv.parent && spec.name) lv.name = spec.name;
+  if (spec.brief) lv.brief = spec.brief;
+  lv.flows = {};
+  if (spec.flows === 'standard') buildLayout(lv.opCount, FULL_OPTS).chans.forEach(ch => { lv.flows[ch.id] = standardFlows(lv, ch); });
+  else if (spec.flows) Object.keys(spec.flows).forEach(k => { lv.flows[k] = spec.flows[k].map(f => ({ name: f[0], dir: f[1] })); });
+  deleteSubtree(lv);
+  (spec.children || []).forEach((cs, i) => { if (cs && i < lv.opCount) applySpec(newLevel(lv, 'o' + i), cs); });
+}
+function nearestBrief(lv) { let c = lv; while (c) { if (c.brief) return c.brief; c = c.parent ? db.levels[c.parent.level] : null; } return ''; }
 
 /* =====================================================================
    Theme
@@ -1797,26 +2108,48 @@ function updateRing(o, on) {
 }
 
 /* ---------- flow particles along channels ---------- */
+function levelHasFlows(lv) { return !!lv.flows && Object.keys(lv.flows).some(k => (lv.flows[k] || []).length); }
+/* Which ways a flow moves along one path: +1 runs with the path, -1 against it */
+function flowDirsOnPath(dir, p) {
+  const sg = p.sgn || 1;
+  if (p.oneWay) return (dir === 'both' || (dir === 'ab' && sg > 0) || (dir === 'ba' && sg < 0)) ? [1] : [];
+  if (dir === 'ab') return [sg];
+  if (dir === 'ba') return [-sg];
+  return [1, -1];
+}
 function buildParticles() {
+  if (particles) { world.remove(particles); particles.material.dispose(); particles.dispose && particles.dispose(); particles = null; }
   particleSpecs = [];
+  const lv = level(), dataMode = levelHasFlows(lv);
   L.chans.forEach(ch => ch.paths.forEach((p, k) => {
     let len = 0;
     for (let i = 1; i < p.samples.length; i++) len += Math.hypot(p.samples[i].x - p.samples[i - 1].x, p.samples[i].y - p.samples[i - 1].y);
-    const count = Math.max(1, Math.round(len / 16));
-    const dirs = p.arrows === 'both' ? [1, -1] : p.arrows === 'none' ? [1, -1] : [1];
-    dirs.forEach(dir => { for (let j = 0; j < count; j++) particleSpecs.push({ id: ch.id, part: k, dir, phase: (j + (dir < 0 ? 0.5 : 0)) / count }); });
+    if (!dataMode) {
+      const count = Math.max(1, Math.round(len / 16));
+      const dirs = p.oneWay || p.arrows === 'end' ? [1] : [1, -1];
+      dirs.forEach(dir => { for (let j = 0; j < count; j++) particleSpecs.push({ id: ch.id, part: k, dir, phase: (j + (dir < 0 ? 0.5 : 0)) / count }); });
+      return;
+    }
+    // data mode: one stream of particles per mapped flow, in that flow's direction
+    const flows = lv.flows[ch.id] || [];
+    const count = Math.max(1, Math.round(len / 22));
+    flows.forEach((f, fi) => flowDirsOnPath(f.dir, p).forEach(dir => {
+      for (let j = 0; j < count; j++) particleSpecs.push({ id: ch.id, part: k, dir, phase: (j + (fi + 0.5) / (flows.length + 1)) / count });
+    }));
   }));
   const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-  particles = new THREE.InstancedMesh(particleGeo, mat, particleSpecs.length);
+  particles = new THREE.InstancedMesh(particleGeo, mat, Math.max(1, particleSpecs.length));
+  particles.count = particleSpecs.length;
   particles.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   particles.frustumCulled = false;
-  particleSpecs.forEach((p, i) => particles.setColorAt(i, tmpC.set(0xffffff)));
+  for (let i = 0; i < Math.max(1, particleSpecs.length); i++) particles.setColorAt(i, tmpC.set(0xffffff));
   world.add(particles);
-  particles.visible = prefs.flows;
+  particles.visible = prefs.flows && particleSpecs.length > 0;
 }
+function rebuildParticles() { buildParticles(); refreshVisuals(); updateParticles((performance.now() - t0) / 1000); dirty = true; }
 const tmpM = new THREE.Matrix4(), tmpV = new THREE.Vector3();
 function updateParticles(time) {
-  if (!particles || !prefs.flows) return;
+  if (!particles || !prefs.flows || !particleSpecs.length) return;
   const speed = 9;
   particleSpecs.forEach((s, i) => {
     const part = chs.get(s.id).parts[s.part];
@@ -2127,6 +2460,7 @@ function select(id, opts) {
   refreshVisuals();
   renderInspector();
   document.querySelectorAll('.erow').forEach(r => r.classList.toggle('sel', r.dataset.id === selected));
+  document.querySelectorAll('.fch').forEach(r => r.classList.toggle('sel', r.dataset.ch === selected));
   if (opts && opts.reveal && selected) revealInList(selected);
   if (selected && narrowQ.matches && !busy) keepAboveSheet(selected);
 }
@@ -2151,23 +2485,33 @@ const tip = $('#tip');
 function describe(id) {
   const lv = level(), t = typeOfId(L, id), kb = KB[t] || {};
   const code = codeOf(lv, id);
-  return '<span class="k">' + esc(kb.kind || '') + (code ? ' · ' + esc(code) : '') + '</span><b>' + esc(labelOf(lv, id)) + '</b>' + (kb.role && kb.role !== labelOf(lv, id) ? '<br><span style="color:var(--ink-2)">' + esc(kb.role) + '</span>' : '');
+  let html = '<span class="k">' + esc(kb.kind || '') + (code ? ' · ' + esc(code) : '') + '</span><b>' + esc(labelOf(lv, id)) + '</b>' + (kb.role && kb.role !== labelOf(lv, id) ? '<br><span style="color:var(--ink-2)">' + esc(kb.role) + '</span>' : '');
+  if (L.chanById[id]) {
+    const fl = flowsOf(lv, id);
+    html += '<span class="tf">' + (fl.length ? fl.length + (fl.length === 1 ? ' flow: ' : ' flows: ') + esc(fl.slice(0, 3).map(f => f.name).join('; ')) + (fl.length > 3 ? '…' : '') : 'No flows mapped') + '</span>';
+  }
+  return html;
 }
 
-let down = null;
+let down = null, lastTap = null;
 canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now(), b: e.button }; });
 canvas.addEventListener('pointerup', e => {
   if (!down || busy) return;
   const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
   if (moved < 6 && down.b === 0) {
+    const now = performance.now();
+    // the second click of a double-click keeps the first click's selection (the inspector may have shifted the view)
+    if (lastTap && now - lastTap.t < 450 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 10) { down = null; return; }
     const id = pickAt(e.clientX, e.clientY);
+    lastTap = { t: now, x: e.clientX, y: e.clientY, id };
     select(id === selected ? null : id, { reveal: true });
   }
   down = null;
 });
 canvas.addEventListener('dblclick', e => {
   if (busy) return;
-  const id = pickAt(e.clientX, e.clientY);
+  const id = lastTap && performance.now() - lastTap.t < 700 ? lastTap.id : pickAt(e.clientX, e.clientY);
+  lastTap = null;
   if (id && isSystemType(typeOfId(L, id))) dive(id);
 });
 let hoverRaf = 0, lastMove = null;
@@ -2422,9 +2766,30 @@ function renderInspector() {
   fillList('#iWatch', kb.watch);
   const notes = $('#iNotes');
   if (document.activeElement !== notes) notes.value = lv.notes[id] || '';
+  const isCh = !!L.chanById[id];
+  $('#iFlowSec').hidden = !isCh;
+  if (isCh) renderFlowEditor($('#iFlows'), id);
+  if (isCh) $('#iIOSec').hidden = true; else renderIO();
   renderLinks();
   renderRecursion();
   if (wasHidden) $('.insp-body').scrollTop = 0;
+}
+/* What reaches and leaves an element, read from the flows on its channels */
+function renderIO() {
+  const lv = level(), id = selected, rows = [];
+  L.chans.forEach(ch => {
+    const inA = ch.poles[0].includes(id), inB = ch.poles[1].includes(id);
+    if (!inA && !inB) return;
+    const other = poleName(lv, inA ? ch.poles[1] : ch.poles[0]);
+    flowsOf(lv, ch.id).forEach(f => {
+      const k = f.dir === 'both' ? 'both' : ((f.dir === 'ab') === inA ? 'out' : 'in');
+      rows.push({ k, name: f.name, via: (k === 'out' ? 'to ' : k === 'in' ? 'from ' : 'with ') + other + ' · ' + labelOf(lv, ch.id) });
+    });
+  });
+  const order = { in: 0, out: 1, both: 2 };
+  rows.sort((a, b) => order[a.k] - order[b.k]);
+  $('#iIO').innerHTML = rows.map(r => '<li><span class="ar" title="' + (r.k === 'in' ? 'Incoming' : r.k === 'out' ? 'Outgoing' : 'Both ways') + '">' + (r.k === 'in' ? '←' : r.k === 'out' ? '→' : '↔') + '</span><span>' + esc(r.name) + '<span class="via">' + esc(r.via) + '</span></span></li>').join('');
+  $('#iIOSec').hidden = !rows.length;
 }
 function renderInspectorColor() {
   const lv = level(), id = selected;
@@ -2440,14 +2805,16 @@ function renderInspectorColor() {
 function renderLinks() {
   const lv = level(), id = selected, ul = $('#iLinks');
   const rows = [];
+  const short = o => codeOf(lv, o) || labelOf(lv, o);
   if (L.byId[id]) {
     L.chans.forEach(c => {
       if (!c.ends.includes(id)) return;
       const others = c.ends.filter(e => e !== id);
-      rows.push({ target: c.id, text: labelOf(lv, c.id), via: others.map(o => codeOf(lv, o)).join(', '), color: colorOf(lv, c.id, L) });
+      rows.push({ target: c.id, text: labelOf(lv, c.id), via: others.map(short).join(', '), color: colorOf(lv, c.id, L) });
     });
   } else {
-    L.chanById[id].ends.forEach(e => rows.push({ target: e, text: labelOf(lv, e), via: codeOf(lv, e), color: colorOf(lv, e, L) }));
+    L.chanById[id].ends.forEach(e => { if (L.byId[e] || L.chanById[e]) rows.push({ target: e, text: labelOf(lv, e), via: short(e), color: colorOf(lv, e, L) }); });
+    L.chans.forEach(c => { if (c.id !== id && c.ends.includes(id)) rows.push({ target: c.id, text: labelOf(lv, c.id), via: 'joins this channel', color: colorOf(lv, c.id, L) }); });
   }
   ul.innerHTML = rows.map(r => '<li><button type="button" data-t="' + r.target + '"><span class="dot" style="background:' + r.color + '"></span><span>' + esc(r.text) + '</span><span class="via">' + esc(r.via) + '</span></button></li>').join('');
   ul.querySelectorAll('button').forEach(b => b.addEventListener('click', () => select(b.dataset.t, { reveal: true })));
@@ -2467,8 +2834,16 @@ function renderRecursion() {
     : 'Strictly, Beer\'s recursion runs through System 1. The unit that performs this function, such as a department, can still be modelled as a viable system of its own.';
   box.innerHTML = '<div class="recur"><div class="t">Viable system inside ' + esc(name) + '</div>' +
     '<div class="prev">' + previewSVG(child, lv) + '</div><p>' + esc(note) + (child ? ' Explored: ' + child.opCount + ' operations.' : '') + '</p>' +
-    '<button class="btn primary" type="button" id="iDive">Open level ' + (lv.depth + 1) + ' · ' + esc(name) + '</button></div>';
+    '<div class="btn-row"><button class="btn primary" type="button" id="iDive">Open level ' + (lv.depth + 1) + ' · ' + esc(name) + '</button>' +
+    (sampleFn ? '<button class="btn" type="button" id="iMap"' + (aiBusy ? ' disabled' : '') + '>Map it with Claude</button>' : '') + '</div>' +
+    (sampleFn ? '<p id="iAiStatus" aria-live="polite">' + esc(aiInspectorNote) + '</p>' : '') + '</div>';
   $('#iDive').addEventListener('click', () => { if (matchMedia('(max-width: 860px)').matches) select(null); dive(id); });
+  const mapBtn = $('#iMap');
+  if (mapBtn) mapBtn.addEventListener('click', () => {
+    const child = ensureChild(lv, key);
+    save(); renderTree();
+    runMapping(child, nearestBrief(lv), 'insp');
+  });
 }
 
 /* Small 2D drawing of a level, for the inspector's recursion preview */
@@ -2503,9 +2878,251 @@ function previewSVG(child, parent) {
 function renderAllPanels() {
   renderCrumbs();
   renderModelPane();
+  renderFlowsPane();
   renderTree();
   renderInspector();
 }
+
+/* ---------- data flows: list, editor, coverage ---------- */
+function coverage(lv) {
+  let mapped = 0, flows = 0;
+  L.chans.forEach(ch => { const n = flowsOf(lv, ch.id).length; if (n) mapped++; flows += n; });
+  return { mapped, total: L.chans.length, flows };
+}
+function renderCoverage() {
+  const lv = level(), cov = coverage(lv);
+  $('#covFill').style.width = (cov.total ? cov.mapped / cov.total * 100 : 0) + '%';
+  $('#covTx').innerHTML = '<b>' + cov.mapped + ' of ' + cov.total + '</b> channels carry flows' + (cov.flows ? ' · ' + cov.flows + ' flows in all' : '') +
+    (cov.mapped && cov.mapped < cov.total ? '. Channels with none are marked: a missing flow can point to a gap in the organization.' : '.');
+}
+function renderFlowsPane() {
+  const lv = level();
+  $('#flowsEyebrow').textContent = 'Data flows · Level ' + lv.depth + ' · ' + levelName(lv);
+  renderCoverage();
+  const brief = $('#aiBrief');
+  if (document.activeElement !== brief && !aiBusy) brief.value = nearestBrief(lv);
+  const list = $('#flowList');
+  const open = {};
+  list.querySelectorAll('details').forEach(d => { open[d.dataset.ch] = d.open; });
+  list.innerHTML = L.chans.map(ch => {
+    const n = flowsOf(lv, ch.id).length;
+    return '<details class="fch' + (selected === ch.id ? ' sel' : '') + '" data-ch="' + ch.id + '"' + (open[ch.id] || selected === ch.id ? ' open' : '') + '>' +
+      '<summary><span class="dot" style="background:' + colorOf(lv, ch.id, L) + '"></span><span class="nm">' + esc(labelOf(lv, ch.id)) +
+      '<small>' + esc(poleName(lv, ch.poles[0])) + ' ↔ ' + esc(poleName(lv, ch.poles[1])) + '</small></span>' +
+      '<span class="cnt' + (n ? '' : ' zero') + '">' + (n || 'none') + '</span></summary><div class="fed" data-ed="' + ch.id + '"></div></details>';
+  }).join('');
+  list.querySelectorAll('.fed').forEach(ed => renderFlowEditor(ed, ed.dataset.ed));
+  list.querySelectorAll('details').forEach(d => d.addEventListener('toggle', () => { if (d.open && selected !== d.dataset.ch) select(d.dataset.ch); }));
+}
+function renderFlowEditor(box, chId) {
+  const lv = level(), ch = L.chanById[chId];
+  if (!ch) { box.innerHTML = ''; return; }
+  const A = poleName(lv, ch.poles[0]), B = poleName(lv, ch.poles[1]);
+  const flows = flowsOf(lv, chId);
+  const dirText = d => d === 'ab' ? A + ' → ' + B : d === 'ba' ? B + ' → ' + A : 'Both ways between ' + A + ' and ' + B;
+  const glyph = d => d === 'ab' ? '→' : d === 'ba' ? '←' : '↔';
+  box.innerHTML = '<div class="fhd"><span class="a">' + esc(A) + '</span><span class="ar">→</span><span class="b">' + esc(B) + '</span></div>' +
+    (flows.length ? flows.map((f, i) =>
+    '<div class="frow" data-i="' + i + '"><button class="fdir" type="button" title="' + esc(dirText(f.dir)) + '. Click to change." aria-label="Direction: ' + esc(dirText(f.dir)) + '. Click to change.">' + glyph(f.dir) + '</button>' +
+    '<input type="text" value="' + esc(f.name) + '" aria-label="Flow name"><button class="x" type="button" aria-label="Remove ' + esc(f.name) + '">×</button></div>').join('')
+    : '<div class="fempty">No flows mapped to this channel yet.</div>') +
+    '<form class="fadd"><input type="text" placeholder="Add a flow, e.g. Monthly KPIs" aria-label="New flow on ' + esc(labelOf(lv, chId)) + '"><button type="submit">Add</button></form>';
+  const inInsp = !!box.closest('#insp');
+  box.querySelectorAll('.frow').forEach(r => {
+    const i = +r.dataset.i;
+    r.querySelector('.fdir').addEventListener('click', e => {
+      const f = lv.flows[chId][i];
+      f.dir = { ab: 'ba', ba: 'both', both: 'ab' }[f.dir] || 'ab';
+      const b = e.currentTarget, t = dirText(f.dir);
+      b.textContent = glyph(f.dir); b.title = t + '. Click to change.'; b.setAttribute('aria-label', 'Direction: ' + t + '. Click to change.');
+      flowsChanged(chId, false, inInsp);
+    });
+    r.querySelector('input').addEventListener('input', e => { lv.flows[chId][i].name = e.target.value; save(); });
+    r.querySelector('input').addEventListener('change', () => flowsChanged(chId, false, inInsp));
+    r.querySelector('.x').addEventListener('click', () => {
+      lv.flows[chId].splice(i, 1);
+      if (!lv.flows[chId].length) delete lv.flows[chId];
+      flowsChanged(chId, true, inInsp);
+    });
+  });
+  box.querySelector('form').addEventListener('submit', e => {
+    e.preventDefault();
+    const inp = e.target.querySelector('input'), v = inp.value.trim();
+    if (!v) return;
+    (lv.flows[chId] = lv.flows[chId] || []).push({ name: v.slice(0, 80), dir: 'ab' });
+    flowsChanged(chId, true, inInsp, true);
+  });
+}
+/* Keep the two editors (panel and inspector), the counts and the moving dots in step */
+function flowsChanged(chId, structural, fromInsp, refocusAdd) {
+  save();
+  rebuildParticles();
+  const paneBox = document.querySelector('#flowList .fed[data-ed="' + chId + '"]');
+  if (fromInsp) {
+    if (paneBox) renderFlowEditor(paneBox, chId);
+    if (structural) renderFlowEditor($('#iFlows'), chId);
+  } else {
+    if (selected === chId) renderFlowEditor($('#iFlows'), chId);
+    if (structural && paneBox) renderFlowEditor(paneBox, chId);
+  }
+  const det = paneBox && paneBox.closest('details');
+  if (det) { const n = flowsOf(level(), chId).length, c = det.querySelector('.cnt'); c.textContent = n || 'none'; c.classList.toggle('zero', !n); }
+  renderCoverage();
+  if (selected && L.byId[selected]) renderIO();
+  if (refocusAdd) { const box = fromInsp ? $('#iFlows') : paneBox; const inp = box && box.querySelector('.fadd input'); if (inp) inp.focus(); }
+}
+function allFlowsChanged() { save(); rebuildParticles(); renderFlowsPane(); renderInspector(); }
+
+/* ---------- mapping with Claude (available when the page runs as a Claude artifact) ---------- */
+let sampleFn = null, aiBusy = false, aiCtl = null;
+let aiInspectorNote = 'Claude proposes this system\'s own operations, labels and flows from the context above it.';
+const CHANNEL_GUIDE = [
+  'eo{i}: A = environment i, B = operation i. Demand, products and services, feedback.',
+  'ee{i} (i up to N-2): A = environment i, B = environment i+1. How the environments affect each other.',
+  'om{i}: A = operation i, B = its local management. Operational reporting and local direction.',
+  'oo{i} (i up to N-2): A = operation i, B = operation i+1. Direct interactions between operations.',
+  'ms{i}: A = local management i, B = coordination unit i (System 2). Schedules, standards, conflicts.',
+  'c2: A = System 2 coordination centre, B = all coordination units.',
+  'c23: A = System 3, B = System 2 coordination centre.',
+  'cmd: A = System 3, B = all local managements. Resource bargain and corporate intervention down, accountability up.',
+  'aud: A = System 3 via 3*, B = the operations. Sporadic audit and monitoring.',
+  'h34: A = System 3, B = System 4. The 3-4 homeostat: present against future.',
+  'c45: A = System 4, B = System 5.',
+  's5h: A = System 5, B = the 3-4 homeostat. System 5 monitors the S3-S4 conversation.',
+  'c4f: A = System 4, B = the future environment.',
+  's4cmd: A = System 4, B = the command channel. Forecasts that shape the resource bargain in advance.',
+  's14: A = the operations, B = System 4. Front-line signals and trials.',
+  'alg: A = the operations, B = System 5. Algedonic alarms that bypass the normal channels.'
+];
+function typeOfIdFor(lv, id) { return typeOfId(buildLayout(lv.opCount, FULL_OPTS), id); }
+function mappingPrompt(lv, brief) {
+  const chain = ancestry(lv).map(levelName);
+  let ctx = '';
+  if (lv.parent) {
+    const p = db.levels[lv.parent.level], m = /^o(\d+)$/.exec(lv.parent.el);
+    ctx = 'This is a recursion inside a larger system: ' + chain.join(' > ') + '. Map only "' + levelName(lv) + '".';
+    if (m) {
+      const k = +m[1], PL = buildLayout(p.opCount, FULL_OPTS), lines = [];
+      ctx += ' In the parent model it is an operation (System 1 unit). Its environment there is "' + labelOf(p, 'e' + k) + '" and its management unit is "' + labelOf(p, 'm' + k) + '": treat these as this level\'s total environment and metasystem.';
+      PL.chans.forEach(ch => {
+        const has = pole => pole.includes('o' + k) || pole.includes('m' + k);
+        const side = has(ch.poles[0]) ? 0 : has(ch.poles[1]) ? 1 : -1;
+        if (side < 0) return;
+        flowsOf(p, ch.id).forEach(f => lines.push('- ' + f.name + ' (' + labelOf(p, ch.id) + ', ' + (f.dir === 'both' ? 'both ways' : (f.dir === 'ab') === (side === 0) ? 'outgoing' : 'incoming') + ')'));
+      });
+      if (lines.length) ctx += '\nFlows that reach or leave it in the parent model:\n' + lines.slice(0, 30).join('\n');
+    } else ctx += ' In the parent model it is the unit performing ' + ((KB[typeOfIdFor(p, lv.parent.el)] || {}).kind || 'a management function') + '.';
+    const sib = Array.from({ length: p.opCount }, (_, i) => labelOf(p, 'o' + i)).join(', ');
+    ctx += '\nOperations of the parent: ' + sib + '. Parent System 3: ' + labelOf(p, 's3') + '; System 4: ' + labelOf(p, 's4') + '; System 5: ' + labelOf(p, 's5') + '.';
+  }
+  return [
+    'Map an organization onto Stafford Beer\'s Viable System Model. Your answer fills an interactive diagram, so follow the format exactly.',
+    '',
+    '<description>',
+    brief || 'No description was given. Infer what you reasonably can from the names and context below.',
+    '</description>',
+    ctx,
+    '',
+    'Reply with only one JSON object of this shape:',
+    '{"name": "system in focus", "operations": [{"name": "...", "environment": "part of the environment it serves", "management": "who manages it", "coordination": "its System 2 unit, such as a schedule, standard or shared service", "sub_operations": ["primary activity inside it", "..."]}], "labels": {"env": "total environment", "fut": "future environment", "meta": "management of the whole", "s2": "System 2 coordination centre", "s3": "System 3", "s3s": "System 3* audit", "s4": "System 4", "s5": "System 5"}, "notes": {"s3": "one sentence on who or what performs this here"}, "flows": {"cmd": [{"name": "Annual budget and targets", "dir": "ab"}, {"name": "Monthly KPIs", "dir": "ba"}]}}',
+    '',
+    'Rules:',
+    '- 2 to 5 operations: the primary activities that produce what the system exists to do, each able to be viable on its own. Never support functions such as HR, finance or IT; those belong to Systems 2 to 5.',
+    '- Names and labels at most 5 words. Flow names at most 7 words and concrete to this organization.',
+    '- notes are optional, keyed by env, fut, meta, s2, s3, s3s, s4, s5, o0, m0, a0, e0 and so on.',
+    '- sub_operations: 2 to 4 per operation, its own System 1 one level down.',
+    '- flows: 1 to 3 per channel, for every channel id below that exists for your number of operations N (i runs from 0 to N-1). "dir" is "ab" from A to B, "ba" from B to A, or "both".',
+    '',
+    'Channel ids:',
+    CHANNEL_GUIDE.join('\n')
+  ].join('\n');
+}
+function applyMapping(lv, r) {
+  const S = (v, n) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, n || 60);
+  const opsIn = (r && Array.isArray(r.operations) ? r.operations : []).filter(o => o && S(o.name)).slice(0, MAX_OPS);
+  if (!opsIn.length) throw { code: 'invalid_shape' };
+  const labels = {};
+  if (r.labels && typeof r.labels === 'object') ['env', 'fut', 'meta', 's2', 's3', 's3s', 's4', 's5'].forEach(k => { if (S(r.labels[k])) labels[k] = S(r.labels[k]); });
+  if (lv.parent && /^o\d+$/.test(lv.parent.el)) { delete labels.env; delete labels.meta; } // inherited from the parent operation
+  const notes = {};
+  if (r.notes && typeof r.notes === 'object') Object.keys(r.notes).forEach(k => { if (/^(env|fut|meta|s2|s3|s3s|s4|s5|[oema]\d)$/.test(k) && S(r.notes[k], 300)) notes[k] = S(r.notes[k], 300); });
+  const flows = {};
+  const valid = new Set(buildLayout(clamp(opsIn.length, MIN_OPS, MAX_OPS), FULL_OPTS).chans.map(c => c.id));
+  if (r.flows && typeof r.flows === 'object') Object.keys(r.flows).forEach(k => {
+    if (!valid.has(k) || !Array.isArray(r.flows[k])) return;
+    const arr = r.flows[k].filter(f => f && S(f.name)).slice(0, 6).map(f => [S(f.name, 80), ['ab', 'ba', 'both'].includes(f.dir) ? f.dir : 'both']);
+    if (arr.length) flows[k] = arr;
+  });
+  applySpec(lv, {
+    name: S(r.name) || null,
+    ops: opsIn.map(o => ({ o: S(o.name), e: S(o.environment), m: S(o.management), a: S(o.coordination) })),
+    labels, notes, flows,
+    children: opsIn.map(o => {
+      const subs = Array.isArray(o.sub_operations) ? o.sub_operations.map(x => S(x)).filter(Boolean).slice(0, MAX_OPS) : [];
+      return subs.length ? { ops: subs.map(x => ({ o: x })) } : null;
+    })
+  });
+}
+const AI_OFF = ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'];
+function aiErrorText(e) {
+  const c = e && e.code;
+  if (c === 'cancelled') return 'Stopped. Nothing was changed.';
+  if (c === 'rate_limited') return 'Too many requests just now. Try again in a little while.';
+  if (c === 'session_expired') return 'Sign in to Claude again, then try once more.';
+  if (c === 'refused') return 'Claude declined this description. Try rephrasing it.';
+  if (c === 'invalid_json' || c === 'invalid_shape') return 'The answer could not be read as a model. Try again, or shorten the description.';
+  if (c === 'prompt_too_large') return 'The description is too long. Shorten it and try again.';
+  if (AI_OFF.includes(c)) return 'Claude is not available for this page, so mapping is switched off. The model company and standard flows still work.';
+  return 'Claude could not be reached. Try again.';
+}
+function renderAIState(msg) {
+  const st = $('#aiStatus');
+  $('#aiRun').disabled = !sampleFn || aiBusy;
+  $('#aiStop').hidden = !aiBusy;
+  if (msg) { st.textContent = msg; return; }
+  if (aiBusy) return;
+  st.textContent = sampleFn
+    ? 'Claude proposes operations, labels, flows for every channel, and sub-operations one level down. This replaces the labels and flows of the level in focus.'
+    : 'Mapping with Claude works when this page is opened as a Claude artifact. The model company and standard flows work everywhere.';
+}
+async function runMapping(target, brief, source) {
+  if (!sampleFn || aiBusy) return;
+  aiBusy = true;
+  aiCtl = new AbortController();
+  let last = '';
+  const say = t => { last = t; if (source === 'insp') { aiInspectorNote = t; const n = $('#iAiStatus'); if (n) n.textContent = t; } renderAIState(t); };
+  const mapBtn = $('#iMap'); if (mapBtn) mapBtn.disabled = true;
+  say('Thinking… a full mapping usually takes 30 to 90 seconds.');
+  try {
+    const r = await sampleFn.json(mappingPrompt(target, brief), {
+      signal: aiCtl.signal, modelTier: 'default',
+      onText: ({ text }) => say('Writing the mapping… ' + text.length.toLocaleString() + ' characters so far.')
+    });
+    applyMapping(target, r);
+    if (brief && !target.parent) target.brief = brief;
+    save();
+    aiBusy = false;
+    if (target.id === db.currentId) {
+      selected = null; focusSet = null;
+      const cam = camState(); buildScene(); setCam(cam); camTween(fitState(), 600);
+    }
+    renderAllPanels();
+    const nFlows = Object.values(target.flows).reduce((a, f) => a + f.length, 0);
+    say('Mapped ' + levelName(target) + ': ' + target.opCount + ' operations and ' + nFlows + ' flows. Sub-operations were added one level down; see the Recursion tab.');
+  } catch (e) {
+    aiBusy = false;
+    if (AI_OFF.includes(e && e.code)) sampleFn = null;
+    say(aiErrorText(e));
+    if (selected) renderRecursion();
+  } finally {
+    aiBusy = false; aiCtl = null;
+    renderAIState(last);
+    const b = $('#iMap'); if (b) b.disabled = false;
+  }
+}
+(window.claude && typeof window.claude.use === 'function' ? Promise.resolve(window.claude.use('sample')).catch(() => null) : Promise.resolve(null))
+  .then(fn => { sampleFn = fn || null; if (!aiBusy) renderAIState(); if (selected) renderRecursion(); });
+
 
 /* =====================================================================
    Wiring
@@ -2516,7 +3133,7 @@ $('#spread').addEventListener('input', e => { prefs.spread = +e.target.value; sa
 $('#btnFlows').addEventListener('click', () => {
   prefs.flows = !prefs.flows; save();
   $('#btnFlows').setAttribute('aria-pressed', String(prefs.flows));
-  if (particles) particles.visible = prefs.flows;
+  if (particles) particles.visible = prefs.flows && particleSpecs.length > 0;
   dirty = true;
 });
 $('#btnNested').addEventListener('click', () => {
@@ -2556,6 +3173,7 @@ function changeOps(delta) {
 $('#opMinus').addEventListener('click', () => changeOps(-1));
 $('#opPlus').addEventListener('click', () => changeOps(1));
 $('#preset').addEventListener('change', e => {
+  if (e.target.value === 'example') { e.target.value = ''; loadExample(); return; }
   const p = PRESETS[e.target.value];
   e.target.value = '';
   if (!p) return;
@@ -2573,7 +3191,7 @@ $('#preset').addEventListener('change', e => {
 });
 $('#resetLevel').addEventListener('click', () => {
   const lv = level();
-  lv.labels = {}; lv.colors = {}; lv.notes = {}; lv.opCount = 3;
+  lv.labels = {}; lv.colors = {}; lv.notes = {}; lv.flows = {}; lv.opCount = 3;
   lv.groupColors = Object.assign({}, lv.parent ? db.levels[lv.parent.level].groupColors : DEFAULT_GROUP_COLORS);
   if (!lv.parent) lv.name = 'Organization';
   save();
@@ -2596,8 +3214,84 @@ $('#resetAll').addEventListener('click', e => {
   camTween(fitState(), 600);
 });
 
+
+// diagram options: where System 2's centre sits, and the two extension channels
+function syncDiagramControls() {
+  const bridge = prefs.s2mode === 'bridge';
+  $('#s2Inside').setAttribute('aria-pressed', String(!bridge));
+  $('#s2Bridge').setAttribute('aria-pressed', String(bridge));
+  $('#extS4cmd').checked = prefs.extS4cmd !== false;
+  $('#extS14').checked = prefs.extS14 !== false;
+}
+function relayout() {
+  const cam = camState();
+  buildScene();
+  if (selected && !L.byId[selected] && !L.chanById[selected]) selected = null;
+  focusSet = computeFocus(selected);
+  refreshVisuals();
+  setCam(cam);
+  syncDiagramControls();
+  renderAllPanels();
+}
+$('#s2Inside').addEventListener('click', () => { if (prefs.s2mode !== 'inside') { prefs.s2mode = 'inside'; save(); relayout(); } });
+$('#s2Bridge').addEventListener('click', () => { if (prefs.s2mode !== 'bridge') { prefs.s2mode = 'bridge'; save(); relayout(); } });
+$('#extS4cmd').addEventListener('change', e => { prefs.extS4cmd = e.target.checked; save(); relayout(); });
+$('#extS14').addEventListener('change', e => { prefs.extS14 = e.target.checked; save(); relayout(); });
+
+// data flows
+function armTwoStep(btn, idle, armed, action) {
+  let timer = 0;
+  btn.addEventListener('click', () => {
+    if (!timer) { btn.textContent = armed; timer = setTimeout(() => { timer = 0; btn.textContent = idle; }, 3500); return; }
+    clearTimeout(timer); timer = 0; btn.textContent = idle;
+    action();
+  });
+}
+function hasUserContent() {
+  return Object.values(db.levels).some(l => Object.keys(l.labels).length || levelHasFlows(l) || Object.keys(l.notes).length) || Object.keys(db.levels).length > 1;
+}
+function loadExample() {
+  const root = db.levels[db.rootId];
+  applySpec(root, EXAMPLE);
+  db.currentId = root.id;
+  save();
+  selected = null; focusSet = null;
+  buildScene(); renderAllPanels();
+  $('#aiBrief').value = EXAMPLE.brief;
+  camTween(fitState(), 600);
+  $('#flowsNote').textContent = 'Model company loaded. Level 0 flows were mapped by hand; the levels below follow the recursion and start from standard flows.';
+}
+(function () {
+  const btn = $('#btnExample');
+  let timer = 0;
+  btn.addEventListener('click', () => {
+    if (!hasUserContent() || timer) { clearTimeout(timer); timer = 0; btn.textContent = 'Load model company'; loadExample(); return; }
+    btn.textContent = 'Replace the whole model? Click again';
+    timer = setTimeout(() => { timer = 0; btn.textContent = 'Load model company'; }, 3500);
+  });
+})();
+$('#btnSuggest').addEventListener('click', () => {
+  const lv = level();
+  let added = 0;
+  L.chans.forEach(ch => { if (!flowsOf(lv, ch.id).length) { lv.flows[ch.id] = standardFlows(lv, ch); added++; } });
+  allFlowsChanged();
+  $('#flowsNote').textContent = added ? 'Added standard flows to ' + added + (added === 1 ? ' channel' : ' channels') + '. Rename them to match the organization.' : 'Every channel already carries at least one flow.';
+});
+armTwoStep($('#btnClearFlows'), 'Clear flows', 'Click again to clear this level', () => {
+  level().flows = {};
+  allFlowsChanged();
+  $('#flowsNote').textContent = 'Flows cleared for this level.';
+});
+$('#aiRun').addEventListener('click', () => {
+  const brief = $('#aiBrief').value.trim();
+  const lv = level();
+  if (!brief && !lv.parent) { renderAIState('Describe the organization first, in a few sentences.'); $('#aiBrief').focus(); return; }
+  runMapping(lv, brief, 'pane');
+});
+$('#aiStop').addEventListener('click', () => { if (aiCtl) aiCtl.abort(); });
+
 // tabs
-const tabs = ['model', 'map', 'guide'];
+const tabs = ['model', 'flows', 'map', 'guide'];
 tabs.forEach(t => $('#tab-' + t).addEventListener('click', () => {
   tabs.forEach(o => { $('#tab-' + o).setAttribute('aria-selected', String(o === t)); $('#pane-' + o).hidden = o !== t; });
 }));
@@ -2654,6 +3348,7 @@ $('#spread').value = prefs.spread;
 $('#btnFlows').setAttribute('aria-pressed', String(prefs.flows));
 $('#btnNested').setAttribute('aria-pressed', String(prefs.nested));
 syncSide();
+syncDiagramControls();
 
 const intro = !hadSaved && !reduceMotion;
 if (intro) prefs.view = '2d';

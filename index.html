@@ -1,0 +1,2685 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Viable System Explorer</title>
+<meta name="description" content="Interactive 2D and 3D explorer for Stafford Beer's Viable System Model, with recursion, custom labels and colours.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: top bar with recursion trail; docked model panel (left), WebGL stage (centre), element inspector (right).
+   On phones the panels become a drawer and a bottom sheet over a full-bleed stage. */
+:root {
+  --bg: #e9eeec;
+  --stage: #edf2f0;
+  --stage-hi: #f7faf9;
+  --surface: #f8faf9;
+  --surface-2: #e3eae7;
+  --ink: #12201e;
+  --ink-2: #4f605c;
+  --rule: #d0dad6;
+  --accent: #d6501a;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(214, 80, 26, 0.12);
+  --halo: rgba(240, 245, 243, 0.94);
+  --shadow: 0 1px 2px rgba(18, 32, 30, 0.06), 0 10px 30px rgba(18, 32, 30, 0.10);
+  --f-display: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --f-body: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --left: 304px;
+  --right: 0px;
+  --radius: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1417;
+    --stage: #0e1a1e;
+    --stage-hi: #142429;
+    --surface: #111e22;
+    --surface-2: #1a2b31;
+    --ink: #e1ebe8;
+    --ink-2: #8fa49f;
+    --rule: #22363c;
+    --accent: #f2773c;
+    --accent-ink: #1b0c05;
+    --accent-soft: rgba(242, 119, 60, 0.16);
+    --halo: rgba(14, 26, 30, 0.92);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1417;
+  --stage: #0e1a1e;
+  --stage-hi: #142429;
+  --surface: #111e22;
+  --surface-2: #1a2b31;
+  --ink: #e1ebe8;
+  --ink-2: #8fa49f;
+  --rule: #22363c;
+  --accent: #f2773c;
+  --accent-ink: #1b0c05;
+  --accent-soft: rgba(242, 119, 60, 0.16);
+  --halo: rgba(14, 26, 30, 0.92);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.45 var(--f-body);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-columns: var(--left) minmax(0, 1fr) var(--right);
+  grid-template-areas: "top top top" "side stage insp";
+}
+.app.insp-open { --right: 368px; }
+.app.side-closed { --left: 0px; }
+
+/* ---------- Top bar ---------- */
+.topbar {
+  grid-area: top;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 16px 8px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--rule);
+  min-width: 0;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 5;
+}
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; flex: none; }
+.brand svg { width: 30px; height: 30px; flex: none; color: var(--ink); }
+.brand-text { display: flex; flex-direction: column; line-height: 1.05; }
+.brand-name {
+  font-family: var(--f-display);
+  font-stretch: 118%;
+  font-weight: 750;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.brand-sub { font-size: 11px; color: var(--ink-2); letter-spacing: 0.04em; }
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 260px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 2px 0;
+  border-left: 1px solid var(--rule);
+  padding-left: 14px;
+}
+.crumbs::-webkit-scrollbar { display: none; }
+.crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.crumb:hover { background: var(--surface-2); color: var(--ink); }
+.crumb[aria-current="page"] { color: var(--ink); background: var(--accent-soft); border-color: transparent; font-weight: 650; }
+.crumb .lv {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+}
+.crumb[aria-current="page"] .lv { background: var(--accent); color: var(--accent-ink); }
+.crumb-sep { color: var(--ink-2); opacity: 0.6; font-size: 12px; flex: none; }
+
+.tools { display: flex; align-items: center; gap: 8px; flex: none; margin-left: auto; flex-wrap: wrap; }
+.seg {
+  display: inline-flex;
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+.seg button {
+  border: 0;
+  background: transparent;
+  padding: 5px 13px;
+  border-radius: 6px;
+  font-family: var(--f-mono);
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 12.5px;
+  font-weight: 550;
+  color: var(--ink-2);
+}
+.tool svg { width: 16px; height: 16px; flex: none; }
+.tool:hover { color: var(--ink); border-color: var(--ink-2); }
+.tool[aria-pressed="true"] { color: var(--ink); background: var(--accent-soft); border-color: var(--accent); }
+.depth {
+  position: absolute;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--ink-2);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 5px 14px;
+  box-shadow: var(--shadow);
+  z-index: 2;
+}
+.depth input { width: 110px; accent-color: var(--accent); }
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--ink-2);
+  flex: none;
+}
+.icon-btn:hover { color: var(--ink); border-color: var(--ink-2); }
+.icon-btn svg { width: 16px; height: 16px; }
+
+/* ---------- Model panel ---------- */
+.side {
+  grid-area: side;
+  background: var(--surface);
+  border-right: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+.app.side-closed .side { display: none; }
+.tabs { display: flex; gap: 2px; padding: 10px 12px 0; border-bottom: 1px solid var(--rule); flex: none; }
+.tab {
+  border: 0;
+  background: transparent;
+  padding: 8px 12px 9px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink-2);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.pane { overflow-y: auto; padding: 14px 16px 24px; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 20px; }
+.block { display: flex; flex-direction: column; gap: 10px; }
+.eyebrow {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.focus-name {
+  font-family: var(--f-display);
+  font-stretch: 112%;
+  font-weight: 700;
+  font-size: 18px;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 4px 6px;
+  margin: -4px -6px;
+  border-radius: 6px;
+  width: calc(100% + 12px);
+}
+.focus-name:hover { border-color: var(--rule); }
+.focus-name:focus { border-color: var(--accent); background: var(--surface-2); outline: none; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.row > span { color: var(--ink-2); font-size: 13px; }
+.stepper { display: inline-flex; align-items: center; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.stepper button { border: 0; background: var(--surface-2); width: 30px; height: 28px; font-size: 16px; line-height: 1; color: var(--ink); }
+.stepper button:disabled { opacity: .35; cursor: default; }
+.stepper output { min-width: 34px; text-align: center; font-family: var(--f-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
+select.inp, .inp {
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  border-radius: 7px;
+  padding: 6px 8px;
+  min-width: 0;
+}
+select.inp { max-width: 170px; }
+.inp:focus { border-color: var(--accent); outline: none; }
+
+.groups { display: grid; gap: 6px; }
+.grow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+.grow b { font-weight: 600; font-size: 13px; }
+.grow small { display: block; color: var(--ink-2); font-size: 11.5px; line-height: 1.2; }
+.grow .cnt { font-family: var(--f-mono); font-size: 11px; color: var(--ink-2); }
+
+input[type="color"].sw {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 6px;
+  cursor: pointer;
+  flex: none;
+}
+input[type="color"].sw::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"].sw::-webkit-color-swatch { border: 1px solid rgba(0,0,0,.18); border-radius: 6px; }
+input[type="color"].sw::-moz-color-swatch { border: 1px solid rgba(0,0,0,.18); border-radius: 6px; }
+input[type="color"].sw.custom::-webkit-color-swatch { box-shadow: inset 0 0 0 2px var(--surface); border: 2px solid var(--ink); }
+input[type="color"].sw.custom::-moz-color-swatch { box-shadow: inset 0 0 0 2px var(--surface); border: 2px solid var(--ink); }
+
+.elist { display: flex; flex-direction: column; gap: 4px; }
+.egroup { border-top: 1px solid var(--rule); padding-top: 6px; }
+.egroup > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0 6px;
+  font-weight: 600;
+  font-size: 13px;
+}
+.egroup > summary::-webkit-details-marker { display: none; }
+.egroup > summary::after { content: "+"; font-family: var(--f-mono); color: var(--ink-2); }
+.egroup[open] > summary::after { content: "−"; }
+.erow { display: grid; grid-template-columns: auto 52px minmax(0, 1fr); align-items: center; gap: 6px; padding: 2px 0; }
+.ecode {
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  border-radius: 5px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 0;
+  color: var(--ink-2);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ecode:hover, .erow.sel .ecode { border-color: var(--accent); color: var(--ink); }
+.erow.sel .ecode { background: var(--accent-soft); }
+.ename {
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 5px;
+  padding: 3px 6px;
+  min-width: 0;
+  width: 100%;
+  font-size: 13px;
+}
+.ename:hover { border-color: var(--rule); }
+.ename:focus { border-color: var(--accent); background: var(--surface-2); outline: none; }
+
+.btn {
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-weight: 600;
+  font-size: 13px;
+}
+.btn:hover { border-color: var(--ink-2); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.primary:hover { filter: brightness(1.05); }
+.btn.warn { color: var(--accent); }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Recursion map */
+.tree, .tree ul { list-style: none; margin: 0; padding: 0; }
+.tree ul { margin-left: 13px; padding-left: 12px; border-left: 1px dashed var(--rule); }
+.tnode { margin: 2px 0; }
+.tbtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 7px;
+  padding: 4px 6px;
+  min-width: 0;
+}
+.tbtn:hover { background: var(--surface-2); }
+.tbtn .lv, .tbtn .cd {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 1px 5px;
+  flex: none;
+}
+.tbtn .lv { background: var(--ink); color: var(--surface); }
+.tbtn .cd { border: 1px solid var(--rule); color: var(--ink-2); }
+.tbtn .tn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.tbtn.level .tn { font-weight: 650; }
+.tbtn.current { background: var(--accent-soft); border-color: var(--accent); }
+.tbtn.current .lv { background: var(--accent); color: var(--accent-ink); }
+.tbtn.unexplored { color: var(--ink-2); }
+.tbtn.unexplored .tn::after { content: " · open"; color: var(--accent); font-size: 11.5px; opacity: 0; }
+.tbtn.unexplored:hover .tn::after { opacity: 1; }
+.here { margin-left: auto; font-family: var(--f-mono); font-size: 10px; color: var(--accent); flex: none; letter-spacing: .06em; }
+
+/* Guide */
+.guide p { margin: 0; max-width: 62ch; }
+.guide h3 {
+  margin: 0;
+  font-family: var(--f-display);
+  font-stretch: 112%;
+  font-size: 15px;
+  font-weight: 700;
+}
+.legend { display: grid; gap: 8px; }
+.leg { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; }
+.leg svg { width: 34px; height: 26px; }
+.leg b { font-weight: 600; }
+.leg span { color: var(--ink-2); font-size: 12.5px; display: block; line-height: 1.3; }
+.keys { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 12.5px; }
+.keys kbd {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  border: 1px solid var(--rule);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0 5px;
+  white-space: nowrap;
+  justify-self: start;
+}
+.src { color: var(--ink-2); font-size: 12px; }
+
+/* ---------- Stage ---------- */
+.stage {
+  grid-area: stage;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: radial-gradient(120% 90% at 58% 38%, var(--stage-hi), var(--stage) 70%);
+  touch-action: none;
+}
+#gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; outline: none; transition: opacity .18s ease; }
+#gl.fade { opacity: 0; }
+.labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.lbl {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: var(--ink);
+  text-shadow: 0 0 2px var(--halo), 0 0 3px var(--halo), 0 0 6px var(--halo), 0 0 10px var(--halo);
+  line-height: 1.08;
+  will-change: transform;
+  transition: opacity .2s ease;
+}
+.lbl .code { font-family: var(--f-mono); font-weight: 600; letter-spacing: .01em; white-space: nowrap; }
+.lbl .nm {
+  font-weight: 560;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  margin-top: 1px;
+}
+.lbl.l { align-items: flex-start; text-align: left; }
+.lbl.r { align-items: flex-end; text-align: right; }
+.lbl.big .nm { font-family: var(--f-display); font-stretch: 110%; font-weight: 650; letter-spacing: .01em; }
+.lbl.sel .code { background: var(--accent); color: var(--accent-ink); text-shadow: none; border-radius: 3px; padding: 0 4px; }
+.lbl.dim { opacity: .28; }
+.lbl.off { opacity: 0; }
+
+.tip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow);
+  border-radius: 8px;
+  padding: 6px 9px;
+  font-size: 12.5px;
+  max-width: 260px;
+  z-index: 3;
+}
+.tip .k { font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-2); letter-spacing: .05em; text-transform: uppercase; display: block; }
+.tip b { font-weight: 650; }
+
+.overlay-tl { position: absolute; top: 12px; left: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; z-index: 2; max-width: calc(100% - 24px); }
+.level-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 4px 12px 4px 5px;
+  box-shadow: var(--shadow);
+  font-size: 12.5px;
+  min-width: 0;
+}
+.level-chip .lv { font-family: var(--f-mono); font-weight: 600; font-size: 11px; background: var(--ink); color: var(--surface); border-radius: 999px; padding: 2px 8px; }
+.level-chip .tx { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.level-chip .tx b { color: var(--ink); font-weight: 650; }
+.up-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 5px 12px;
+  box-shadow: var(--shadow);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.up-btn svg { width: 14px; height: 14px; flex: none; }
+.up-btn span { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.up-btn:hover { border-color: var(--accent); }
+
+.hint {
+  position: absolute;
+  left: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  font-size: 12px;
+  color: var(--ink-2);
+  background: var(--halo);
+  padding: 5px 10px;
+  border-radius: 7px;
+  pointer-events: none;
+  max-width: calc(100% - 300px);
+}
+.hint kbd { font-family: var(--f-mono); font-size: 11px; color: var(--ink); }
+.fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 24px;
+  color: var(--ink-2);
+}
+
+/* ---------- Inspector ---------- */
+.insp {
+  grid-area: insp;
+  background: var(--surface);
+  border-left: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+.insp-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--rule);
+  flex: none;
+}
+.code-chip {
+  font-family: var(--f-mono);
+  font-weight: 600;
+  font-size: 15px;
+  min-width: 42px;
+  height: 42px;
+  padding: 0 8px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: #fff;
+  background: var(--ink);
+}
+.insp-kind { display: flex; flex-direction: column; min-width: 0; }
+.insp-kind .k { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2); }
+.insp-kind .r { font-family: var(--f-display); font-stretch: 110%; font-weight: 700; font-size: 16px; line-height: 1.15; }
+.insp-body { overflow-y: auto; padding: 14px 16px 28px; display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+.fld { display: flex; flex-direction: column; gap: 5px; }
+.fld > span { font-size: 12px; color: var(--ink-2); font-weight: 500; }
+.fld input[type="text"], .fld textarea { border: 1px solid var(--rule); background: var(--surface); border-radius: 7px; padding: 7px 9px; width: 100%; }
+.fld input[type="text"] { font-weight: 600; font-size: 15px; }
+.fld textarea { min-height: 70px; resize: vertical; font-size: 13px; }
+.fld input:focus, .fld textarea:focus { border-color: var(--accent); outline: none; }
+.color-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.color-row .sw { width: 30px; height: 30px; }
+.color-row small { color: var(--ink-2); font-size: 12px; }
+.linkish { border: 0; background: none; padding: 0; color: var(--accent); font-weight: 600; font-size: 12.5px; }
+.summary { margin: 0; font-size: 14px; line-height: 1.55; max-width: 62ch; }
+.isec h4 {
+  margin: 0 0 6px;
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.isec ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.isec ul.links { list-style: none; padding: 0; gap: 2px; }
+.links button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.links button:hover { background: var(--surface-2); }
+.links .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.links .via { color: var(--ink-2); font-size: 12px; margin-left: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; }
+.recur {
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface-2);
+}
+.recur .prev { background: var(--stage); border-radius: 7px; overflow: hidden; }
+.recur .prev svg { display: block; width: 100%; height: auto; }
+.recur p { margin: 0; font-size: 12.5px; color: var(--ink-2); }
+.recur .t { font-weight: 650; font-size: 13px; }
+
+.scrim { display: none; }
+
+/* ---------- Narrow screens ---------- */
+@media (max-width: 860px) {
+  .app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "stage"; }
+  .app.insp-open { --right: 0px; }
+  .topbar { gap: 8px 10px; padding-inline: 12px; }
+  .brand-sub { display: none; }
+  .crumbs { order: 5; flex-basis: 100%; border-left: 0; padding-left: 0; }
+  .tools { gap: 6px; }
+  .tool .t { display: none; }
+  .tool { padding: 6px 8px; }
+  .depth input { width: 90px; }
+  .side {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: min(88vw, 340px);
+    z-index: 20;
+    box-shadow: var(--shadow);
+    padding-top: env(safe-area-inset-top, 0px);
+    transform: translateX(-102%);
+    transition: transform .22s ease;
+  }
+  .app.side-closed .side { display: flex; }
+  .app.drawer-open .side { transform: none; }
+  .app.drawer-open .scrim { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.28); z-index: 15; }
+  .insp {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: 58%;
+    z-index: 12;
+    border-left: 0;
+    border-top: 1px solid var(--rule);
+    border-radius: 14px 14px 0 0;
+    box-shadow: var(--shadow);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .hint { display: none; }
+  .level-chip { display: none; }
+  .insp { max-height: 52%; }
+}
+@media (max-width: 520px) {
+  .brand-text { display: none; }
+}
+@media (min-width: 861px) { .only-narrow { display: none !important; } }
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0s !important; }
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="topbar">
+    <button class="icon-btn" id="btnSide" aria-label="Toggle model panel" aria-expanded="true">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 4h11M2.5 8h11M2.5 12h11"/></svg>
+    </button>
+    <div class="brand">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <path d="M5.5 9.5c-2-3 1-7 4-5.5 2 1 1.5 4 1 6.5s1 6-1 8.5c-2 2.6-6 1-5.6-2.4.3-2.6 3.4-4 1.6-7.1z" opacity=".75"/>
+        <circle cx="16" cy="22" r="5"/>
+        <path d="M23 3.5l5.5 7-5.5 7-5.5-7z"/>
+        <path d="M19.6 18.6l2.6-2.9M10.6 21.5h.4" stroke-linecap="round"/>
+      </svg>
+      <div class="brand-text">
+        <span class="brand-name">Viable System Explorer</span>
+        <span class="brand-sub">Stafford Beer's VSM, in 2D and 3D</span>
+      </div>
+    </div>
+    <nav class="crumbs" id="crumbs" aria-label="Recursion trail"></nav>
+    <div class="tools">
+      <div class="seg" role="group" aria-label="View mode">
+        <button id="v2d" type="button" aria-pressed="false" title="Classic 2D diagram (key 2)">2D</button>
+        <button id="v3d" type="button" aria-pressed="true" title="3D model (key 3)">3D</button>
+      </div>
+      <button class="tool" id="btnFlows" type="button" aria-pressed="true" title="Animate information flow along channels">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 8h9"/><path d="M8 4.5L11.5 8 8 11.5"/><circle cx="14" cy="8" r="1.2" fill="currentColor" stroke="none"/></svg>
+        <span class="t">Flows</span>
+      </button>
+      <button class="tool" id="btnNested" type="button" aria-pressed="false" title="Show the viable system nested inside each operation">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.3"/><circle cx="8" cy="9.2" r="2.2"/><path d="M8 3.6l1.6 1.8L8 7.2 6.4 5.4z"/></svg>
+        <span class="t">Nested</span>
+      </button>
+      <button class="tool" id="btnFrame" type="button" title="Fit the model to the view (key F)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5V2h3.5M10.5 2H14v3.5M14 10.5V14h-3.5M5.5 14H2v-3.5"/></svg>
+        <span class="t">Fit</span>
+      </button>
+    </div>
+  </header>
+
+  <aside class="side" id="side" aria-label="Model panel">
+    <div class="tabs" role="tablist">
+      <button class="icon-btn only-narrow" id="sideClose" type="button" aria-label="Close panel" style="margin:0 6px 6px 0;width:30px;height:30px">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+      </button>
+      <button class="tab" role="tab" id="tab-model" aria-controls="pane-model" aria-selected="true">Model</button>
+      <button class="tab" role="tab" id="tab-map" aria-controls="pane-map" aria-selected="false">Recursion map</button>
+      <button class="tab" role="tab" id="tab-guide" aria-controls="pane-guide" aria-selected="false">Guide</button>
+    </div>
+
+    <section class="pane" id="pane-model" role="tabpanel" aria-labelledby="tab-model">
+      <div class="block">
+        <div class="eyebrow" id="focusEyebrow">System in focus · Level 0</div>
+        <input class="focus-name" id="levelName" type="text" aria-label="Name of the system in focus">
+        <div class="row">
+          <span>System 1 operations</span>
+          <div class="stepper">
+            <button id="opMinus" type="button" aria-label="Remove an operation">−</button>
+            <output id="opCount" aria-live="polite">3</output>
+            <button id="opPlus" type="button" aria-label="Add an operation">+</button>
+          </div>
+        </div>
+        <div class="row">
+          <span>Labels preset</span>
+          <select class="inp" id="preset" aria-label="Apply a labels preset to this level">
+            <option value="">Choose…</option>
+            <option value="canonical">Canonical (Beer)</option>
+            <option value="hospital">Example: regional hospital</option>
+            <option value="software">Example: software company</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="eyebrow">Group colours</div>
+        <div class="groups" id="groups"></div>
+      </div>
+
+      <div class="block">
+        <div class="eyebrow">Elements · rename and recolour</div>
+        <div class="elist" id="elist"></div>
+      </div>
+
+      <div class="block">
+        <div class="btn-row">
+          <button class="btn" id="resetLevel" type="button">Reset this level</button>
+          <button class="btn warn" id="resetAll" type="button">Reset everything</button>
+        </div>
+        <div class="src" id="saveNote">Changes are saved in this browser.</div>
+      </div>
+    </section>
+
+    <section class="pane" id="pane-map" role="tabpanel" aria-labelledby="tab-map" hidden>
+      <div class="block">
+        <div class="eyebrow">Recursive structure</div>
+        <p class="src" style="margin:0">Every System 1 operation contains a whole viable system. Open any branch to step into it; the highlighted node is the level in focus.</p>
+        <ul class="tree" id="tree"></ul>
+      </div>
+    </section>
+
+    <section class="pane guide" id="pane-guide" role="tabpanel" aria-labelledby="tab-guide" hidden>
+      <div class="block">
+        <h3>What the model describes</h3>
+        <p>Stafford Beer developed the Viable System Model in <i>Brain of the Firm</i> (1972), <i>The Heart of Enterprise</i> (1979) and <i>Diagnosing the System for Organizations</i> (1985). It sets out the functions any system needs to remain viable: to keep a separate existence in an environment that keeps changing.</p>
+        <p>The operations (System 1) do the work. The metasystem (Systems 2 to 5) exists to serve them: it coordinates, manages the whole in the present, looks to the future, and holds identity. Each operation is itself a viable system, so the same structure repeats at every level of recursion.</p>
+      </div>
+      <div class="block">
+        <h3>Beer's symbols</h3>
+        <div class="legend">
+          <div class="leg"><svg viewBox="0 0 34 26"><path d="M5 13c0-7 7-10 13-9s12 4 11 10-6 9-13 8S5 20 5 13z" fill="#4f9a63" fill-opacity=".25" stroke="#4f9a63" stroke-width="1.5"/></svg><div><b>Amoeba</b><span>Environment: fuzzy, changing, of far greater variety than the system</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><circle cx="17" cy="13" r="9" fill="#2f74c0" fill-opacity=".25" stroke="#2f74c0" stroke-width="1.5"/></svg><div><b>Circle</b><span>Operation: a System 1 unit that does the primary work</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><rect x="9" y="5" width="16" height="16" fill="#2f74c0" fill-opacity=".25" stroke="#2f74c0" stroke-width="1.5"/></svg><div><b>Square</b><span>Management: local management of an operation, and Systems 3, 4, 5</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><path d="M17 4l9 16H8z" fill="#cf8a1f" fill-opacity=".25" stroke="#cf8a1f" stroke-width="1.5"/></svg><div><b>Triangle</b><span>System 2 coordination (pointing up) and System 3* audit (pointing down)</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><path d="M17 2l11 11-11 11L6 13z" fill="#cf8a1f" fill-opacity=".14" stroke="#cf8a1f" stroke-width="1.5"/></svg><div><b>Rhombus</b><span>Metasystem: the management of the whole, enclosing 3, 4 and 5</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><path d="M3 13h24" stroke="#d43d33" stroke-width="2"/><path d="M24 9l5 4-5 4" fill="none" stroke="#d43d33" stroke-width="2"/></svg><div><b>Algedonic channel</b><span>Alarm signals from operations straight to System 5</span></div></div>
+        </div>
+      </div>
+      <div class="block">
+        <h3>How the 3D view uses depth</h3>
+        <p>The 3D model keeps the canonical layout and adds one dimension: the environment sits at the back, the operations in the middle, the metasystem in front. Channels that cross between domains become visible as slopes. Each solid is chosen so that seen face-on it is exactly Beer's symbol: spheres for circles, cubes for squares, prisms for triangles, an octahedron for the rhombus. The Depth slider controls the separation.</p>
+      </div>
+      <div class="block">
+        <h3>Controls</h3>
+        <div class="keys">
+          <kbd>Drag</kbd><span>Rotate (3D) or pan (2D)</span>
+          <kbd>Right-drag</kbd><span>Pan; Shift-drag also works</span>
+          <kbd>Scroll</kbd><span>Zoom; pinch on touch screens</span>
+          <kbd>Click</kbd><span>Select an element and read about it</span>
+          <kbd>Double-click</kbd><span>Step into a system's own viable system</span>
+          <kbd>2 / 3</kbd><span>Switch between 2D and 3D</span>
+          <kbd>F</kbd><span>Fit the model to the view</span>
+          <kbd>Esc</kbd><span>Clear the selection</span>
+        </div>
+      </div>
+      <div class="block">
+        <p class="src">Ashby's law of requisite variety underpins every channel: only variety can absorb variety. The model's channels exist to amplify the system's variety and attenuate the environment's until they balance.</p>
+      </div>
+    </section>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <main class="stage" id="stage">
+    <canvas id="gl" tabindex="0" aria-label="Viable System Model view. Use the Model panel's element list for keyboard access."></canvas>
+    <div class="labels" id="labels" aria-hidden="true"></div>
+    <div class="overlay-tl">
+      <div class="level-chip" id="levelChip"></div>
+      <button class="up-btn" id="upBtn" type="button" hidden>
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/></svg>
+        <span id="upTx">Up one level</span>
+      </button>
+    </div>
+    <div class="tip" id="tip" hidden></div>
+    <div class="hint" id="hint"></div>
+    <label class="depth" id="depthCtl" title="Separation between environment, operations and metasystem">
+      <span>Layer depth</span>
+      <input type="range" id="spread" min="0.3" max="2.2" step="0.05" value="1">
+    </label>
+    <div class="fallback" id="fallback" hidden>
+      <div><b>WebGL is not available in this browser.</b><br>The explorer needs WebGL to draw the model. Try a recent version of Chrome, Firefox, Safari or Edge.</div>
+    </div>
+  </main>
+
+  <aside class="insp" id="insp" aria-label="Element details" hidden>
+    <div class="insp-head">
+      <div class="code-chip" id="iCode">4</div>
+      <div class="insp-kind"><span class="k" id="iKind">System 4</span><span class="r" id="iRole">Intelligence</span></div>
+      <button class="icon-btn" id="iClose" type="button" aria-label="Close details">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+      </button>
+    </div>
+    <div class="insp-body">
+      <label class="fld"><span>Label in this model</span><input type="text" id="iName"></label>
+      <div class="fld">
+        <span>Colour</span>
+        <div class="color-row">
+          <input type="color" class="sw" id="iColor" aria-label="Element colour">
+          <small id="iColorNote">Using the group colour</small>
+          <button class="linkish" id="iColorReset" type="button">Use group colour</button>
+        </div>
+      </div>
+      <p class="summary" id="iSummary"></p>
+      <div id="iRecur"></div>
+      <div class="isec" id="iLinksSec"><h4>Connected</h4><ul class="links" id="iLinks"></ul></div>
+      <div class="isec" id="iPracticeSec"><h4>In practice</h4><ul id="iPractice"></ul></div>
+      <div class="isec" id="iQuestionsSec"><h4>Diagnostic questions</h4><ul id="iQuestions"></ul></div>
+      <div class="isec" id="iWatchSec"><h4>Watch for</h4><ul id="iWatch"></ul></div>
+      <label class="fld"><span>Notes for your organization</span><textarea id="iNotes" placeholder="Who or what performs this function here? What works, what doesn't?"></textarea></label>
+    </div>
+  </aside>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function () {
+'use strict';
+
+/* =====================================================================
+   Helpers
+   ===================================================================== */
+const $ = (s, r) => (r || document).querySelector(s);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const LETTERS = 'ABCDEFGHIJKLMNOP';
+const MIN_OPS = 1, MAX_OPS = 6;
+
+/* =====================================================================
+   Knowledge base: what each element and channel is, after Beer
+   ===================================================================== */
+const KB = {
+  envTotal: {
+    kind: 'Environment', role: 'Total environment',
+    summary: 'Everything outside the system that it has to deal with. Beer drew the environment as an amoeba because its boundary is fuzzy and always shifting. Its variety vastly exceeds the system\'s, so the system survives only by amplifying its own variety and attenuating the environment\'s: Ashby\'s law of requisite variety.',
+    practice: ['Markets, communities, ecosystems and institutions the organization lives among', 'Competitors, regulators, suppliers and the wider economy'],
+    questions: ['Where does the system draw its boundary, and who would draw it differently?', 'Which parts of the environment does no one in the organization attend to?'],
+    watch: ['Treating the environment as fixed rather than co-evolving with the organization']
+  },
+  envFuture: {
+    kind: 'Environment', role: 'Future environment',
+    summary: 'The wider and future environment watched by System 4: emerging technologies, shifting markets, regulation, demography and society. It is the space of possibilities the organization may need to adapt to, beyond the environments its operations serve today.',
+    practice: ['Technology trends, policy changes, new entrants', 'Changing expectations of customers, citizens or members'],
+    questions: ['Which future developments could make the current operations irrelevant?', 'Who brings news of this environment into the organization?'],
+    watch: ['Scanning that only extrapolates the present']
+  },
+  envOp: {
+    kind: 'Environment', role: 'Operational environment',
+    summary: 'The part of the environment that one operation directly serves and draws from: its customers, users, suppliers and local regulators. Operational environments overlap and interact, so a change in one can ripple through the others.',
+    practice: ['A customer segment, a region, a patient population, a user community'],
+    questions: ['Who exactly does this operation serve?', 'How fast does this environment change, and does the operation keep pace?'],
+    watch: ['An operation that has drifted away from the environment it was set up to serve']
+  },
+  op: {
+    kind: 'System 1', role: 'Operation',
+    summary: 'Operations do what the system exists to do: make the products, deliver the services, produce its identity in the world. Each operation is itself a viable system, with its own management, metasystem and environment. This is the recursion at the heart of the model: open it to see the viable system inside.',
+    practice: ['Business units, product lines or regional branches', 'Clinical departments in a hospital', 'Teams that deliver a service from end to end'],
+    questions: ['Which activities produce the system\'s purpose? Could each survive on its own?', 'Does each operation have the autonomy and resources to absorb the variety of its environment?', 'Is the operation itself viable, with all five systems present inside it?'],
+    watch: ['Operations defined by internal function rather than by what they deliver', 'Autonomy so constrained that every decision escalates upward']
+  },
+  mgmt: {
+    kind: 'System 1', role: 'Local management',
+    summary: 'Each operation has its own local management, drawn as a square. It regulates the operation directly, negotiates resources and accountability with System 3 along the command channel, and is coordinated with its siblings through System 2. Seen one level down, this square is the whole metasystem of the operation\'s own viable system.',
+    practice: ['Plant manager, branch head, ward manager, team lead, product owner'],
+    questions: ['Does local management have enough variety (information, authority, skill) to regulate its operation?', 'Which decisions can it take without referring to System 3?'],
+    watch: ['Local management bypassed by direct commands from above', 'Managers acting as messengers rather than regulators']
+  },
+  s2: {
+    kind: 'System 2', role: 'Coordination unit',
+    summary: 'System 2 damps oscillation between operations: the conflicts and hunting that arise when autonomous units share resources, customers or schedules. Each coordination unit sits beside one operation\'s management. Together they form a largely self-regulating channel that works through shared rules and information rather than commands.',
+    practice: ['Production schedules, timetables and rotas', 'Shared standards, protocols and IT systems', 'Booking systems and inter-team agreements'],
+    questions: ['Where do operations interfere with each other?', 'Is coordination achieved by agreed protocols, or by managers stepping in each time?'],
+    watch: ['Coordination used as a channel of control', 'Missing coordination, so every clash escalates to System 3']
+  },
+  s2c: {
+    kind: 'System 2', role: 'Coordination centre',
+    summary: 'The regulatory centre of System 2 links the coordination channel to System 3. It holds the overall picture of schedules and shared services, so that System 3 can see where oscillation is building and tune the rules, without intervening in each operation.',
+    practice: ['A central planning office, a patient-flow hub, an engineering programme office'],
+    questions: ['Who maintains the shared rules, and how are they changed?', 'Does System 3 rely on this centre, or bypass it?'],
+    watch: ['A coordination centre that grows into a second line of management']
+  },
+  s3: {
+    kind: 'System 3', role: 'Control and cohesion',
+    summary: 'System 3 manages the inside and now: the operations taken together. It allocates resources, agrees performance with each operation (the resource bargain), and looks for synergy that no single operation could achieve on its own. It is the operational management of the whole.',
+    practice: ['Chief operating officer or executive team', 'Budgeting, performance agreements, resource allocation'],
+    questions: ['How are resources bargained against accountability?', 'What synergy does System 3 create that the operations could not create alone?', 'How often does it intervene beyond the agreed bargain?'],
+    watch: ['Micromanagement that soaks up the operations\' autonomy', 'Treating operations as cost centres rather than the reason the system exists']
+  },
+  s3s: {
+    kind: 'System 3*', role: 'Audit and monitoring',
+    summary: 'System 3* is the audit channel. It lets System 3 look directly into the operations, sporadically and by agreement, to see what routine reports cannot show. It gives System 3 high-variety information without routing everything through local management.',
+    practice: ['Internal audit, quality inspections, safety walks', 'Staff surveys, site visits, spot checks'],
+    questions: ['How does System 3 validate the reports it receives?', 'Is audit sporadic and agreed, or constant surveillance?'],
+    watch: ['Audit so heavy that it erodes trust and autonomy', 'No independent view, so System 3 only hears what it wants to hear']
+  },
+  s4: {
+    kind: 'System 4', role: 'Intelligence',
+    summary: 'System 4 looks outside and then: the total environment and the future. It scans for threats and opportunities, keeps a model of the organization and its environment, and proposes adaptation. It works in constant dialogue with System 3, so that plans for the future stay grounded in what the operations can actually do.',
+    practice: ['Strategy, research and development, market research', 'Business development, foresight and horizon scanning'],
+    questions: ['Who scans the environment beyond current customers?', 'Does System 4 hold a working model of the organization itself?', 'How are its proposals negotiated with System 3?'],
+    watch: ['System 4 missing or reduced to forecasting', 'Strategy disconnected from what the operations can deliver']
+  },
+  s5: {
+    kind: 'System 5', role: 'Policy and identity',
+    summary: 'System 5 provides identity, purpose and policy: the ethos that defines what the system is. It closes the system by balancing the present (System 3) against the future (System 4), and is the final arbiter when they cannot agree. Beer described it as supplying closure to the whole.',
+    practice: ['Board, owners, members or founders', 'Constitution, mission, values and policy'],
+    questions: ['What is the purpose of this system, as it is actually practised?', 'How does System 5 hear the debate between Systems 3 and 4?', 'Does it reach directly into operations, collapsing into System 3?'],
+    watch: ['System 5 collapsing into System 3', 'An identity that is declared but never acted on']
+  },
+  meta: {
+    kind: 'Metasystem', role: 'Management of the whole',
+    summary: 'The metasystem is the management of the whole system: Systems 2, 3, 4 and 5 together, drawn here as Beer\'s rhombus around 3, 4 and 5. It exists to serve the operations, providing the cohesion and adaptation they cannot provide for themselves. "Meta" means a higher logical order, not a higher status.',
+    practice: ['The leadership and support functions taken together'],
+    questions: ['Does the metasystem add value the operations recognize?', 'Is its variety enough to manage the operations without smothering them?'],
+    watch: ['A metasystem that serves itself rather than the operations']
+  },
+  /* channels */
+  eo: {
+    kind: 'Channel', role: 'Environment and operation',
+    summary: 'Each operation exchanges variety with its environment: products and services flow out, demand, feedback and disturbance flow back. Requisite variety has to hold across this boundary, so the operation must match the complexity its environment presents.',
+    practice: ['Sales, service delivery, customer feedback, complaints'],
+    questions: ['Is the operation\'s variety a match for its environment\'s?', 'How does it amplify its own variety and filter the environment\'s?'],
+    watch: ['Feedback from the environment that never reaches management']
+  },
+  ee: {
+    kind: 'Channel', role: 'Environmental interaction',
+    summary: 'Operational environments affect each other: customers overlap, markets move together, a change in one community touches another. These interactions reach the operations whether management notices them or not.',
+    practice: ['Shared customers, overlapping regions, linked supply chains'],
+    questions: ['Which environments overlap, and does anyone track the overlap?'],
+    watch: ['Operations surprised by changes that began in a neighbouring environment']
+  },
+  om: {
+    kind: 'Channel', role: 'Management loop',
+    summary: 'Local management regulates its operation and the operation reports back. This loop needs requisite variety: the manager must have enough information and authority to match what the operation is doing.',
+    practice: ['Daily stand-ups, local reporting, team decisions'],
+    questions: ['Can local management see what the operation is doing in time to act?'],
+    watch: ['Reports that arrive too late to regulate anything']
+  },
+  oo: {
+    kind: 'Channel', role: 'Operational interaction',
+    summary: 'Operations interact directly: they supply each other, share staff and customers, and compete for resources. These interactions are a source of synergy and also of oscillation, which System 2 exists to damp.',
+    practice: ['Internal supply, shared staff, hand-offs between units'],
+    questions: ['Where do operations depend on one another?', 'Which interactions cause recurring conflict?'],
+    watch: ['Hidden dependencies that only surface in a crisis']
+  },
+  ms2: {
+    kind: 'Channel', role: 'Coordination link',
+    summary: 'Links one operation\'s management to the coordination system. Schedules, standards and early signs of conflict flow in both directions.',
+    practice: ['Planning meetings, shared calendars, protocol updates'],
+    questions: ['Does each operation take part in setting the shared rules it follows?'],
+    watch: ['Rules imposed on operations without their involvement']
+  },
+  s2ch: {
+    kind: 'Channel', role: 'Coordination channel',
+    summary: 'The System 2 channel runs along all the coordination units, so the operations can adjust to each other without escalation. In a healthy system it carries agreements and information rather than instructions.',
+    practice: ['Common scheduling, shared ledgers, protocols every unit uses'],
+    questions: ['How much oscillation is absorbed here before reaching System 3?'],
+    watch: ['The channel used to transmit commands']
+  },
+  s2s3: {
+    kind: 'Channel', role: 'Coordination and control',
+    summary: 'Connects the coordination centre to System 3, so operational management can see the overall picture of scheduling and shared resources and tune the rules System 2 applies.',
+    practice: ['Capacity reports, scheduling reviews'],
+    questions: ['Does System 3 learn from patterns of oscillation?'],
+    watch: ['System 3 bypassing coordination and issuing direct fixes']
+  },
+  cmd: {
+    kind: 'Channel', role: 'Command channel',
+    summary: 'The vertical channel links System 3 with the management of each operation. It carries the resource bargain (resources down, accountability up), corporate and legal requirements, and the limits of autonomy. Beer argued it should carry as little variety as possible: most regulation belongs to the operations themselves and to System 2.',
+    practice: ['Budgets and targets, performance reviews, policies and legal requirements'],
+    questions: ['What is negotiated here, and what is simply imposed?', 'How much traffic does this channel carry compared with the others?'],
+    watch: ['Overloading the command channel with detail', 'Bargains that are never revisited']
+  },
+  audit: {
+    kind: 'Channel', role: 'Audit channel (3*)',
+    summary: 'The 3* channel bypasses local management and reaches directly into the operations. It carries sporadic audits and monitoring, giving System 3 an independent check on what it hears through the command channel.',
+    practice: ['Audits, inspections, site visits, surveys'],
+    questions: ['Do operations know and accept how they are audited?'],
+    watch: ['Audit perceived as surveillance']
+  },
+  s34: {
+    kind: 'Channel', role: '3–4 homeostat',
+    summary: 'A continuous, two-way conversation between the inside and now (System 3) and the outside and then (System 4). Adaptation depends on this balance: too much System 3 and the organization ossifies; too much System 4 and it chases futures it cannot deliver.',
+    practice: ['Joint planning between operations and strategy', 'Scenario work that tests plans against current capability'],
+    questions: ['Who takes part in the conversation, and how often?', 'Which side usually wins?'],
+    watch: ['Systems 3 and 4 that never meet']
+  },
+  s45: {
+    kind: 'Channel', role: 'Policy and intelligence',
+    summary: 'System 5 and System 4 inform each other: identity and policy shape what System 4 looks for, and what System 4 finds can challenge identity. With the policy and control link, this lets System 5 monitor the 3–4 homeostat.',
+    practice: ['Board strategy sessions, horizon reports to the board'],
+    questions: ['Does what System 4 learns ever change policy?'],
+    watch: ['A board captured by the latest opportunity']
+  },
+  s35: {
+    kind: 'Channel', role: 'Policy and control',
+    summary: 'System 5 and System 3 inform each other: policy constrains how the operations are managed, and System 3 reports the state of the whole. System 5 uses this and the link to System 4 to judge the balance between present and future.',
+    practice: ['Executive reports to the board, policy directives'],
+    questions: ['Does System 5 hear the present through System 3 only, or through other channels too?'],
+    watch: ['System 5 managing operations through this channel']
+  },
+  s4f: {
+    kind: 'Channel', role: 'Environmental scanning',
+    summary: 'System 4 monitors the future and wider environment, and the organization\'s actions shape that environment in turn. This is where research, market intelligence and foresight enter the system.',
+    practice: ['Research partnerships, market studies, policy engagement'],
+    questions: ['How does what is learned out there reach decisions in here?'],
+    watch: ['Scanning that produces reports nobody reads']
+  },
+  alg: {
+    kind: 'Channel', role: 'Algedonic channel',
+    summary: 'The algedonic channel (from the Greek for pain and pleasure) carries alerts straight from the operations to System 5, bypassing the usual filters. It fires when something exceeds tolerance and has not been resolved through ordinary channels in time.',
+    practice: ['Whistleblowing lines, safety stop signals, critical-incident alerts'],
+    questions: ['Can a front-line alarm reach the top within hours?', 'Are false alarms tolerated so real ones are raised?'],
+    watch: ['No algedonic route, so crises are discovered late']
+  }
+};
+
+/* =====================================================================
+   Canonical layout (2D world units, y up). The 3D model reuses x and y
+   exactly and adds a layer depth per domain.
+   ===================================================================== */
+const LAYER = { env: -18, ops: 0, mid: 7, meta: 14 };
+const OP_GAP = 24;
+
+function blobPoint(s, t) {
+  const c = Math.cos(t), sn = Math.sin(t), e = 2 / s.p;
+  const x = Math.sign(c) * Math.pow(Math.abs(c), e);
+  const y = Math.sign(sn) * Math.pow(Math.abs(sn), e);
+  const k = s.seed;
+  const m = 1 + s.amp * (0.6 * Math.sin(3 * t + k) + 0.35 * Math.sin(5 * t + 1.7 * k) + 0.5 * Math.sin(2 * t + 2.3 * k));
+  return [s.cx + s.rx * x * m, s.cy + s.ry * y * m];
+}
+
+function outlineOf(s) {
+  const pts = [];
+  switch (s.kind) {
+    case 'circle':
+      for (let i = 0; i < 72; i++) { const t = i / 72 * Math.PI * 2; pts.push([s.cx + s.r * Math.cos(t), s.cy + s.r * Math.sin(t)]); }
+      return pts;
+    case 'square': {
+      const h = s.s / 2;
+      return [[s.cx - h, s.cy - h], [s.cx + h, s.cy - h], [s.cx + h, s.cy + h], [s.cx - h, s.cy + h]];
+    }
+    case 'tri': {
+      const hw = s.w / 2, hh = s.h / 2;
+      return s.dir === 'down'
+        ? [[s.cx + hw, s.cy + hh], [s.cx - hw, s.cy + hh], [s.cx, s.cy - hh]]
+        : [[s.cx - hw, s.cy - hh], [s.cx + hw, s.cy - hh], [s.cx, s.cy + hh]];
+    }
+    case 'rhombus':
+      return [[s.cx, s.cy - s.hh], [s.cx + s.hw, s.cy], [s.cx, s.cy + s.hh], [s.cx - s.hw, s.cy]];
+    case 'blob':
+      for (let i = 0; i < 120; i++) pts.push(blobPoint(s, i / 120 * Math.PI * 2));
+      return pts;
+  }
+  return pts;
+}
+
+/* Point where a ray from the shape centre towards (dx, dy) leaves the outline */
+function edgePoint(el, dx, dy) {
+  const s = el.shape, pts = el.outline;
+  const len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len;
+  let best = Infinity;
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i], b = pts[(i + 1) % pts.length];
+    const ex = b[0] - a[0], ey = b[1] - a[1];
+    const den = ux * ey - uy * ex;
+    if (Math.abs(den) < 1e-9) continue;
+    const ax = a[0] - s.cx, ay = a[1] - s.cy;
+    const t = (ax * ey - ay * ex) / den;
+    const u = (ax * uy - ay * ux) / den;
+    if (t > 0 && u >= -1e-6 && u <= 1 + 1e-6 && t < best) best = t;
+  }
+  if (!isFinite(best)) best = 0;
+  return [s.cx + ux * best, s.cy + uy * best];
+}
+
+function buildLayout(n) {
+  const els = [], chans = [], byId = {};
+  const yOp = i => -OP_GAP * i;
+  const yLast = yOp(n - 1);
+  const add = o => { o.outline = outlineOf(o.shape); els.push(o); byId[o.id] = o; return o; };
+  const envTop = 78, envBottom = yLast - 17;
+  const envCy = (envTop + envBottom) / 2, envRy = (envTop - envBottom) / 2;
+
+  add({ id: 'env', type: 'envTotal', group: 'env', container: true, layer: LAYER.env, zoff: -6, z2: -0.6,
+    shape: { kind: 'blob', cx: -47, cy: envCy, rx: 20.5, ry: envRy, p: 3.4, amp: 0.03, seed: 2.1 },
+    label: { dx: 0, dy: envTop - envCy - 6, w: 32, big: true } });
+  add({ id: 'fut', type: 'envFuture', group: 'env', layer: LAYER.env, z2: -0.45,
+    shape: { kind: 'blob', cx: -46, cy: 52, rx: 15, ry: 12.5, p: 2.2, amp: 0.07, seed: 7.3 },
+    label: { dx: 0, dy: 0, w: 24 } });
+  for (let i = 0; i < n; i++) {
+    const y = yOp(i);
+    add({ id: 'e' + i, type: 'envOp', group: 'env', idx: i, layer: LAYER.env, z2: -0.45,
+      shape: { kind: 'blob', cx: -50, cy: y, rx: 12, ry: 9.5, p: 2.3, amp: 0.08, seed: 11.7 + i * 3.1 },
+      label: { dx: 0, dy: 0, w: 20 } });
+    add({ id: 'o' + i, type: 'op', group: 'ops', idx: i, layer: LAYER.ops, z2: 0,
+      shape: { kind: 'circle', cx: -14, cy: y, r: 8.5 }, label: { dx: 0, dy: 0, w: 16, nestDy: 6.2 } });
+    add({ id: 'm' + i, type: 'mgmt', group: 'ops', idx: i, layer: LAYER.ops, z2: 0,
+      shape: { kind: 'square', cx: 12, cy: y + 7, s: 10 }, label: { dx: 0, dy: 0, w: 14 } });
+    add({ id: 'a' + i, type: 's2', group: 'meta', idx: i, layer: LAYER.meta, z2: 0,
+      shape: { kind: 'tri', cx: 30, cy: y + 7, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
+  }
+  add({ id: 'meta', type: 'meta', group: 'meta', container: true, layer: LAYER.meta, z2: -0.3,
+    shape: { kind: 'rhombus', cx: 12, cy: 50, hw: 24, hh: 37 }, label: { dx: 0, dy: 37 + 4, w: 30, big: true, nameOnly: true } });
+  add({ id: 's2', type: 's2c', group: 'meta', layer: LAYER.meta, z2: 0,
+    shape: { kind: 'tri', cx: 30, cy: 33, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
+  add({ id: 's3', type: 's3', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 12, cy: 33, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
+  add({ id: 's3s', type: 's3s', group: 'meta', layer: LAYER.meta, z2: 0,
+    shape: { kind: 'tri', cx: -6, cy: 26, w: 9, h: 8, dir: 'down' }, label: { dx: -6, dy: 0, w: 14, align: 'r', codeIn: true } });
+  add({ id: 's4', type: 's4', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 12, cy: 50, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
+  add({ id: 's5', type: 's5', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 12, cy: 67, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
+
+  const at = (id, dx, dy) => edgePoint(byId[id], dx, dy);
+  const P = (xy, L) => ({ x: xy[0], y: xy[1], L });
+  const chan = (id, type, ends, paths, idx) => { chans.push({ id, type, ends, paths, idx, group: 'chan' }); };
+  const E = LAYER.env, O = LAYER.ops, M = LAYER.meta, MID = LAYER.mid;
+  const c35 = Math.cos(35 * Math.PI / 180), s35 = Math.sin(35 * Math.PI / 180);
+  const c20 = Math.cos(-20 * Math.PI / 180), s20 = Math.sin(-20 * Math.PI / 180);
+
+  for (let i = 0; i < n; i++) {
+    chan('eo' + i, 'eo', ['e' + i, 'o' + i], [{ pts: [P(at('e' + i, 1, 0), E), P(at('o' + i, -1, 0), O)], arrows: 'both' }], i);
+    chan('om' + i, 'om', ['o' + i, 'm' + i], [{ pts: [P(at('o' + i, c35, s35), O), P(at('m' + i, -1, -0.2), O)], arrows: 'both' }], i);
+    chan('ms' + i, 'ms2', ['m' + i, 'a' + i], [{ pts: [P(at('m' + i, 1, 0), O), P(at('a' + i, -1, 0), M)], arrows: 'both' }], i);
+    if (i < n - 1) {
+      chan('ee' + i, 'ee', ['e' + i, 'e' + (i + 1)], [{ pts: [P(at('e' + i, 0, -1), E), P(at('e' + (i + 1), 0, 1), E)], mode: 'wave', amp: 1.8, arrows: 'both' }], i);
+      chan('oo' + i, 'oo', ['o' + i, 'o' + (i + 1)], [{ pts: [P(at('o' + i, 0, -1), O), P(at('o' + (i + 1), 0, 1), O)], mode: 'wave', amp: 1.8, arrows: 'both' }], i);
+    }
+  }
+  const s2paths = [{ pts: [P(at('s2', 0, -1), M), P(at('a0', 0, 1), M)], arrows: 'both' }];
+  for (let i = 0; i < n - 1; i++) s2paths.push({ pts: [P(at('a' + i, 0, -1), M), P(at('a' + (i + 1), 0, 1), M)], arrows: 'both' });
+  chan('c2', 's2ch', ['s2'].concat(Array.from({ length: n }, (_, i) => 'a' + i)), s2paths);
+  chan('c23', 's2s3', ['s3', 's2'], [{ pts: [P(at('s3', 1, 0), M), P(at('s2', -1, 0), M)], arrows: 'both' }]);
+
+  const cmdPaths = [{ pts: [P(at('s3', 0, -1), M), P(at('m0', 0, 1), O)], arrows: 'both' }];
+  for (let i = 0; i < n - 1; i++) cmdPaths.push({ pts: [P(at('m' + i, 0, -1), O), P(at('m' + (i + 1), 0, 1), O)], arrows: 'both' });
+  chan('cmd', 'cmd', ['s3'].concat(Array.from({ length: n }, (_, i) => 'm' + i)), cmdPaths);
+
+  const audPaths = [
+    { pts: [P(at('s3', -1, -0.55), M), P(at('s3s', 4.5, 4), M)], arrows: 'both' },
+    { pts: [P(at('s3s', 0, -1), M), P([-1, 17], MID), P([-1, yLast - 3], MID)], corner: 3, arrows: 'none' }
+  ];
+  for (let i = 0; i < n; i++) audPaths.push({ pts: [P([-1, yOp(i) - 3], MID), P(at('o' + i, c20, s20), O)], arrows: 'end' });
+  chan('aud', 'audit', ['s3', 's3s'].concat(Array.from({ length: n }, (_, i) => 'o' + i)), audPaths);
+
+  chan('h34', 's34', ['s3', 's4'], [
+    { pts: [P(at('s3', -3.5, 5.5), M), P([3.6, 41.5], M), P(at('s4', -3.5, -5.5), M)], mode: 'quad', arrows: 'end' },
+    { pts: [P(at('s4', 3.5, -5.5), M), P([20.4, 41.5], M), P(at('s3', 3.5, 5.5), M)], mode: 'quad', arrows: 'end' }
+  ]);
+  chan('c45', 's45', ['s4', 's5'], [{ pts: [P(at('s4', 0, 1), M), P(at('s5', 0, -1), M)], arrows: 'both' }]);
+  chan('c35', 's35', ['s3', 's5'], [{ pts: [P(at('s5', 1, -0.6), M), P([30, 50], M), P(at('s3', 1, 0.55), M)], mode: 'quad', arrows: 'both' }]);
+  chan('c4f', 's4f', ['s4', 'fut'], [{ pts: [P(at('s4', -1, 0), M), P(at('fut', 1, -0.1), E)], arrows: 'both' }]);
+  chan('alg', 'alg', ['o' + (n - 1), 's5'], [{
+    pts: [P(at('o' + (n - 1), 0, -1), O), P([-14, yLast - 13], O), P([50, yLast - 13], O), P([50, 70], M), P(at('s5', 1, 0.55), M)],
+    corner: 3.5, arrows: 'end'
+  }]);
+
+  chans.forEach(c => c.paths.forEach(p => { p.samples = samplePath(p); }));
+
+  // bounding box for framing (shapes, channels and label room)
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  const grow = (x, y) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); };
+  els.forEach(e => e.outline.forEach(p => grow(p[0], p[1])));
+  chans.forEach(c => c.paths.forEach(p => p.samples.forEach(s => grow(s.x, s.y))));
+  grow(x1 + 1, y1 + 6);
+  return { els, chans, byId, chanById: Object.fromEntries(chans.map(c => [c.id, c])), bbox: { x0, x1, y0, y1 }, n };
+}
+
+function samplePath(p) {
+  const pts = p.pts, out = [];
+  if (p.mode === 'quad') {
+    const [a, c, b] = pts, N = 30;
+    for (let i = 0; i <= N; i++) {
+      const t = i / N, m = 1 - t;
+      out.push({ x: m * m * a.x + 2 * m * t * c.x + t * t * b.x, y: m * m * a.y + 2 * m * t * c.y + t * t * b.y, L: lerp(a.L, b.L, t) });
+    }
+    return out;
+  }
+  if (p.mode === 'wave') {
+    const [a, b] = pts, N = 30;
+    const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1, nx = -dy / len, ny = dx / len, amp = p.amp || 2;
+    for (let i = 0; i <= N; i++) {
+      const t = i / N, off = Math.sin(t * Math.PI * 2) * amp;
+      out.push({ x: a.x + dx * t + nx * off, y: a.y + dy * t + ny * off, L: lerp(a.L, b.L, t) });
+    }
+    return out;
+  }
+  const r = p.corner || 0;
+  const toward = (from, to, d) => {
+    const l = Math.hypot(to.x - from.x, to.y - from.y) || 1, t = d / l;
+    return { x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t, L: from.L + (to.L - from.L) * t };
+  };
+  out.push(pts[0]);
+  for (let i = 1; i < pts.length - 1; i++) {
+    const a = pts[i - 1], b = pts[i], c = pts[i + 1];
+    if (!r) { out.push(b); continue; }
+    const rr = Math.min(r, Math.hypot(b.x - a.x, b.y - a.y) / 2, Math.hypot(c.x - b.x, c.y - b.y) / 2);
+    const p1 = toward(b, a, rr), p2 = toward(b, c, rr);
+    for (let k = 0; k <= 6; k++) {
+      const t = k / 6, m = 1 - t;
+      out.push({ x: m * m * p1.x + 2 * m * t * b.x + t * t * p2.x, y: m * m * p1.y + 2 * m * t * b.y + t * t * p2.y, L: m * m * p1.L + 2 * m * t * b.L + t * t * p2.L });
+    }
+  }
+  out.push(pts[pts.length - 1]);
+  return out;
+}
+
+/* =====================================================================
+   Model data: a tree of levels (recursions), each with its own labels
+   ===================================================================== */
+const DEFAULT_GROUP_COLORS = { env: '#4f9a63', ops: '#2f74c0', meta: '#cf8a1f', chan: '#6c7b86' };
+const SPECIAL_DEFAULTS = { alg: '#d43d33' };
+const GROUP_INFO = {
+  env: { name: 'Environment', hint: 'Total, future and operational environments' },
+  ops: { name: 'Operations', hint: 'System 1: operations and their management' },
+  meta: { name: 'Metasystem', hint: 'Systems 2, 3, 3*, 4 and 5' },
+  chan: { name: 'Channels', hint: 'Every connection between elements' }
+};
+const STORE_KEY = 'vsm-explorer:v1';
+
+let db = null; // { seq, rootId, currentId, levels: {} }
+let prefs = { view: '3d', flows: !reduceMotion, nested: false, spread: 1, side: true };
+
+function newLevel(parent, elId) {
+  db.seq += 1;
+  const id = 'L' + db.seq;
+  const tag = parent ? childTag(parent, elId) : '';
+  const lv = {
+    id, depth: parent ? parent.depth + 1 : 0, tag,
+    parent: parent ? { level: parent.id, el: elId } : null,
+    name: parent ? null : 'Organization',
+    opCount: 3, labels: {}, colors: {}, notes: {},
+    groupColors: Object.assign({}, parent ? parent.groupColors : DEFAULT_GROUP_COLORS),
+    children: {}
+  };
+  db.levels[id] = lv;
+  if (parent) parent.children[elId] = id;
+  return lv;
+}
+
+function childTag(parent, elId) {
+  const m = /^[om](\d+)$/.exec(elId);
+  return m ? opTag(parent, +m[1]) : '';
+}
+function opTag(lv, i) {
+  const base = lv.tag;
+  if (!base) return LETTERS[i];
+  if (base.endsWith('.')) return base + (i + 1);
+  return base + (/\d$/.test(base) ? LETTERS[i].toLowerCase() : String(i + 1));
+}
+
+function codeOf(lv, id) {
+  let m;
+  const tg = (prefix, i) => { const t = opTag(lv, i); return prefix + (/^\d/.test(t) ? '·' : '') + t; };
+  if ((m = /^o(\d+)$/.exec(id))) return tg('1', +m[1]);
+  if ((m = /^m(\d+)$/.exec(id))) return tg('1', +m[1]) + '·M';
+  if ((m = /^a(\d+)$/.exec(id))) return tg('2', +m[1]);
+  if ((m = /^e(\d+)$/.exec(id))) return tg('E', +m[1]);
+  return ({ env: 'E', fut: 'EF', meta: 'M', s2: '2', s3: '3', s3s: '3*', s4: '4', s5: '5' })[id] || '';
+}
+
+function defaultLabel(lv, id) {
+  let m;
+  const t = i => opTag(lv, i);
+  if ((m = /^o(\d+)$/.exec(id))) return 'Operation ' + t(+m[1]);
+  if ((m = /^m(\d+)$/.exec(id))) return 'Management ' + t(+m[1]);
+  if ((m = /^a(\d+)$/.exec(id))) return 'Coordination ' + t(+m[1]);
+  if ((m = /^e(\d+)$/.exec(id))) return 'Environment ' + t(+m[1]);
+  if ((m = /^eo(\d+)$/.exec(id))) return 'Environment–operation ' + t(+m[1]);
+  if ((m = /^om(\d+)$/.exec(id))) return 'Management loop ' + t(+m[1]);
+  if ((m = /^ms(\d+)$/.exec(id))) return 'Coordination link ' + t(+m[1]);
+  if ((m = /^ee(\d+)$/.exec(id))) return 'Environmental interaction ' + t(+m[1]) + '–' + t(+m[1] + 1);
+  if ((m = /^oo(\d+)$/.exec(id))) return 'Operational interaction ' + t(+m[1]) + '–' + t(+m[1] + 1);
+  return ({
+    env: 'Total environment', fut: 'Future environment', meta: 'Metasystem',
+    s2: 'Coordination centre', s3: 'Control', s3s: 'Audit', s4: 'Intelligence', s5: 'Policy',
+    c2: 'Coordination channel', c23: 'Coordination–control link', cmd: 'Command channel', aud: 'Audit channel',
+    h34: '3–4 homeostat', c45: 'Policy–intelligence link', c35: 'Policy–control link', c4f: 'Environmental scanning', alg: 'Algedonic channel'
+  })[id] || id;
+}
+
+const labelOf = (lv, id) => (lv.labels[id] != null && lv.labels[id] !== '' ? lv.labels[id] : defaultLabel(lv, id));
+const level = () => db.levels[db.currentId];
+function levelName(lv) {
+  if (!lv.parent) return lv.name || 'Organization';
+  const p = db.levels[lv.parent.level];
+  return labelOf(p, lv.parent.el);
+}
+function setLevelName(lv, v) {
+  if (!lv.parent) lv.name = v || 'Organization';
+  else db.levels[lv.parent.level].labels[lv.parent.el] = v;
+}
+function groupOfId(L, id) { const e = L.byId[id]; return e ? e.group : 'chan'; }
+function colorOf(lv, id, L) {
+  if (lv.colors[id]) return lv.colors[id];
+  if (SPECIAL_DEFAULTS[id]) return SPECIAL_DEFAULTS[id];
+  return lv.groupColors[groupOfId(L, id)];
+}
+function ancestry(lv) { const out = []; let c = lv; while (c) { out.unshift(c); c = c.parent ? db.levels[c.parent.level] : null; } return out; }
+function typeOfId(L, id) { return L.byId[id] ? L.byId[id].type : (L.chanById[id] ? L.chanById[id].type : null); }
+function isSystemType(t) { return ['op', 'mgmt', 's2', 's2c', 's3', 's3s', 's4', 's5'].includes(t); }
+function recursionKey(id) { const m = /^m(\d+)$/.exec(id); return m ? 'o' + m[1] : id; }
+
+function freshDb() {
+  db = { seq: 0, rootId: null, currentId: null, levels: {} };
+  const root = newLevel(null);
+  db.rootId = db.currentId = root.id;
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (data && data.db && data.db.levels && data.db.levels[data.db.rootId]) {
+        db = data.db;
+        if (!db.levels[db.currentId]) db.currentId = db.rootId;
+        Object.assign(prefs, data.prefs || {});
+        return true;
+      }
+    }
+  } catch (e) { /* storage unavailable */ }
+  freshDb();
+  return false;
+}
+let saveTimer = 0;
+function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify({ db, prefs })); $('#saveNote').textContent = 'Changes are saved in this browser.'; }
+    catch (e) { $('#saveNote').textContent = 'This browser is not keeping changes between visits.'; }
+  }, 250);
+}
+
+/* Label presets */
+const PRESETS = {
+  canonical: { ops: 3, name: null, labels: {} },
+  hospital: {
+    ops: 4, name: 'Regional hospital (example)',
+    labels: {
+      env: 'Health region', fut: 'Ageing population, new treatments, health policy', meta: 'Hospital executive',
+      s2: 'Patient flow hub', s3: 'Chief operating officer', s3s: 'Clinical audit', s4: 'Strategy and planning', s5: 'Hospital board',
+      o0: 'Emergency care', o1: 'Surgery', o2: 'Maternity', o3: 'Outpatient clinics',
+      m0: 'ED leadership', m1: 'Surgical directorate', m2: 'Maternity lead', m3: 'Clinics manager',
+      a0: 'Bed management', a1: 'Theatre scheduling', a2: 'Midwifery rota', a3: 'Clinic booking',
+      e0: 'Emergency patients', e1: 'Surgical referrals', e2: 'Expectant families', e3: 'GP referrals'
+    }
+  },
+  software: {
+    ops: 3, name: 'Software company (example)',
+    labels: {
+      env: 'Software market', fut: 'AI tooling, regulation, new competitors', meta: 'Leadership team',
+      s2: 'Engineering coordination', s3: 'Head of delivery', s3s: 'Security and quality audits', s4: 'Product strategy and research', s5: 'Founders and board',
+      o0: 'Mobile app', o1: 'Web platform', o2: 'Enterprise integrations',
+      m0: 'App team lead', m1: 'Platform lead', m2: 'Integrations lead',
+      a0: 'Release calendar', a1: 'Shared design system', a2: 'API standards',
+      e0: 'Consumer users', e1: 'Small businesses', e2: 'Enterprise clients'
+    }
+  }
+};
+
+/* =====================================================================
+   Theme
+   ===================================================================== */
+const theme = { stage: null, ink: null, accent: null, dark: false };
+function readTheme() {
+  const cs = getComputedStyle(document.documentElement);
+  const get = n => cs.getPropertyValue(n).trim() || '#888888';
+  theme.stage = new THREE.Color(get('--stage'));
+  theme.ink = new THREE.Color(get('--ink'));
+  theme.accent = new THREE.Color(get('--accent'));
+  theme.dark = theme.stage.r + theme.stage.g + theme.stage.b < 1.2;
+}
+
+/* =====================================================================
+   3D scene
+   ===================================================================== */
+const canvas = $('#gl');
+const stage = $('#stage');
+let renderer;
+try {
+  if (!window.THREE) throw new Error('three.js did not load');
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+} catch (err) {
+  $('#fallback').hidden = false;
+  if (!window.THREE) $('#fallback').firstElementChild.innerHTML = '<b>The 3D library could not be loaded.</b><br>Check the network connection and reload the page.';
+  return;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setClearColor(0x000000, 0);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, 4, 5000);
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.09;
+controls.minDistance = 25;
+controls.maxDistance = 1600;
+controls.screenSpacePanning = true;
+
+const hemi = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
+scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xffffff, 0.2);
+sun.position.set(60, 100, 160);
+scene.add(sun);
+const rim = new THREE.DirectionalLight(0xffffff, 0);
+rim.position.set(-120, 40, -60);
+scene.add(rim);
+
+const world = new THREE.Group();
+scene.add(world);
+
+const anim = { d: prefs.view === '3d' ? 1 : 0 };   // morph factor: 0 = classic 2D, 1 = 3D
+let L = null;            // current layout
+const els = new Map();   // id -> element objects
+const chs = new Map();   // id -> channel objects
+let pickables = [];
+let minis = [];          // nested previews
+let dirty = true;
+let selected = null, hovered = null;
+let focusSet = null;
+
+const SZ = d => lerp(0.012, 1, d);
+const elZ = (el, d) => d * (el.layer * prefs.spread + (el.zoff || 0)) + (1 - d) * el.z2;
+const chZ = (Lz, d) => d * Lz * prefs.spread + (1 - d) * -0.15;
+
+const TINT = { envTotal: [0.88, 0.7], envFuture: [0.76, 0.32], envOp: [0.76, 0.32], meta: [0.9, 0.55], def: [0.74, 0.0] };
+const STROKE3D = { circle: 0, square: 0, tri: 0, rhombus: 0, blob: 0.45 };
+
+function shapeFromPts(pts) {
+  const sh = new THREE.Shape();
+  pts.forEach((p, i) => (i ? sh.lineTo(p[0], p[1]) : sh.moveTo(p[0], p[1])));
+  sh.closePath();
+  return sh;
+}
+
+function octahedron(hw, hh, hd) {
+  const v = [[hw, 0, 0], [-hw, 0, 0], [0, hh, 0], [0, -hh, 0], [0, 0, hd], [0, 0, -hd]];
+  const f = [[0, 2, 4], [2, 1, 4], [1, 3, 4], [3, 0, 4], [2, 0, 5], [1, 2, 5], [3, 1, 5], [0, 3, 5]];
+  const pos = [];
+  f.forEach(face => face.forEach(i => pos.push(v[i][0], v[i][1], v[i][2])));
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.computeVertexNormals();
+  return g;
+}
+
+function localOutline(el) { return el.outline.map(p => [p[0] - el.shape.cx, p[1] - el.shape.cy]); }
+
+function fillGeometry(el, quality) {
+  const s = el.shape, q = quality || 1;
+  switch (s.kind) {
+    case 'circle': return { g: new THREE.SphereGeometry(s.r, Math.round(48 * q), Math.round(32 * q)), half: s.r };
+    case 'square': return { g: new THREE.BoxGeometry(s.s, s.s, s.s), half: s.s / 2 };
+    case 'tri': {
+      const g = new THREE.ExtrudeGeometry(shapeFromPts(localOutline(el)), { depth: 7, bevelEnabled: false });
+      g.translate(0, 0, -3.5);
+      return { g, half: 3.5 };
+    }
+    case 'rhombus': return { g: octahedron(s.hw, s.hh, 11), half: 11 };
+    case 'blob': {
+      const big = el.type === 'envTotal';
+      const depth = big ? 0.6 : 1, bt = big ? 1.6 : 2, bs = big ? 1.6 : 1.8;
+      const g = new THREE.ExtrudeGeometry(shapeFromPts(localOutline(el)), {
+        depth, bevelEnabled: true, bevelThickness: bt, bevelSize: bs, bevelOffset: -bs, bevelSegments: q < 1 ? 2 : 5, curveSegments: 1
+      });
+      g.translate(0, 0, -depth / 2);
+      return { g, half: depth / 2 + bt };
+    }
+  }
+}
+
+/* A flat band that follows an outline: Beer's ink line in 2D */
+function bandGeometry(pts, width, offset) {
+  const n = pts.length, pos = [], idx = [];
+  offset = offset || 0;
+  for (let i = 0; i < n; i++) {
+    const p = pts[i], a = pts[(i - 1 + n) % n], b = pts[(i + 1) % n];
+    let d1x = p[0] - a[0], d1y = p[1] - a[1]; const l1 = Math.hypot(d1x, d1y) || 1; d1x /= l1; d1y /= l1;
+    let d2x = b[0] - p[0], d2y = b[1] - p[1]; const l2 = Math.hypot(d2x, d2y) || 1; d2x /= l2; d2y /= l2;
+    const n1x = d1y, n1y = -d1x, n2x = d2y, n2y = -d2x;
+    let mx = n1x + n2x, my = n1y + n2y; const ml = Math.hypot(mx, my) || 1; mx /= ml; my /= ml;
+    const cos = Math.max(0.3, mx * n1x + my * n1y);
+    const o = offset / cos, h = width / 2 / cos;
+    pos.push(p[0] + mx * (o + h), p[1] + my * (o + h), 0, p[0] + mx * (o - h), p[1] + my * (o - h), 0);
+  }
+  for (let i = 0; i < n; i++) { const j = (i + 1) % n; idx.push(2 * i, 2 * i + 1, 2 * j, 2 * i + 1, 2 * j + 1, 2 * j); }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx);
+  return g;
+}
+
+class PolyCurve extends THREE.Curve {
+  constructor(points) {
+    super();
+    this.points = points;
+    this.cum = [0];
+    for (let i = 1; i < points.length; i++) this.cum.push(this.cum[i - 1] + points[i].distanceTo(points[i - 1]));
+    this.total = this.cum[this.cum.length - 1] || 1;
+  }
+  getPoint(t, target) {
+    target = target || new THREE.Vector3();
+    const d = clamp(t, 0, 1) * this.total, c = this.cum;
+    let lo = 0, hi = c.length - 1;
+    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (c[mid] <= d) lo = mid; else hi = mid; }
+    const seg = c[hi] - c[lo] || 1;
+    return target.copy(this.points[lo]).lerp(this.points[hi], (d - c[lo]) / seg);
+  }
+}
+
+const coneGeo = new THREE.ConeGeometry(1.05, 2.6, 16);
+const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+const particleGeo = new THREE.SphereGeometry(0.62, 10, 8);
+let particles = null, particleSpecs = [];
+
+function stdMat(opts) {
+  return new THREE.MeshStandardMaterial(Object.assign({ roughness: 0.62, metalness: 0, transparent: false }, opts || {}));
+}
+
+function disposeGroup(g) {
+  g.traverse(o => {
+    if (o.geometry && o.geometry !== coneGeo && o.geometry !== particleGeo) o.geometry.dispose();
+    if (o.material && o.material !== hitMat) (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => m.dispose());
+  });
+}
+
+function buildScene() {
+  disposeGroup(world);
+  while (world.children.length) world.remove(world.children[0]);
+  els.clear(); chs.clear(); pickables = []; minis = [];
+  const lv = level();
+  L = buildLayout(lv.opCount);
+
+  L.els.forEach(el => {
+    const group = new THREE.Group();
+    group.position.set(el.shape.cx, el.shape.cy, 0);
+    const fg = fillGeometry(el);
+    const mat = stdMat({ side: el.shape.kind === 'rhombus' ? THREE.DoubleSide : THREE.FrontSide });
+    const fill = new THREE.Mesh(fg.g, mat);
+    fill.userData.pick = { kind: 'el', id: el.id, container: !!el.container };
+    if (el.type === 'meta') fill.renderOrder = 2;
+    if (el.type === 'envTotal') fill.renderOrder = -1;
+    group.add(fill);
+    pickables.push(fill);
+    let edges = null;
+    if (el.shape.kind === 'square' || el.shape.kind === 'tri' || el.shape.kind === 'rhombus') {
+      edges = new THREE.LineSegments(new THREE.EdgesGeometry(fg.g, 20), new THREE.LineBasicMaterial({ transparent: true }));
+      fill.add(edges);
+    }
+    const band = new THREE.Mesh(bandGeometry(localOutline(el), el.container ? 0.5 : 0.62), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true }));
+    group.add(band);
+    world.add(group);
+    els.set(el.id, { el, group, fill, edges, band, half: fg.half, ring: null });
+  });
+
+  const chanMats = {};
+  L.chans.forEach(ch => {
+    const group = new THREE.Group();
+    const mat = stdMat();
+    chanMats[ch.id] = mat;
+    world.add(group);
+    const obj = { ch, group, mat, parts: [] };
+    ch.paths.forEach(() => {
+      const tube = new THREE.Mesh(new THREE.BufferGeometry(), mat);
+      const hit = new THREE.Mesh(new THREE.BufferGeometry(), hitMat);
+      hit.userData.pick = { kind: 'ch', id: ch.id };
+      group.add(tube); group.add(hit);
+      pickables.push(hit);
+      obj.parts.push({ tube, hit, cones: [] });
+    });
+    chs.set(ch.id, obj);
+  });
+
+  buildParticles();
+  buildMinis();
+  updateGeometry();
+  refreshVisuals();
+  buildLabels();
+  dirty = true;
+}
+
+/* Rebuild everything whose shape depends on the morph factor or depth */
+function updateGeometry() {
+  const d = anim.d, sz = SZ(d);
+  els.forEach(o => {
+    o.group.position.z = elZ(o.el, d);
+    o.fill.scale.z = sz;
+    o.band.position.z = lerp(o.half * sz + 0.04, 0, d);
+    if (o.ring) o.ring.position.z = lerp(o.half * sz + 0.06, 0, d);
+  });
+  chs.forEach(o => {
+    o.group.scale.z = sz;
+    o.ch.paths.forEach((p, k) => {
+      const part = o.parts[k];
+      const pts = p.samples.map(s => new THREE.Vector3(s.x, s.y, chZ(s.L, d) / sz));
+      const curve = new PolyCurve(pts);
+      const segs = clamp(Math.round(curve.total * 1.2), 6, 180);
+      part.tube.geometry.dispose();
+      part.tube.geometry = new THREE.TubeGeometry(curve, segs, 0.3, 8, false);
+      part.hit.geometry.dispose();
+      part.hit.geometry = new THREE.TubeGeometry(curve, clamp(Math.round(segs / 2), 4, 60), 1.6, 6, false);
+      part.cones.forEach(c => { o.group.remove(c); });
+      part.cones = [];
+      const addCone = (tip, prev) => {
+        const dir = tip.clone().sub(prev).normalize();
+        const cone = new THREE.Mesh(coneGeo, o.mat);
+        cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+        cone.position.copy(tip).addScaledVector(dir, -1.3);
+        o.group.add(cone);
+        part.cones.push(cone);
+      };
+      const back = (arr, from, dist) => { // a point `dist` back along the polyline, for a stable arrow direction
+        let acc = 0;
+        for (let i = from; i > 0; i--) { acc += arr[i].distanceTo(arr[i - 1]); if (acc >= dist) return arr[i - 1]; }
+        return arr[0];
+      };
+      const fwd = (arr, dist) => {
+        let acc = 0;
+        for (let i = 0; i < arr.length - 1; i++) { acc += arr[i].distanceTo(arr[i + 1]); if (acc >= dist) return arr[i + 1]; }
+        return arr[arr.length - 1];
+      };
+      if (p.arrows === 'both' || p.arrows === 'end') addCone(pts[pts.length - 1], back(pts, pts.length - 1, 2.2));
+      if (p.arrows === 'both') addCone(pts[0], fwd(pts, 2.2));
+      // world-space polyline for flow particles
+      part.world = p.samples.map(s => new THREE.Vector3(s.x, s.y, chZ(s.L, d)));
+      part.cum = [0];
+      for (let i = 1; i < part.world.length; i++) part.cum.push(part.cum[i - 1] + part.world[i].distanceTo(part.world[i - 1]));
+    });
+  });
+  minis.forEach(updateMini);
+  dirty = true;
+}
+
+/* ---------- colours, opacity, emphasis ---------- */
+const tmpC = new THREE.Color(), tmpC2 = new THREE.Color();
+function setOpacity(mat, op) {
+  const transparent = op < 0.995;
+  if (mat.transparent !== transparent) { mat.transparent = transparent; mat.needsUpdate = true; }
+  mat.opacity = op;
+  mat.depthWrite = op > 0.6;
+}
+function strokeColor(base, out) {
+  out.copy(base);
+  if (theme.dark) out.lerp(tmpC2.set(0xffffff), 0.18); else out.lerp(theme.ink, 0.12);
+  return out;
+}
+function refreshVisuals() {
+  if (!L) return;
+  const d = anim.d, lv = level();
+  hemi.intensity = lerp(0.64, 0.5, d);
+  hemi.groundColor.set(theme.dark ? 0x9aa6a4 : 0xc7cfcc);
+  sun.intensity = lerp(0.14, 0.78, d);
+  rim.intensity = lerp(0, 0.22, d);
+
+  els.forEach((o, id) => {
+    const el = o.el, base = new THREE.Color(colorOf(lv, id, L));
+    const tint = TINT[el.type] || TINT.def;
+    const fill = base.clone().lerp(theme.stage, lerp(tint[0], tint[1], d));
+    let op = 1;
+    if (el.type === 'meta') op = lerp(1, 0.15, d);
+    else if (el.type === 'envTotal') op = lerp(1, 0.45, d);
+    else if (el.type === 'op' && prefs.nested) op = lerp(0.55, 0.2, d);
+    const related = !focusSet || focusSet.has(id);
+    const dimF = related ? 1 : (el.container ? 0.5 : 0.22);
+    o.fill.material.color.copy(fill);
+    let em = lerp(0.26, 0.05, d);
+    if (hovered === id) em += 0.12;
+    o.fill.material.emissive.copy(fill).multiplyScalar(em);
+    if (selected === id) o.fill.material.emissive.lerp(theme.accent, 0.14);
+    setOpacity(o.fill.material, op * dimF);
+    strokeColor(base, o.band.material.color);
+    if (selected === id) o.band.material.color.copy(theme.accent);
+    o.band.material.opacity = lerp(1, STROKE3D[el.shape.kind], d) * (related ? 1 : 0.25) * (el.container ? 0.8 : 1);
+    o.band.visible = o.band.material.opacity > 0.01;
+    if (o.edges) {
+      strokeColor(base, o.edges.material.color);
+      if (selected === id) o.edges.material.color.copy(theme.accent);
+      o.edges.material.opacity = lerp(0, el.container ? 0.5 : 0.85, d) * (related ? 1 : 0.25);
+      o.edges.visible = d > 0.02;
+    }
+    updateRing(o, selected === id);
+  });
+  chs.forEach((o, id) => {
+    const base = new THREE.Color(colorOf(lv, id, L));
+    const related = !focusSet || focusSet.has(id);
+    const c = selected === id ? theme.accent.clone() : base;
+    o.mat.color.copy(c);
+    o.mat.emissive.copy(c).multiplyScalar(lerp(0.3, 0.12, d) + (hovered === id ? 0.25 : 0));
+    setOpacity(o.mat, related ? 1 : 0.18);
+  });
+  if (particles) {
+    particleSpecs.forEach((p, i) => {
+      const related = !focusSet || focusSet.has(p.id);
+      tmpC.set(colorOf(lv, p.id, L));
+      if (selected === p.id) tmpC.copy(theme.accent);
+      if (theme.dark) tmpC.lerp(tmpC2.set(0xffffff), 0.45); else tmpC.lerp(theme.ink, 0.25);
+      if (!related) tmpC.lerp(theme.stage, 0.8);
+      particles.setColorAt(i, tmpC);
+    });
+    if (particles.instanceColor) particles.instanceColor.needsUpdate = true;
+  }
+  minis.forEach(colorMini);
+  updateLabelClasses();
+  dirty = true;
+}
+
+function updateRing(o, on) {
+  if (on && !o.ring) {
+    o.ring = new THREE.Mesh(bandGeometry(localOutline(o.el), 0.9, o.el.container ? 1.2 : 1.9), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true, opacity: 0.95, depthWrite: false }));
+    o.group.add(o.ring);
+    o.ring.position.z = lerp(o.half * SZ(anim.d) + 0.06, 0, anim.d);
+  }
+  if (!on && o.ring) { o.group.remove(o.ring); o.ring.geometry.dispose(); o.ring.material.dispose(); o.ring = null; }
+  if (o.ring) o.ring.material.color.copy(theme.accent);
+}
+
+/* ---------- flow particles along channels ---------- */
+function buildParticles() {
+  particleSpecs = [];
+  L.chans.forEach(ch => ch.paths.forEach((p, k) => {
+    let len = 0;
+    for (let i = 1; i < p.samples.length; i++) len += Math.hypot(p.samples[i].x - p.samples[i - 1].x, p.samples[i].y - p.samples[i - 1].y);
+    const count = Math.max(1, Math.round(len / 16));
+    const dirs = p.arrows === 'both' ? [1, -1] : p.arrows === 'none' ? [1, -1] : [1];
+    dirs.forEach(dir => { for (let j = 0; j < count; j++) particleSpecs.push({ id: ch.id, part: k, dir, phase: (j + (dir < 0 ? 0.5 : 0)) / count }); });
+  }));
+  const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  particles = new THREE.InstancedMesh(particleGeo, mat, particleSpecs.length);
+  particles.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  particles.frustumCulled = false;
+  particleSpecs.forEach((p, i) => particles.setColorAt(i, tmpC.set(0xffffff)));
+  world.add(particles);
+  particles.visible = prefs.flows;
+}
+const tmpM = new THREE.Matrix4(), tmpV = new THREE.Vector3();
+function updateParticles(time) {
+  if (!particles || !prefs.flows) return;
+  const speed = 9;
+  particleSpecs.forEach((s, i) => {
+    const part = chs.get(s.id).parts[s.part];
+    const total = part.cum[part.cum.length - 1] || 1;
+    let u = ((time * speed / total) + s.phase) % 1;
+    if (s.dir < 0) u = 1 - u;
+    const dist = u * total, c = part.cum;
+    let lo = 0, hi = c.length - 1;
+    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (c[mid] <= dist) lo = mid; else hi = mid; }
+    tmpV.copy(part.world[lo]).lerp(part.world[hi], (dist - c[lo]) / ((c[hi] - c[lo]) || 1));
+    const fadeEnds = Math.min(1, Math.min(dist, total - dist) / 2.5);
+    const sc = 0.35 + 0.65 * fadeEnds;
+    tmpM.makeScale(sc, sc, Math.max(SZ(anim.d), 0.05) * sc).setPosition(tmpV.x, tmpV.y, tmpV.z + (1 - anim.d) * 0.4);
+    particles.setMatrixAt(i, tmpM);
+  });
+  particles.instanceMatrix.needsUpdate = true;
+}
+
+/* ---------- nested viable systems inside each operation ---------- */
+const MINI_K = 0.084;
+function buildMinis() {
+  if (!prefs.nested) return;
+  const lv = level();
+  for (let i = 0; i < lv.opCount; i++) {
+    const childId = lv.children['o' + i];
+    const child = childId ? db.levels[childId] : null;
+    const ML = buildLayout(child ? child.opCount : 3);
+    const holder = new THREE.Group();
+    const inner = new THREE.Group();
+    const cx = (ML.bbox.x0 + ML.bbox.x1) / 2, cy = (ML.bbox.y0 + ML.bbox.y1) / 2;
+    inner.position.set(-cx, -cy, 0);
+    holder.add(inner);
+    holder.scale.setScalar(MINI_K);
+    const parts = [];
+    ML.els.forEach(el => {
+      if (el.type === 'envTotal') return;
+      const fg = fillGeometry(el, 0.5);
+      const m = new THREE.Mesh(fg.g, new THREE.MeshStandardMaterial({ roughness: 0.6, transparent: !!el.container, opacity: el.container ? 0.3 : 1, depthWrite: !el.container, side: el.container ? THREE.DoubleSide : THREE.FrontSide }));
+      m.position.set(el.shape.cx, el.shape.cy, 0);
+      inner.add(m);
+      parts.push({ kind: 'el', el, mesh: m });
+    });
+    ML.chans.forEach(ch => ch.paths.forEach(p => {
+      const g = new THREE.BufferGeometry().setFromPoints(p.samples.map(s => new THREE.Vector3(s.x, s.y, 0)));
+      const line = new THREE.Line(g, new THREE.LineBasicMaterial({ transparent: true, opacity: 0.9 }));
+      inner.add(line);
+      parts.push({ kind: 'ch', ch, p, line });
+    }));
+    world.add(holder);
+    minis.push({ holder, parts, child, ML, op: 'o' + i });
+  }
+}
+function updateMini(m) {
+  const d = anim.d, o = els.get(m.op);
+  if (!o) return;
+  m.holder.position.set(o.el.shape.cx, o.el.shape.cy, elZ(o.el, d) + (1 - d) * (o.half * SZ(d) + 0.12));
+  m.parts.forEach(pt => {
+    if (pt.kind === 'el') {
+      pt.mesh.position.z = d * pt.el.layer * prefs.spread * 0.55 + (1 - d) * (pt.el.z2 * 4);
+      pt.mesh.scale.z = SZ(d);
+    } else {
+      const pos = pt.line.geometry.attributes.position;
+      pt.p.samples.forEach((s, i) => pos.setZ(i, d * s.L * prefs.spread * 0.55 + (1 - d) * -0.4));
+      pos.needsUpdate = true;
+    }
+  });
+}
+function colorMini(m) {
+  const src = m.child || null;
+  const parent = level();
+  m.parts.forEach(pt => {
+    const id = pt.kind === 'el' ? pt.el.id : pt.ch.id;
+    const lv = src || { colors: {}, groupColors: parent.groupColors };
+    const base = new THREE.Color(lv.colors[id] || SPECIAL_DEFAULTS[id] || lv.groupColors[pt.kind === 'el' ? pt.el.group : 'chan']);
+    if (pt.kind === 'el') {
+      const t = pt.el.container ? 0.6 : lerp(0.35, 0, anim.d);
+      pt.mesh.material.color.copy(base).lerp(theme.stage, t);
+      pt.mesh.material.emissive.copy(pt.mesh.material.color).multiplyScalar(lerp(0.26, 0.05, anim.d));
+    } else pt.line.material.color.copy(base);
+  });
+}
+
+/* =====================================================================
+   Labels (HTML overlay, sized in world units for semantic zoom)
+   ===================================================================== */
+const labelsEl = $('#labels');
+let labelNodes = new Map();
+function buildLabels() {
+  labelsEl.innerHTML = '';
+  labelNodes = new Map();
+  const lv = level();
+  L.els.forEach(el => {
+    const div = document.createElement('div');
+    const lab = el.label;
+    div.className = 'lbl ' + (lab.align || 'c') + (lab.big ? ' big' : '');
+    const code = lab.nameOnly ? '' : '<span class="code">' + esc(codeOf(lv, el.id)) + '</span>';
+    div.innerHTML = code + '<span class="nm">' + esc(labelOf(lv, el.id)) + '</span>';
+    labelsEl.appendChild(div);
+    let codeDiv = null;
+    if (lab.codeIn) { // triangles: code sits inside, name beside
+      codeDiv = document.createElement('div');
+      codeDiv.className = 'lbl c';
+      codeDiv.innerHTML = '<span class="code">' + esc(codeOf(lv, el.id)) + '</span>';
+      labelsEl.appendChild(codeDiv);
+      const c = div.querySelector('.code'); if (c) c.remove();
+    }
+    labelNodes.set(el.id, { div, codeDiv, el, last: {} });
+  });
+  updateLabelClasses();
+}
+function updateLabelText(id) {
+  const n = labelNodes.get(id);
+  if (n) n.div.querySelector('.nm').textContent = labelOf(level(), id);
+}
+function updateLabelClasses() {
+  labelNodes.forEach((n, id) => {
+    const dim = focusSet && !focusSet.has(id) && !n.el.container;
+    [n.div, n.codeDiv].forEach(dv => { if (!dv) return; dv.classList.toggle('dim', !!dim); dv.classList.toggle('sel', selected === id); });
+  });
+}
+const projV = new THREE.Vector3(), camDir = new THREE.Vector3();
+function updateLabels() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  const tanHalf = Math.tan(camera.fov * Math.PI / 360);
+  camera.getWorldDirection(camDir);
+  labelNodes.forEach(n => {
+    const el = n.el, lab = el.label;
+    const z = elZ(el, anim.d);
+    const place = (dv, x, y, align, wUnits, isCode) => {
+      projV.set(x, y, z);
+      const depth = projV.clone().sub(camera.position).dot(camDir);
+      if (depth <= camera.near) { dv.style.visibility = 'hidden'; return; }
+      const ppu = h / (2 * depth * tanHalf);
+      projV.project(camera);
+      const sx = (projV.x * 0.5 + 0.5) * w, sy = (-projV.y * 0.5 + 0.5) * h;
+      const last = n.last;
+      const codeSize = clamp(ppu * (lab.big ? 2.2 : 2.7), 9.5, lab.big ? 15 : 17);
+      const nameSize = clamp(ppu * (lab.big ? 2.6 : 2.05), 8.5, lab.big ? 17 : 13.5);
+      const showName = (ppu * 1.95 >= 6.8 || lab.big) && !(prefs.nested && lab.nestDy);
+      const key = (isCode ? 'c' : 'n');
+      const fs = Math.round((isCode ? codeSize : nameSize) * 2) / 2;
+      if (last[key + 'fs'] !== fs) {
+        last[key + 'fs'] = fs;
+        if (isCode) dv.style.fontSize = fs + 'px';
+        else {
+          dv.style.fontSize = fs + 'px';
+          const c = dv.querySelector('.code');
+          if (c) c.style.fontSize = (Math.round(codeSize * 2) / 2) + 'px';
+        }
+      }
+      if (!isCode) {
+        const nm = dv.querySelector('.nm');
+        if (last.show !== showName) { last.show = showName; nm.style.display = showName ? '' : 'none'; }
+        const width = Math.max(58, wUnits * ppu);
+        if (Math.abs((last.w || 0) - width) > 1) { last.w = width; dv.style.width = Math.round(width) + 'px'; }
+      }
+      const tx = align === 'l' ? '0' : align === 'r' ? '-100%' : '-50%';
+      dv.style.visibility = '';
+      dv.style.transform = 'translate(' + sx.toFixed(1) + 'px,' + sy.toFixed(1) + 'px) translate(' + tx + ',-50%)';
+    };
+    if (n.codeDiv) {
+      const cy = el.shape.cy + (el.shape.dir === 'down' ? el.shape.h / 7 : -el.shape.h / 7);
+      place(n.codeDiv, el.shape.cx, cy, 'c', 0, true);
+    }
+    const dy = prefs.nested && lab.nestDy ? lab.nestDy : lab.dy;
+    place(n.div, el.shape.cx + lab.dx, el.shape.cy + dy, lab.align || 'c', lab.w, false);
+  });
+}
+
+/* =====================================================================
+   Camera framing, view mode transitions, tweens
+   ===================================================================== */
+const VIEW3D = { az: 0.6, el: 0.27 };
+function camState() {
+  const off = camera.position.clone().sub(controls.target);
+  const dist = off.length();
+  return { target: controls.target.clone(), dist, az: Math.atan2(off.x, off.z), el: Math.asin(clamp(off.y / dist, -1, 1)) };
+}
+function setCam(s) {
+  controls.target.copy(s.target);
+  camera.position.set(
+    s.target.x + s.dist * Math.sin(s.az) * Math.cos(s.el),
+    s.target.y + s.dist * Math.sin(s.el),
+    s.target.z + s.dist * Math.cos(s.az) * Math.cos(s.el)
+  );
+  camera.lookAt(s.target);
+  dirty = true;
+}
+function fitState(forD) {
+  const b = L.bbox, w = stage.clientWidth || 800, h = stage.clientHeight || 600;
+  const aspect = w / h, tanHalf = Math.tan(camera.fov * Math.PI / 360);
+  const bw = (b.x1 - b.x0) + 8, bh = (b.y1 - b.y0) + 8;
+  let dist = Math.max(bh / 2 / tanHalf, bw / 2 / (tanHalf * aspect)) * 1.04;
+  const padTop = matchMedia('(max-width: 860px)').matches ? 0 : 56 / h; // keep clear of the level chip
+  dist *= 1 + padTop;
+  const d = forD == null ? anim.d : forD;
+  if (d > 0.5) dist *= 1.06;
+  const visH = 2 * dist * tanHalf;
+  const target = new THREE.Vector3((b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2 + visH * padTop * 0.5, 0);
+  return { target, dist, az: d > 0.5 ? VIEW3D.az : 0, el: d > 0.5 ? VIEW3D.el : 0 };
+}
+
+let tweens = [];
+function tween(dur, fn) {
+  return new Promise(resolve => {
+    if (reduceMotion || dur <= 0) { fn(1); resolve(); return; }
+    tweens.push({ start: performance.now(), dur, fn, resolve });
+  });
+}
+function runTweens(now) {
+  if (!tweens.length) return false;
+  tweens = tweens.filter(t => {
+    const k = clamp((now - t.start) / t.dur, 0, 1);
+    t.fn(ease(k));
+    if (k >= 1) { t.resolve(); return false; }
+    return true;
+  });
+  return true;
+}
+function angleLerp(a, b, t) { let d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return a + d * t; }
+function camTween(to, dur) {
+  const from = camState();
+  return tween(dur, k => {
+    setCam({
+      target: from.target.clone().lerp(to.target, k),
+      dist: Math.exp(lerp(Math.log(from.dist), Math.log(to.dist), k)),
+      az: angleLerp(from.az, to.az, k), el: lerp(from.el, to.el, k)
+    });
+  });
+}
+
+let busy = false;
+function applyControlMode() {
+  const is3d = prefs.view === '3d';
+  controls.enableRotate = is3d;
+  controls.mouseButtons = is3d
+    ? { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN }
+    : { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN };
+  controls.touches = is3d
+    ? { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN }
+    : { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN };
+  $('#v2d').setAttribute('aria-pressed', String(!is3d));
+  $('#v3d').setAttribute('aria-pressed', String(is3d));
+  $('#depthCtl').hidden = !is3d;
+  const narrow = matchMedia('(pointer: coarse)').matches;
+  $('#hint').innerHTML = is3d
+    ? (narrow ? 'Drag to rotate · two fingers to pan and zoom · tap to select' : '<kbd>Drag</kbd> rotate · <kbd>Right-drag</kbd> pan · <kbd>Scroll</kbd> zoom · <kbd>Double-click</kbd> a system to step inside')
+    : (narrow ? 'Drag to pan · pinch to zoom · tap to select' : '<kbd>Drag</kbd> pan · <kbd>Scroll</kbd> zoom · <kbd>Click</kbd> to select · <kbd>Double-click</kbd> a system to step inside');
+}
+
+async function setView(mode) {
+  if (busy || prefs.view === mode) return;
+  busy = true;
+  prefs.view = mode; save();
+  applyControlMode();
+  controls.enabled = false;
+  const from = camState(), d0 = anim.d, d1 = mode === '3d' ? 1 : 0;
+  const toAz = mode === '3d' ? VIEW3D.az : 0, toEl = mode === '3d' ? VIEW3D.el : 0;
+  const target = from.target.clone(); if (mode === '2d') target.z = 0;
+  await tween(1150, k => {
+    anim.d = lerp(d0, d1, k);
+    setCam({ target: from.target.clone().lerp(target, k), dist: from.dist, az: angleLerp(from.az, toAz, k), el: lerp(from.el, toEl, k) });
+    updateGeometry();
+    refreshVisuals();
+  });
+  controls.enabled = true;
+  busy = false;
+}
+
+/* =====================================================================
+   Picking, hover, selection
+   ===================================================================== */
+const ray = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+function pickAt(cx, cy) {
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hits = ray.intersectObjects(pickables, false);
+  if (!hits.length) return null;
+  let firstEl = null, firstCh = null, container = null;
+  for (const h of hits) {
+    const p = h.object.userData.pick;
+    if (!p) continue;
+    if (p.kind === 'el' && p.container) { if (!container) container = { p, dist: h.distance }; continue; }
+    if (p.kind === 'el' && !firstEl) firstEl = { p, dist: h.distance };
+    if (p.kind === 'ch' && !firstCh) firstCh = { p, dist: h.distance };
+  }
+  if (firstEl && (!firstCh || firstEl.dist <= firstCh.dist + 4)) return firstEl.p.id;
+  if (firstCh) return firstCh.p.id;
+  return container ? container.p.id : null;
+}
+
+function computeFocus(id) {
+  if (!id) return null;
+  const set = new Set([id]);
+  if (L.byId[id]) {
+    L.chans.forEach(c => { if (c.ends.includes(id)) { set.add(c.id); c.ends.forEach(e => set.add(e)); } });
+    if (id === 'meta') L.els.forEach(e => { if (e.group === 'meta') set.add(e.id); });
+    if (id === 'env') L.els.forEach(e => { if (e.group === 'env') set.add(e.id); });
+  } else if (L.chanById[id]) L.chanById[id].ends.forEach(e => set.add(e));
+  return set;
+}
+
+function select(id, opts) {
+  selected = id || null;
+  focusSet = computeFocus(selected);
+  refreshVisuals();
+  renderInspector();
+  document.querySelectorAll('.erow').forEach(r => r.classList.toggle('sel', r.dataset.id === selected));
+  if (opts && opts.reveal && selected) revealInList(selected);
+  if (selected && narrowQ.matches && !busy) keepAboveSheet(selected);
+}
+function keepAboveSheet(id) {
+  let p;
+  if (els.get(id)) p = els.get(id).group.position.clone();
+  else if (chs.get(id)) { const w = chs.get(id).parts[0].world; p = w[Math.floor(w.length / 2)].clone(); }
+  if (!p) return;
+  const s = camState();
+  const worldPerPx = 2 * s.dist * Math.tan(camera.fov * Math.PI / 360) / (stage.clientHeight || 1);
+  const up = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+  const shift = stage.clientHeight * 0.26 * worldPerPx;
+  camTween({ target: p.addScaledVector(up, -shift), dist: s.dist, az: s.az, el: s.el }, 450);
+}
+function revealInList(id) {
+  const row = document.querySelector('.erow[data-id="' + id + '"]');
+  if (!row) return;
+  const det = row.closest('details'); if (det && !det.open) det.open = true;
+}
+
+const tip = $('#tip');
+function describe(id) {
+  const lv = level(), t = typeOfId(L, id), kb = KB[t] || {};
+  const code = codeOf(lv, id);
+  return '<span class="k">' + esc(kb.kind || '') + (code ? ' · ' + esc(code) : '') + '</span><b>' + esc(labelOf(lv, id)) + '</b>' + (kb.role && kb.role !== labelOf(lv, id) ? '<br><span style="color:var(--ink-2)">' + esc(kb.role) + '</span>' : '');
+}
+
+let down = null;
+canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now(), b: e.button }; });
+canvas.addEventListener('pointerup', e => {
+  if (!down || busy) return;
+  const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
+  if (moved < 6 && down.b === 0) {
+    const id = pickAt(e.clientX, e.clientY);
+    select(id === selected ? null : id, { reveal: true });
+  }
+  down = null;
+});
+canvas.addEventListener('dblclick', e => {
+  if (busy) return;
+  const id = pickAt(e.clientX, e.clientY);
+  if (id && isSystemType(typeOfId(L, id))) dive(id);
+});
+let hoverRaf = 0, lastMove = null;
+canvas.addEventListener('pointermove', e => {
+  lastMove = e;
+  if (hoverRaf) return;
+  hoverRaf = requestAnimationFrame(() => {
+    hoverRaf = 0;
+    const ev = lastMove;
+    if (busy || (ev.buttons && ev.buttons !== 0) || ev.pointerType === 'touch') { tip.hidden = true; return; }
+    const id = pickAt(ev.clientX, ev.clientY);
+    if (id !== hovered) { hovered = id; refreshVisuals(); }
+    canvas.style.cursor = id ? 'pointer' : (prefs.view === '3d' ? 'grab' : 'move');
+    if (id) {
+      tip.innerHTML = describe(id);
+      tip.hidden = false;
+      const r = stage.getBoundingClientRect();
+      let x = ev.clientX - r.left + 14, y = ev.clientY - r.top + 16;
+      const tw = tip.offsetWidth, th = tip.offsetHeight;
+      if (x + tw > r.width - 8) x = ev.clientX - r.left - tw - 12;
+      if (y + th > r.height - 8) y = ev.clientY - r.top - th - 12;
+      tip.style.left = x + 'px'; tip.style.top = y + 'px';
+    } else tip.hidden = true;
+  });
+});
+canvas.addEventListener('pointerleave', () => { tip.hidden = true; if (hovered) { hovered = null; refreshVisuals(); } });
+controls.addEventListener('change', () => { dirty = true; });
+controls.addEventListener('start', () => { tip.hidden = true; });
+
+/* =====================================================================
+   Recursion: stepping into and out of systems
+   ===================================================================== */
+function ensureChild(lv, elId) {
+  const key = recursionKey(elId);
+  if (lv.children[key] && db.levels[lv.children[key]]) return db.levels[lv.children[key]];
+  return newLevel(lv, key);
+}
+async function dive(elId) {
+  if (busy) return;
+  const lv = level();
+  const o = els.get(elId);
+  busy = true; controls.enabled = false; tip.hidden = true;
+  if (o) {
+    const s = camState();
+    const p = o.group.position.clone();
+    await camTween({ target: p, dist: Math.max(40, s.dist * 0.18), az: s.az, el: s.el }, 520);
+  }
+  canvas.classList.add('fade');
+  labelsEl.style.opacity = 0;
+  await wait(reduceMotion ? 0 : 170);
+  const child = ensureChild(lv, elId);
+  db.currentId = child.id; save();
+  selected = null; focusSet = null;
+  buildScene();
+  renderAllPanels();
+  const fit = fitState();
+  setCam({ target: fit.target, dist: fit.dist * 0.22, az: fit.az, el: fit.el });
+  canvas.classList.remove('fade');
+  labelsEl.style.opacity = '';
+  await camTween(fit, 760);
+  controls.enabled = true; busy = false;
+}
+async function goToLevel(id) {
+  if (busy || id === db.currentId) return;
+  const cur = level(), target = db.levels[id];
+  if (!target) return;
+  busy = true; controls.enabled = false; tip.hidden = true;
+  // when moving up, find the element in the target level that leads back down to where we were
+  let focusEl = null;
+  const chain = ancestry(cur);
+  const idx = chain.findIndex(l => l.id === id);
+  if (idx >= 0 && idx < chain.length - 1) focusEl = chain[idx + 1].parent.el;
+  canvas.classList.add('fade');
+  labelsEl.style.opacity = 0;
+  await wait(reduceMotion ? 0 : 170);
+  db.currentId = id; save();
+  selected = null; focusSet = null;
+  buildScene();
+  renderAllPanels();
+  const fit = fitState();
+  if (focusEl && els.get(focusEl)) {
+    const p = els.get(focusEl).group.position.clone();
+    setCam({ target: p, dist: 45, az: fit.az, el: fit.el });
+  } else setCam(Object.assign({}, fit, { dist: fit.dist * 1.4 }));
+  canvas.classList.remove('fade');
+  labelsEl.style.opacity = '';
+  await camTween(fit, 760);
+  controls.enabled = true; busy = false;
+}
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+/* =====================================================================
+   Panels
+   ===================================================================== */
+function renderCrumbs() {
+  const chain = ancestry(level());
+  const nav = $('#crumbs');
+  nav.innerHTML = chain.map((lv, i) => {
+    const cur = i === chain.length - 1;
+    const code = lv.parent ? codeOf(db.levels[lv.parent.level], lv.parent.el) : '';
+    return (i ? '<span class="crumb-sep" aria-hidden="true">›</span>' : '') +
+      '<button class="crumb" type="button" data-level="' + lv.id + '"' + (cur ? ' aria-current="page"' : '') + ' title="Level ' + lv.depth + (code ? ' · ' + esc(code) : '') + '">' +
+      '<span class="lv">L' + lv.depth + '</span><span class="nm">' + esc(levelName(lv)) + '</span></button>';
+  }).join('');
+  nav.querySelectorAll('.crumb').forEach(b => b.addEventListener('click', () => goToLevel(b.dataset.level)));
+  const last = nav.lastElementChild; if (last && last.scrollIntoView) last.scrollIntoView({ block: 'nearest', inline: 'end' });
+
+  const lv = level();
+  const chip = $('#levelChip');
+  if (lv.parent) {
+    const p = db.levels[lv.parent.level];
+    chip.innerHTML = '<span class="lv">Level ' + lv.depth + '</span><span class="tx">Inside <b>' + esc(codeOf(p, lv.parent.el)) + ' ' + esc(levelName(lv)) + '</b> of ' + esc(levelName(p)) + '</span>';
+    $('#upBtn').hidden = false;
+    $('#upTx').textContent = 'Up to ' + levelName(p);
+    $('#upBtn').title = 'Back to level ' + p.depth + ': ' + levelName(p);
+  } else {
+    chip.innerHTML = '<span class="lv">Level 0</span><span class="tx">System in focus: <b>' + esc(levelName(lv)) + '</b></span>';
+    $('#upBtn').hidden = true;
+  }
+}
+
+function renderModelPane() {
+  const lv = level();
+  $('#focusEyebrow').textContent = 'System in focus · Level ' + lv.depth;
+  const nameInp = $('#levelName');
+  if (document.activeElement !== nameInp) nameInp.value = levelName(lv);
+  $('#opCount').textContent = lv.opCount;
+  $('#opMinus').disabled = lv.opCount <= MIN_OPS;
+  $('#opPlus').disabled = lv.opCount >= MAX_OPS;
+
+  const counts = { env: 0, ops: 0, meta: 0, chan: L.chans.length };
+  L.els.forEach(e => counts[e.group]++);
+  $('#groups').innerHTML = Object.keys(GROUP_INFO).map(g =>
+    '<label class="grow"><input type="color" class="sw" data-group="' + g + '" value="' + lv.groupColors[g] + '" aria-label="' + GROUP_INFO[g].name + ' colour">' +
+    '<span><b>' + GROUP_INFO[g].name + '</b><small>' + GROUP_INFO[g].hint + '</small></span><span class="cnt">' + counts[g] + '</span></label>'
+  ).join('');
+  $('#groups').querySelectorAll('input').forEach(inp => inp.addEventListener('input', () => {
+    lv.groupColors[inp.dataset.group] = inp.value; save();
+    refreshVisuals(); renderElementList(true); renderInspector();
+  }));
+  renderElementList();
+}
+
+function renderElementList(colorsOnly) {
+  const lv = level();
+  const list = $('#elist');
+  if (colorsOnly) {
+    list.querySelectorAll('.erow').forEach(r => {
+      const sw = r.querySelector('.sw');
+      sw.value = colorOf(lv, r.dataset.id, L);
+      sw.classList.toggle('custom', !!lv.colors[r.dataset.id]);
+    });
+    return;
+  }
+  const openState = {};
+  list.querySelectorAll('details').forEach(d => { openState[d.dataset.group] = d.open; });
+  const groups = { env: [], ops: [], meta: [], chan: [] };
+  L.els.forEach(e => groups[e.group].push(e.id));
+  L.chans.forEach(c => groups.chan.push(c.id));
+  list.innerHTML = Object.keys(groups).map(g => {
+    const open = openState[g] != null ? openState[g] : g !== 'chan';
+    return '<details class="egroup" data-group="' + g + '"' + (open ? ' open' : '') + '><summary>' + GROUP_INFO[g].name + '</summary>' +
+      groups[g].map(id => {
+        const code = codeOf(lv, id) || '↔';
+        return '<div class="erow' + (selected === id ? ' sel' : '') + '" data-id="' + id + '">' +
+          '<input type="color" class="sw' + (lv.colors[id] ? ' custom' : '') + '" value="' + colorOf(lv, id, L) + '" aria-label="Colour of ' + esc(labelOf(lv, id)) + '">' +
+          '<button class="ecode" type="button" title="Select in the model">' + esc(code) + '</button>' +
+          '<input class="ename" type="text" value="' + esc(labelOf(lv, id)) + '" aria-label="Label for ' + esc(code) + '">' +
+          '</div>';
+      }).join('') + '</details>';
+  }).join('');
+  list.querySelectorAll('.erow').forEach(r => {
+    const id = r.dataset.id;
+    r.querySelector('.ecode').addEventListener('click', () => select(id));
+    r.querySelector('.ename').addEventListener('input', ev => renameElement(id, ev.target.value, 'list'));
+    r.querySelector('.ename').addEventListener('focus', () => { if (selected !== id) select(id); });
+    r.querySelector('.sw').addEventListener('input', ev => recolorElement(id, ev.target.value, 'list'));
+  });
+}
+
+function renameElement(id, value, source) {
+  const lv = level();
+  lv.labels[id] = value.trim() === '' ? '' : value;
+  if (!value.trim()) delete lv.labels[id];
+  save();
+  updateLabelText(id);
+  if (source !== 'list') { const inp = document.querySelector('.erow[data-id="' + id + '"] .ename'); if (inp) inp.value = labelOf(lv, id); }
+  if (source !== 'insp' && selected === id) $('#iName').value = labelOf(lv, id);
+  if (lv.children[recursionKey(id)] || /^[om]\d+$/.test(id)) { renderCrumbs(); renderTree(); }
+  if (selected === id) renderRecursion();
+}
+function recolorElement(id, value, source) {
+  const lv = level();
+  if (value) lv.colors[id] = value; else delete lv.colors[id];
+  save();
+  refreshVisuals();
+  if (source !== 'list') renderElementList(true);
+  else { const sw = document.querySelector('.erow[data-id="' + id + '"] .sw'); if (sw) sw.classList.add('custom'); }
+  if (selected === id) renderInspectorColor();
+}
+
+function renderTree() {
+  const root = db.levels[db.rootId];
+  const cur = db.currentId;
+  const node = lv => {
+    const isCur = lv.id === cur;
+    let html = '<li class="tnode"><button class="tbtn level' + (isCur ? ' current' : '') + '" data-level="' + lv.id + '" type="button"><span class="lv">L' + lv.depth + '</span><span class="tn">' + esc(levelName(lv)) + '</span>' + (isCur ? '<span class="here">HERE</span>' : '') + '</button>';
+    const rows = [];
+    for (let i = 0; i < lv.opCount; i++) {
+      const key = 'o' + i, childId = lv.children[key];
+      if (childId && db.levels[childId]) rows.push(node(db.levels[childId]));
+      else rows.push('<li class="tnode"><button class="tbtn unexplored" type="button" data-from="' + lv.id + '" data-el="' + key + '"><span class="cd">' + esc(codeOf(lv, key)) + '</span><span class="tn">' + esc(labelOf(lv, key)) + '</span></button></li>');
+    }
+    Object.keys(lv.children).forEach(k => { if (!/^o\d+$/.test(k) && db.levels[lv.children[k]]) rows.push(node(db.levels[lv.children[k]])); });
+    if (rows.length) html += '<ul>' + rows.join('') + '</ul>';
+    return html + '</li>';
+  };
+  const tree = $('#tree');
+  tree.innerHTML = node(root);
+  tree.querySelectorAll('.tbtn.level').forEach(b => b.addEventListener('click', () => goToLevel(b.dataset.level)));
+  tree.querySelectorAll('.tbtn.unexplored').forEach(b => b.addEventListener('click', async () => {
+    const from = db.levels[b.dataset.from];
+    if (from.id === db.currentId) { dive(b.dataset.el); return; }
+    const child = ensureChild(from, b.dataset.el);
+    await goToLevel(child.id);
+  }));
+}
+
+/* ---------- inspector ---------- */
+const insp = $('#insp');
+function renderInspector() {
+  const app = $('#app');
+  if (!selected || (!L.byId[selected] && !L.chanById[selected])) {
+    insp.hidden = true; app.classList.remove('insp-open');
+    return;
+  }
+  const lv = level(), id = selected, t = typeOfId(L, id), kb = KB[t] || {};
+  const wasHidden = insp.hidden;
+  insp.hidden = false; app.classList.add('insp-open');
+  const code = codeOf(lv, id);
+  $('#iCode').textContent = code || '↔';
+  $('#iKind').textContent = kb.kind || '';
+  $('#iRole').textContent = kb.role || '';
+  const nm = $('#iName');
+  if (document.activeElement !== nm) nm.value = labelOf(lv, id);
+  nm.setAttribute('aria-label', 'Label for ' + (code || kb.role));
+  renderInspectorColor();
+  $('#iSummary').textContent = kb.summary || '';
+  const fillList = (sel, arr) => { $(sel).innerHTML = (arr || []).map(x => '<li>' + esc(x) + '</li>').join(''); $(sel).parentElement.hidden = !(arr && arr.length); };
+  fillList('#iPractice', kb.practice);
+  fillList('#iQuestions', kb.questions);
+  fillList('#iWatch', kb.watch);
+  const notes = $('#iNotes');
+  if (document.activeElement !== notes) notes.value = lv.notes[id] || '';
+  renderLinks();
+  renderRecursion();
+  if (wasHidden) $('.insp-body').scrollTop = 0;
+}
+function renderInspectorColor() {
+  const lv = level(), id = selected;
+  if (!id) return;
+  $('#iColor').value = colorOf(lv, id, L);
+  const custom = !!lv.colors[id];
+  const groupName = GROUP_INFO[L.byId[id] ? L.byId[id].group : 'chan'].name;
+  $('#iColorNote').textContent = custom ? 'Custom colour' : (SPECIAL_DEFAULTS[id] ? 'Default: red, by convention' : 'Using the ' + groupName.toLowerCase() + ' colour');
+  $('#iColorReset').hidden = !custom;
+  $('#iColorReset').textContent = SPECIAL_DEFAULTS[id] ? 'Restore default' : 'Use group colour';
+  $('#iCode').style.background = colorOf(lv, id, L);
+}
+function renderLinks() {
+  const lv = level(), id = selected, ul = $('#iLinks');
+  const rows = [];
+  if (L.byId[id]) {
+    L.chans.forEach(c => {
+      if (!c.ends.includes(id)) return;
+      const others = c.ends.filter(e => e !== id);
+      rows.push({ target: c.id, text: labelOf(lv, c.id), via: others.map(o => codeOf(lv, o)).join(', '), color: colorOf(lv, c.id, L) });
+    });
+  } else {
+    L.chanById[id].ends.forEach(e => rows.push({ target: e, text: labelOf(lv, e), via: codeOf(lv, e), color: colorOf(lv, e, L) }));
+  }
+  ul.innerHTML = rows.map(r => '<li><button type="button" data-t="' + r.target + '"><span class="dot" style="background:' + r.color + '"></span><span>' + esc(r.text) + '</span><span class="via">' + esc(r.via) + '</span></button></li>').join('');
+  ul.querySelectorAll('button').forEach(b => b.addEventListener('click', () => select(b.dataset.t, { reveal: true })));
+  $('#iLinksSec').hidden = !rows.length;
+}
+function renderRecursion() {
+  const box = $('#iRecur');
+  const lv = level(), id = selected, t = typeOfId(L, id);
+  if (!id || !isSystemType(t)) { box.innerHTML = ''; return; }
+  const key = recursionKey(id);
+  const childId = lv.children[key];
+  const child = childId ? db.levels[childId] : null;
+  const name = labelOf(lv, key);
+  const isS1 = t === 'op' || t === 'mgmt';
+  const note = isS1
+    ? (t === 'mgmt' ? 'This square belongs to System 1 ' + codeOf(lv, key) + '. One level down it becomes the metasystem of ' + name + '.' : 'Every operation is a viable system in its own right. Its management square becomes the metasystem one level down.')
+    : 'Strictly, Beer\'s recursion runs through System 1. The unit that performs this function, such as a department, can still be modelled as a viable system of its own.';
+  box.innerHTML = '<div class="recur"><div class="t">Viable system inside ' + esc(name) + '</div>' +
+    '<div class="prev">' + previewSVG(child, lv) + '</div><p>' + esc(note) + (child ? ' Explored: ' + child.opCount + ' operations.' : '') + '</p>' +
+    '<button class="btn primary" type="button" id="iDive">Open level ' + (lv.depth + 1) + ' · ' + esc(name) + '</button></div>';
+  $('#iDive').addEventListener('click', () => { if (matchMedia('(max-width: 860px)').matches) select(null); dive(id); });
+}
+
+/* Small 2D drawing of a level, for the inspector's recursion preview */
+function previewSVG(child, parent) {
+  const n = child ? child.opCount : 3;
+  const PL = buildLayout(n);
+  const src = child || { colors: {}, groupColors: parent.groupColors, labels: {}, tag: childTag(parent, recursionKey(selected)) };
+  const b = PL.bbox, pad = 4;
+  const vb = [b.x0 - pad, -(b.y1 + pad), (b.x1 - b.x0) + pad * 2, (b.y1 - b.y0) + pad * 2];
+  const col = (id, g) => src.colors[id] || SPECIAL_DEFAULTS[id] || src.groupColors[g];
+  const mix = (hex, t) => '#' + new THREE.Color(hex).lerp(theme.stage, t).getHexString();
+  let s = '<svg viewBox="' + vb.join(' ') + '" role="img" aria-label="Preview of the subsystem viable system">';
+  PL.els.forEach(el => {
+    const c = col(el.id, el.group), tint = (TINT[el.type] || TINT.def)[0];
+    const d = el.outline.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + (-p[1]).toFixed(1)).join('') + 'Z';
+    s += '<path d="' + d + '" fill="' + mix(c, tint) + '" stroke="' + c + '" stroke-width="0.7"/>';
+  });
+  PL.chans.forEach(ch => ch.paths.forEach(p => {
+    s += '<polyline fill="none" stroke="' + col(ch.id, 'chan') + '" stroke-width="0.6" points="' + p.samples.map(q => q.x.toFixed(1) + ',' + (-q.y).toFixed(1)).join(' ') + '"/>';
+  }));
+  PL.els.forEach(el => {
+    if (el.container || el.type.startsWith('env')) return;
+    const code = el.type === 'mgmt' ? '' : codeOf(src, el.id);
+    const fs = (el.shape.kind === 'tri' ? 3.2 : 4) * (code.length > 3 ? 0.75 : 1);
+    if (!code) return;
+    const y = el.shape.kind === 'tri' ? el.shape.cy + (el.shape.dir === 'down' ? 1.6 : -1.4) : el.shape.cy;
+    s += '<text x="' + el.shape.cx + '" y="' + (-y + 1.4) + '" font-size="' + fs + '" text-anchor="middle" fill="currentColor" font-family="IBM Plex Mono, monospace" font-weight="600">' + esc(code) + '</text>';
+  });
+  return s + '</svg>';
+}
+
+function renderAllPanels() {
+  renderCrumbs();
+  renderModelPane();
+  renderTree();
+  renderInspector();
+}
+
+/* =====================================================================
+   Wiring
+   ===================================================================== */
+$('#v2d').addEventListener('click', () => setView('2d'));
+$('#v3d').addEventListener('click', () => setView('3d'));
+$('#spread').addEventListener('input', e => { prefs.spread = +e.target.value; save(); updateGeometry(); });
+$('#btnFlows').addEventListener('click', () => {
+  prefs.flows = !prefs.flows; save();
+  $('#btnFlows').setAttribute('aria-pressed', String(prefs.flows));
+  if (particles) particles.visible = prefs.flows;
+  dirty = true;
+});
+$('#btnNested').addEventListener('click', () => {
+  prefs.nested = !prefs.nested; save();
+  $('#btnNested').setAttribute('aria-pressed', String(prefs.nested));
+  const cam = camState();
+  buildScene(); setCam(cam); renderInspector();
+});
+$('#btnFrame').addEventListener('click', () => { if (!busy) camTween(fitState(), 650); });
+$('#upBtn').addEventListener('click', () => { const lv = level(); if (lv.parent) goToLevel(lv.parent.level); });
+$('#iClose').addEventListener('click', () => select(null));
+$('#iName').addEventListener('input', e => renameElement(selected, e.target.value, 'insp'));
+$('#iColor').addEventListener('input', e => recolorElement(selected, e.target.value, 'insp'));
+$('#iColorReset').addEventListener('click', () => recolorElement(selected, null, 'insp'));
+$('#iNotes').addEventListener('input', e => { const lv = level(); if (e.target.value) lv.notes[selected] = e.target.value; else delete lv.notes[selected]; save(); });
+$('#levelName').addEventListener('input', e => {
+  const lv = level();
+  setLevelName(lv, e.target.value);
+  save();
+  renderCrumbs(); renderTree();
+  if (lv.parent) updateLabelText(lv.parent.el);
+});
+function changeOps(delta) {
+  const lv = level();
+  const n = clamp(lv.opCount + delta, MIN_OPS, MAX_OPS);
+  if (n === lv.opCount || busy) return;
+  lv.opCount = n; save();
+  if (selected && !L.byId[selected] && !L.chanById[selected]) selected = null;
+  const cam = camState();
+  buildScene();
+  if (selected && !L.byId[selected] && !L.chanById[selected]) selected = null;
+  focusSet = computeFocus(selected);
+  setCam(cam);
+  renderAllPanels();
+  camTween(fitState(), 600);
+}
+$('#opMinus').addEventListener('click', () => changeOps(-1));
+$('#opPlus').addEventListener('click', () => changeOps(1));
+$('#preset').addEventListener('change', e => {
+  const p = PRESETS[e.target.value];
+  e.target.value = '';
+  if (!p) return;
+  const lv = level();
+  lv.labels = Object.assign({}, p.labels);
+  if (lv.parent) { if (p.name) setLevelName(lv, p.name.replace(' (example)', '')); }
+  else lv.name = p.name || 'Organization';
+  lv.opCount = p.ops;
+  save();
+  const cam = camState();
+  selected = null; focusSet = null;
+  buildScene(); setCam(cam);
+  renderAllPanels();
+  camTween(fitState(), 600);
+});
+$('#resetLevel').addEventListener('click', () => {
+  const lv = level();
+  lv.labels = {}; lv.colors = {}; lv.notes = {}; lv.opCount = 3;
+  lv.groupColors = Object.assign({}, lv.parent ? db.levels[lv.parent.level].groupColors : DEFAULT_GROUP_COLORS);
+  if (!lv.parent) lv.name = 'Organization';
+  save();
+  selected = null; focusSet = null;
+  buildScene(); renderAllPanels();
+  camTween(fitState(), 600);
+});
+let resetArmed = 0;
+$('#resetAll').addEventListener('click', e => {
+  const btn = e.currentTarget;
+  if (!resetArmed) {
+    btn.textContent = 'Click again to erase all levels';
+    resetArmed = setTimeout(() => { resetArmed = 0; btn.textContent = 'Reset everything'; }, 3500);
+    return;
+  }
+  clearTimeout(resetArmed); resetArmed = 0; btn.textContent = 'Reset everything';
+  freshDb(); save();
+  selected = null; focusSet = null;
+  buildScene(); renderAllPanels();
+  camTween(fitState(), 600);
+});
+
+// tabs
+const tabs = ['model', 'map', 'guide'];
+tabs.forEach(t => $('#tab-' + t).addEventListener('click', () => {
+  tabs.forEach(o => { $('#tab-' + o).setAttribute('aria-selected', String(o === t)); $('#pane-' + o).hidden = o !== t; });
+}));
+
+// side panel: docked on wide screens, a drawer on narrow ones
+const app = $('#app');
+const narrowQ = matchMedia('(max-width: 860px)');
+function syncSide() {
+  if (narrowQ.matches) { app.classList.remove('side-closed'); $('#btnSide').setAttribute('aria-expanded', String(app.classList.contains('drawer-open'))); }
+  else { app.classList.remove('drawer-open'); app.classList.toggle('side-closed', !prefs.side); $('#btnSide').setAttribute('aria-expanded', String(prefs.side)); }
+}
+$('#btnSide').addEventListener('click', () => {
+  if (narrowQ.matches) app.classList.toggle('drawer-open');
+  else { prefs.side = !prefs.side; save(); }
+  syncSide();
+});
+$('#scrim').addEventListener('click', () => { app.classList.remove('drawer-open'); syncSide(); });
+$('#sideClose').addEventListener('click', () => { app.classList.remove('drawer-open'); syncSide(); });
+if (narrowQ.addEventListener) narrowQ.addEventListener('change', syncSide);
+
+window.addEventListener('keydown', e => {
+  const tag = (e.target && e.target.tagName) || '';
+  if (/INPUT|TEXTAREA|SELECT/.test(tag)) { if (e.key === 'Escape') e.target.blur(); return; }
+  if (e.key === '2') setView('2d');
+  else if (e.key === '3') setView('3d');
+  else if (e.key === 'f' || e.key === 'F') { if (!busy) camTween(fitState(), 650); }
+  else if (e.key === 'Escape') { if (app.classList.contains('drawer-open')) { app.classList.remove('drawer-open'); syncSide(); } else select(null); }
+});
+
+// theme changes: OS setting or the host's explicit choice
+function onTheme() { readTheme(); refreshVisuals(); if (selected) renderRecursion(); }
+const darkQ = matchMedia('(prefers-color-scheme: dark)');
+if (darkQ.addEventListener) darkQ.addEventListener('change', onTheme);
+new MutationObserver(onTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+
+// sizing
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  if (!w || !h) return;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  dirty = true;
+}
+new ResizeObserver(resize).observe(stage);
+
+/* =====================================================================
+   Boot
+   ===================================================================== */
+const hadSaved = load();
+readTheme();
+prefs.spread = clamp(+prefs.spread || 1, 0.3, 2.2);
+$('#spread').value = prefs.spread;
+$('#btnFlows').setAttribute('aria-pressed', String(prefs.flows));
+$('#btnNested').setAttribute('aria-pressed', String(prefs.nested));
+syncSide();
+
+const intro = !hadSaved && !reduceMotion;
+if (intro) prefs.view = '2d';
+anim.d = prefs.view === '3d' ? 1 : 0;
+applyControlMode();
+resize();
+buildScene();
+renderAllPanels();
+setCam(fitState());
+
+let t0 = performance.now();
+function frame(now) {
+  requestAnimationFrame(frame);
+  const tw = runTweens(now);
+  const moved = controls.update();
+  if (prefs.flows && particles) { updateParticles((now - t0) / 1000); dirty = true; }
+  if (dirty || tw || moved) {
+    renderer.render(scene, camera);
+    updateLabels();
+    dirty = false;
+  }
+}
+requestAnimationFrame(frame);
+
+if (intro) setTimeout(() => setView('3d'), 900);
+})();
+</script>
+</body>
+</html>

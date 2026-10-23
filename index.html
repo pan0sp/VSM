@@ -1337,7 +1337,7 @@ function buildLayout(n, opts) {
   const S2X = sq ? 33 : 27, S3SX = -15;
   const ops = Array.from({ length: n }, (_, i) => i);
 
-  add({ id: 'env', type: 'envTotal', group: 'env', container: true, layer: LAYER.env, zoff: -6, z2: -0.6,
+  add({ id: 'env', type: 'envTotal', group: 'env', container: true, layer: LAYER.env, zoff: 0, z2: -0.6,
     shape: { kind: 'blob', cx: -63, cy: envCy, rx: 20.5, ry: envRy, p: 3.4, amp: 0.03, seed: 2.1 },
     label: { dx: 0, dy: envTop - envCy - 6, w: 32, big: true } });
   add({ id: 'fut', type: 'envFuture', group: 'env', layer: LAYER.env, z2: -0.45,
@@ -1907,7 +1907,8 @@ function fillGeometry(el, quality) {
     case 'diamond': { const side = s.hw * Math.SQRT2, g = new THREE.BoxGeometry(side, side, side); g.rotateZ(Math.PI / 4); return { g, half: side / 2 }; }
     case 'blob': {
       const big = el.type === 'envTotal';
-      const depth = big ? 0.6 : 1, bt = big ? 1.6 : 2, bs = big ? 1.6 : 1.8;
+      // the total environment is a translucent volume holding the operations' environments, as the metasystem box holds Systems Two to Five
+      const depth = big ? 16 : 1, bt = big ? 3 : 2, bs = big ? 2.4 : 1.8;
       const g = new THREE.ExtrudeGeometry(shapeFromPts(localOutline(el)), {
         depth, bevelEnabled: true, bevelThickness: bt, bevelSize: bs, bevelOffset: -bs, bevelSegments: q < 1 ? 2 : 5, curveSegments: 1
       });
@@ -2109,7 +2110,7 @@ function refreshVisuals() {
     const fill = base.clone().lerp(theme.stage, lerp(tint[0], tint[1], d));
     let op = 1;
     if (el.type === 'meta') op = lerp(0.5, 0.15, d); // see-through, so the algedonic signal shows behind it
-    else if (el.type === 'envTotal') op = lerp(1, 0.45, d);
+    else if (el.type === 'envTotal') op = lerp(1, 0.16, d);
     else if (el.type === 'op' && minisShown) op = lerp(0.55, 0.2, d);
     const related = !focusSet || focusSet.has(id);
     const dimF = related ? 1 : (el.container ? 0.5 : 0.22);

@@ -1420,9 +1420,9 @@ function buildLayout(n, opts) {
   const s3s = byId.s3s.shape;
   const audPaths = [
     { pts: [P(at('s3', -1, 0), M), P(at('s3s', 1, 0), M)], arrows: 'both' },
-    { pts: [P(at('s3s', 0, -1), M), P([X_AUD, yCL + 4.25], 6)], arrows: 'none' }
+    { pts: [P(at('s3s', 0, -1), M), P([X_AUD, yCL + 11.65], 6)], arrows: 'none' }
   ];
-  ops.forEach(i => audPaths.push({ pts: [P([X_AUD, yC(i) + 4.25], 6), P(at('o' + i, ...deg(150)), O)], arrows: 'end' }));
+  ops.forEach(i => audPaths.push({ pts: [P([X_AUD, yC(i) + 11.65], 6), P(at('o' + i, ...deg(135)), O)], arrows: 'end' }));
   chan('aud', 'audit', ['s3', 's3s'].concat(allO), [['s3'], allO], audPaths);
 
   // Three-Four homeostat, and System Five monitoring it (System Five has no direct line to System Three)

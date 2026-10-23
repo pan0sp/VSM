@@ -1448,8 +1448,8 @@ function buildLayout(n, opts) {
 
   // Algedonic signal: rises from every local management (the operation's own metasystem), parallel to
   // the Resource Bargain and one layer behind Systems Three, Four and Five, and breaks through to System Five
-  const X_ALG = 18.5, Z_ALG = -8;
-  const algPaths = [{ pts: [P([X_ALG, yLast + 2], Z_ALG), P([X_ALG, 63], Z_ALG), P(at('s5', 1, -0.6), M)], corner: 2.5, arrows: 'end' }];
+  const X_ALG = 13, Z_ALG = -8; // directly behind the command axis
+  const algPaths = [{ pts: [P([X_ALG, yLast + 2], Z_ALG), P([X_ALG, 62], Z_ALG), P([X_ALG, 64.5], M)], arrows: 'end' }];
   ops.forEach(i => algPaths.push({ pts: [P(at('m' + i, 1, -1), O), P([X_ALG, yOp(i) + 2], Z_ALG)], arrows: 'none' }));
   chan('alg', 'alg', allM.concat(['s5']), [allM, ['s5']], algPaths, { z2: -0.36, behind: true });
 

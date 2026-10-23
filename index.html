@@ -1321,8 +1321,10 @@ function buildLayout(n, opts) {
   const els = [], chans = [], byId = {};
   const yOp = i => -OP_GAP * i;
   const yLast = yOp(n - 1);
+  const OPX = -3.34, OPDY = -5.34;          // operation centre relative to its row
+  const yC = i => yOp(i) + OPDY, yCL = yC(n - 1);
   const add = o => { o.outline = outlineOf(o.shape); els.push(o); byId[o.id] = o; return o; };
-  const envTop = 80, envBottom = yLast - 17;
+  const envTop = 80, envBottom = yLast - 23;
   const envCy = (envTop + envBottom) / 2, envRy = (envTop - envBottom) / 2;
   const bridge = opts.s2 === 'bridge';
   // Two drawing conventions. 'square': the metasystem is a square box holding 3, 3*, 4, 5 and the
@@ -1331,6 +1333,8 @@ function buildLayout(n, opts) {
   // local managements are upright squares.
   const sq = opts.style !== 'diamond';
   const S2L = bridge ? LAYER.mid : LAYER.meta;
+  // System Two and Three-Star sit at the same distance either side of System Three (x = 9)
+  const S2X = sq ? 33 : 27, S3SX = -15;
   const ops = Array.from({ length: n }, (_, i) => i);
 
   add({ id: 'env', type: 'envTotal', group: 'env', container: true, layer: LAYER.env, zoff: -6, z2: -0.6,
@@ -1342,17 +1346,18 @@ function buildLayout(n, opts) {
   ops.forEach(i => {
     const y = yOp(i);
     add({ id: 'e' + i, type: 'envOp', group: 'env', idx: i, layer: LAYER.env, z2: -0.45,
-      shape: { kind: 'blob', cx: -66, cy: y, rx: 12, ry: 9.5, p: 2.3, amp: 0.08, seed: 11.7 + i * 3.1 },
+      shape: { kind: 'blob', cx: -66, cy: y + OPDY, rx: 12, ry: 9.5, p: 2.3, amp: 0.08, seed: 11.7 + i * 3.1 },
       label: { dx: 0, dy: 0, w: 20 } });
     add({ id: 'o' + i, type: 'op', group: 'ops', idx: i, layer: LAYER.ops, z2: 0,
-      shape: { kind: 'circle', cx: -18, cy: y, r: 8.5 }, label: { dx: 0, dy: 0, w: 16, nestDy: 6.2 } });
+      // each operation sits below and to the left of its local management, on the 45 degree diagonal
+      shape: { kind: 'circle', cx: OPX, cy: y + OPDY, r: 8.5 }, label: { dx: 0, dy: 0, w: 16, nestDy: 6.2 } });
     add({ id: 'm' + i, type: 'mgmt', group: 'ops', idx: i, layer: LAYER.ops, z2: 0,
       shape: sq ? { kind: 'diamond', cx: 9, cy: y + 7, hw: 7, hh: 7 } : { kind: 'square', cx: 9, cy: y + 7, s: 10 },
       label: { dx: 0, dy: 0, w: 14 } });
     add({ id: 'a' + i, type: 's2', group: 'meta', idx: i, layer: S2L, z2: 0,
-      shape: { kind: 'tri', cx: 27, cy: y + 7, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
+      shape: { kind: 'tri', cx: S2X, cy: y + 7, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
   });
-  const RECT = { x0: -41, x1: 35, y0: 18, y1: 80 };
+  const RECT = { x0: -22, x1: 40, y0: 18, y1: 80 };
   add(sq
     ? { id: 'meta', type: 'meta', group: 'meta', container: true, layer: LAYER.meta, z2: -0.3,
         shape: { kind: 'rect', cx: (RECT.x0 + RECT.x1) / 2, cy: (RECT.y0 + RECT.y1) / 2, hw: (RECT.x1 - RECT.x0) / 2, hh: (RECT.y1 - RECT.y0) / 2 },
@@ -1361,10 +1366,10 @@ function buildLayout(n, opts) {
         shape: { kind: 'rhombus', cx: 14, cy: 52, hw: 35, hh: 39 }, label: { dx: 0, dy: 39 + 4, w: 30, big: true, nameOnly: true } });
   // System Two's regulatory centre: inside the metasystem, or on its boundary in the bridge view
   add({ id: 's2', type: 's2c', group: 'meta', layer: S2L, z2: 0.05,
-    shape: { kind: 'tri', cx: 27, cy: bridge ? (sq ? RECT.y0 : 27.5) : 37, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
+    shape: { kind: 'tri', cx: S2X, cy: bridge ? (sq ? RECT.y0 : 27.5) : 37, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
   add({ id: 's3', type: 's3', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: 37, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
   add({ id: 's3s', type: 's3s', group: 'meta', layer: LAYER.meta, z2: 0,
-    shape: { kind: 'tri', cx: -36, cy: 29, w: 9, h: 8, dir: 'down' }, label: { dx: 0, dy: 6.5, w: 14, codeIn: true } });
+    shape: { kind: 'tri', cx: S3SX, cy: 37, w: 9, h: 8, dir: 'down' }, label: { dx: -6, dy: 0, w: 14, align: 'r', codeIn: true } });
   add({ id: 's4', type: 's4', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: 53.5, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
   add({ id: 's5', type: 's5', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: 70, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
 
@@ -1378,11 +1383,11 @@ function buildLayout(n, opts) {
   };
   const E = LAYER.env, O = LAYER.ops, M = LAYER.meta;
   const allO = ops.map(i => 'o' + i), allM = ops.map(i => 'm' + i), allA = ops.map(i => 'a' + i);
-  const X_AUD = -36, X_S14 = -29.5, X_ALG = -4;
+  const X_AUD = S3SX, X_S14 = -25, X_ALG = -30, X_RISE = 60;
 
   ops.forEach(i => {
     chan('eo' + i, 'eo', ['e' + i, 'o' + i], [['e' + i], ['o' + i]], [{ pts: [P(at('e' + i, 1, 0), E), P(at('o' + i, -1, 0), O)], arrows: 'both' }], { idx: i });
-    chan('om' + i, 'om', ['o' + i, 'm' + i], [['o' + i], ['m' + i]], [{ pts: [P(at('o' + i, ...deg(25)), O), P(at('m' + i, -1, -0.4), O)], arrows: 'both' }], { idx: i });
+    chan('om' + i, 'om', ['o' + i, 'm' + i], [['o' + i], ['m' + i]], [{ pts: [P(at('o' + i, ...deg(45)), O), P(at('m' + i, -1, -1), O)], arrows: 'both' }], { idx: i });
     chan('ms' + i, 'ms2', ['m' + i, 'a' + i], [['m' + i], ['a' + i]], [{ pts: [P(at('m' + i, 1, 0), O), P(at('a' + i, -1, 0), S2L)], arrows: 'both' }], { idx: i });
     if (i < n - 1) {
       chan('ee' + i, 'ee', ['e' + i, 'e' + (i + 1)], [['e' + i], ['e' + (i + 1)]], [{ pts: [P(at('e' + i, 0, -1), E), P(at('e' + (i + 1), 0, 1), E)], mode: 'wave', amp: 1.8, arrows: 'both' }], { idx: i });
@@ -1414,10 +1419,10 @@ function buildLayout(n, opts) {
   // System Three-Star: sporadic audit, reaching past local management into the operations from the environment side
   const s3s = byId.s3s.shape;
   const audPaths = [
-    { pts: [P(at('s3', -1, -0.73), M), P(at('s3s', 4.5, 4), M)], arrows: 'both' },
-    { pts: [P(at('s3s', 0, -1), M), P([X_AUD, yLast + 4.25], 6)], arrows: 'none' }
+    { pts: [P(at('s3', -1, 0), M), P(at('s3s', 1, 0), M)], arrows: 'both' },
+    { pts: [P(at('s3s', 0, -1), M), P([X_AUD, yCL + 4.25], 6)], arrows: 'none' }
   ];
-  ops.forEach(i => audPaths.push({ pts: [P([X_AUD, yOp(i) + 4.25], 6), P(at('o' + i, ...deg(150)), O)], arrows: 'end' }));
+  ops.forEach(i => audPaths.push({ pts: [P([X_AUD, yC(i) + 4.25], 6), P(at('o' + i, ...deg(150)), O)], arrows: 'end' }));
   chan('aud', 'audit', ['s3', 's3s'].concat(allO), [['s3'], allO], audPaths);
 
   // Three-Four homeostat, and System Five monitoring it (System Five has no direct line to System Three)
@@ -1436,17 +1441,17 @@ function buildLayout(n, opts) {
     chan('s4cmd', 's4cmd', ['s4', 'rb'], [['s4'], ['rb']], [{ pts: [P(at('s4', 1, -0.45), M), P([21, 51], M), P([21, jy], M), P([jx, jy], jL)], corner: 2.5, arrows: 'end' }], { ext: true });
   }
   if (opts.s14) {
-    const s14paths = [{ pts: [P([X_S14, yLast - 3.6], 5), P([X_S14, 50.5], 5), P(at('s4', -1, -0.55), M)], corner: 3, arrows: 'end' }];
-    ops.forEach(i => s14paths.push({ pts: [P(at('o' + i, ...deg(205)), O), P([X_S14, yOp(i) - 3.6], 5)], arrows: 'none' }));
+    const s14paths = [{ pts: [P([X_S14, yCL - 3.6], 5), P([X_S14, 50.5], 5), P(at('s4', -1, -0.55), M)], corner: 3, arrows: 'end' }];
+    ops.forEach(i => s14paths.push({ pts: [P(at('o' + i, ...deg(205)), O), P([X_S14, yC(i) - 3.6], 5)], arrows: 'none' }));
     chan('s14', 's14', allO.concat(['s4']), [allO, ['s4']], s14paths, { ext: true });
   }
 
   // Algedonic signal: ascends from every operation and breaks through to System Five
   const algPaths = [{
-    pts: [P([X_ALG, yOp(0) - 4.88], O), P([X_ALG, yLast - 13], O), P([54, yLast - 13], O), P([54, 72.5], M), P(at('s5', 1, 0.45), M)],
+    pts: [P([X_ALG, yC(0) - 5.46], O), P([X_ALG, yCL - 13], O), P([X_RISE, yCL - 13], O), P([X_RISE, 72.5], M), P(at('s5', 1, 0.45), M)],
     corner: 3.5, arrows: 'end'
   }];
-  ops.forEach(i => algPaths.push({ pts: [P(at('o' + i, ...deg(-35)), O), P([X_ALG, yOp(i) - 4.88], O)], arrows: 'none' }));
+  ops.forEach(i => algPaths.push({ pts: [P(at('o' + i, ...deg(220)), O), P([X_ALG, yC(i) - 5.46], O)], arrows: 'none' }));
   chan('alg', 'alg', allO.concat(['s5']), [allO, ['s5']], algPaths);
 
   chans.forEach(c => c.paths.forEach(p => { p.samples = samplePath(p); }));

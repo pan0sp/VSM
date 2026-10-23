@@ -852,7 +852,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.6"/><path d="M8 2.4v11.2A5.6 5.6 0 0 0 8 2.4z" fill="currentColor" stroke="none"/></svg>
         <span class="t" id="themeTx">Auto</span>
       </button>
-      <button class="tool" id="btnFrame" type="button" title="Recentre the model face-on, as in 2D (key F)">
+      <button class="tool" id="btnFrame" type="button" title="Recentre the model face-on, as in 2D (key C)">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5V2h3.5M10.5 2H14v3.5M14 10.5V14h-3.5M5.5 14H2v-3.5"/><circle cx="8" cy="8" r="1.6" fill="currentColor" stroke="none"/></svg>
         <span class="t">Recentre</span>
       </button>
@@ -1014,11 +1014,11 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
           <kbd>Scroll</kbd><span>Zoom; pinch on touch screens</span>
           <kbd>Click</kbd><span>Select an element and read about it</span>
           <kbd>Shift-click</kbd><span>Add to or remove from the selection</span>
-          <kbd>I</kbd><span>Focus: show only the selection and what connects directly to it</span>
+          <kbd>F</kbd><span>Focus: show only the selection and what connects directly to it</span>
           <kbd>Double-click</kbd><span>Step into an operation's own viable system</span>
           <kbd>Scroll into</kbd><span>Zoom toward the pointer; keep going into an operation to enter its recursion</span>
           <kbd>2 / 3</kbd><span>Switch between 2D and 3D</span>
-          <kbd>F</kbd><span>Recentre the model and reset the view angle</span>
+          <kbd>C</kbd><span>Recentre the model face-on</span>
           <kbd>Esc</kbd><span>Leave focus, then clear the selection</span>
         </div>
       </div>
@@ -1042,7 +1042,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
     <div class="focusbar" id="focusBar" role="toolbar" aria-label="Selection" hidden></div>
     <div class="tip" id="tip" hidden></div>
     <div class="hint" id="hint"></div>
-    <button class="recentre" id="btnRecentre" type="button" title="Recentre the model face-on, as in 2D (key F)">
+    <button class="recentre" id="btnRecentre" type="button" title="Recentre the model face-on, as in 2D (key C)">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="5.2"/><circle cx="8" cy="8" r="1.6" fill="currentColor" stroke="none"/><path d="M8 0.8v2.4M8 12.8v2.4M0.8 8h2.4M12.8 8h2.4"/></svg>
       <span>Recentre</span>
     </button>
@@ -1925,7 +1925,8 @@ let minis = [];          // nested previews
 let dirty = true;
 let selected = null, hovered = null;
 let selSet = new Set();   // everything selected (shift-click adds); `selected` is the one shown in the inspector
-let focusMode = false;    // when on, only the selection and what connects directly to it is drawn
+let focusMode = false;
+let inspDismissed = false; // the details pane was closed by hand; the selection and focus stay    // when on, only the selection and what connects directly to it is drawn
 let focusSet = null;
 
 const SZ = d => lerp(0.012, 1, d);
@@ -2616,6 +2617,7 @@ function select(id, opts) {
   selected = id || null;
   focusSet = computeFocusAll();
   if (focusMode && !selSet.size) focusMode = false;
+  if (!selSet.size) inspDismissed = false;
   renderFocusBar();
   refreshVisuals();
   renderInspector();
@@ -2636,14 +2638,15 @@ function renderFocusBar() {
   bar.classList.toggle('on', focusMode);
   bar.innerHTML = focusMode
     ? '<span class="fx">Focused on ' + who + ' · ' + linked + ' directly connected</span>' +
-      '<button type="button" id="fReframe">Reframe</button><button type="button" class="go" id="fExit">Show all</button>'
+      (inspDismissed ? '<button type="button" id="fDetails">Details</button>' : '') + '<button type="button" id="fReframe">Reframe</button><button type="button" class="go" id="fExit">Show all</button>'
     : '<span class="fx">' + who + ' · ' + linked + ' directly connected</span><span class="fk">Shift-click to add</span>' +
-      '<button type="button" class="go" id="fEnter" title="Show only the selection and what connects to it (key I)">Focus</button><button type="button" id="fClear">Clear</button>';
+      '<button type="button" class="go" id="fEnter" title="Show only the selection and what connects to it (key F)">Focus</button>' + (inspDismissed ? '<button type="button" id="fDetails">Details</button>' : '') + '<button type="button" id="fClear">Clear</button>';
   const b = id => document.getElementById(id);
   if (b('fEnter')) b('fEnter').onclick = enterFocus;
   if (b('fClear')) b('fClear').onclick = () => select(null);
   if (b('fExit')) b('fExit').onclick = exitFocus;
   if (b('fReframe')) b('fReframe').onclick = frameFocus;
+  if (b('fDetails')) b('fDetails').onclick = () => { inspDismissed = false; renderInspector(); renderFocusBar(); };
 }
 function focusBBox() {
   let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
@@ -2667,7 +2670,9 @@ function enterFocus() {
   if (!selSet.size) return;
   focusMode = true;
   tip.hidden = true;
-  refreshVisuals(); renderFocusBar(); frameFocus();
+  inspDismissed = true; renderInspector();
+  refreshVisuals(); renderFocusBar();
+  requestAnimationFrame(frameFocus); // after the stage has widened
 }
 function exitFocus() {
   if (!focusMode) return;
@@ -3041,7 +3046,7 @@ function renderTree() {
 const insp = $('#insp');
 function renderInspector() {
   const app = $('#app');
-  if (!selected || (!L.byId[selected] && !L.chanById[selected])) {
+  if (!selected || inspDismissed || (!L.byId[selected] && !L.chanById[selected])) {
     insp.hidden = true; app.classList.remove('insp-open');
     return;
   }
@@ -3449,7 +3454,7 @@ function recentre() {
 $('#btnFrame').addEventListener('click', recentre);
 $('#btnRecentre').addEventListener('click', recentre);
 $('#upBtn').addEventListener('click', () => exitToParent());
-$('#iClose').addEventListener('click', () => select(null));
+$('#iClose').addEventListener('click', () => { inspDismissed = true; renderInspector(); renderFocusBar(); });
 $('#iName').addEventListener('input', e => renameElement(selected, e.target.value, 'insp'));
 $('#iColor').addEventListener('input', e => recolorElement(selected, e.target.value, 'insp'));
 $('#iColorReset').addEventListener('click', () => recolorElement(selected, null, 'insp'));
@@ -3641,8 +3646,8 @@ window.addEventListener('keydown', e => {
   if (/INPUT|TEXTAREA|SELECT/.test(tag)) { if (e.key === 'Escape') e.target.blur(); return; }
   if (e.key === '2') setView('2d');
   else if (e.key === '3') setView('3d');
-  else if (e.key === 'f' || e.key === 'F') recentre();
-  else if (e.key === 'i' || e.key === 'I') { if (focusMode) exitFocus(); else enterFocus(); }
+  else if (e.key === 'c' || e.key === 'C') recentre();
+  else if (e.key === 'f' || e.key === 'F') { if (focusMode) exitFocus(); else enterFocus(); }
   else if (e.key === 'Escape') { if (app.classList.contains('drawer-open')) { app.classList.remove('drawer-open'); syncSide(); } else if (focusMode) exitFocus(); else select(null); }
 });
 

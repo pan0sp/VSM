@@ -1414,7 +1414,7 @@ function buildLayout(n, opts) {
       shape: { kind: 'circle', cx: OPX, cy: y + OPDY, r: 8.5 }, label: { dx: 0, dy: 0, w: 16, nestDy: 6.2 } });
     add({ id: 'm' + i, type: 'mgmt', group: 'ops', idx: i, layer: LAYER.ops, z2: 0,
       shape: sq ? { kind: 'diamond', cx: 9, cy: y + 7, hw: 7, hh: 7 } : { kind: 'square', cx: 9, cy: y + 7, s: 10 },
-      label: { dx: 0, dy: 0, w: 14 } });
+      label: { dx: 0, dy: 0, w: 21 } });
     add({ id: 'a' + i, type: 's2', group: 'meta', idx: i, layer: S2L, z2: 0,
       shape: { kind: 'tri', cx: S2X, cy: y + 7, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
   });
@@ -2486,7 +2486,7 @@ function fitState(forD, bbox) {
   const aspect = w / h, tanHalf = Math.tan(camera.fov * Math.PI / 360);
   const bw = (b.x1 - b.x0) + 8, bh = (b.y1 - b.y0) + 8;
   let dist = Math.max(bh / 2 / tanHalf, bw / 2 / (tanHalf * aspect)) * 1.04;
-  const padTop = matchMedia('(max-width: 860px)').matches ? 0 : 56 / h; // keep clear of the level chip
+  const padTop = matchMedia('(max-width: 860px)').matches ? 0 : 100 / h; // keep clear of the level chip and selection bar
   dist *= 1 + padTop;
   const d = forD == null ? anim.d : forD;
   if (d > 0.5) dist *= 1.06;

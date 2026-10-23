@@ -1446,13 +1446,12 @@ function buildLayout(n, opts) {
     chan('s14', 's14', allO.concat(['s4']), [allO, ['s4']], s14paths, { ext: true });
   }
 
-  // Algedonic signal: rises from the local managements parallel to the Resource Bargain, behind
-  // Systems Three, Four and Five (a layer behind them in 3D), and breaks through to System Five
-  const X_ALG = 13, Z_ALG = LAYER.env - 14; // behind the whole model, environment included
-  chan('alg', 'alg', allM.concat(['s5']), [allM, ['s5']], [{
-    pts: [P([X_ALG, yLast + 7], O), P([X_ALG, yLast + 9], Z_ALG), P([X_ALG, 68], Z_ALG), P([X_ALG, 70], M)],
-    arrows: 'none'
-  }], { z2: -0.22, behind: true });
+  // Algedonic signal: rises from every local management (the operation's own metasystem), parallel to
+  // the Resource Bargain and one layer behind Systems Three, Four and Five, and breaks through to System Five
+  const X_ALG = 18.5, Z_ALG = -8;
+  const algPaths = [{ pts: [P([X_ALG, yLast + 2], Z_ALG), P([X_ALG, 63], Z_ALG), P(at('s5', 1, -0.6), M)], corner: 2.5, arrows: 'end' }];
+  ops.forEach(i => algPaths.push({ pts: [P(at('m' + i, 1, -1), O), P([X_ALG, yOp(i) + 2], Z_ALG)], arrows: 'none' }));
+  chan('alg', 'alg', allM.concat(['s5']), [allM, ['s5']], algPaths, { z2: -0.36, behind: true });
 
   chans.forEach(c => c.paths.forEach(p => { p.samples = samplePath(p); }));
 
@@ -2109,7 +2108,7 @@ function refreshVisuals() {
     const tint = TINT[el.type] || TINT.def;
     const fill = base.clone().lerp(theme.stage, lerp(tint[0], tint[1], d));
     let op = 1;
-    if (el.type === 'meta') op = lerp(1, 0.15, d);
+    if (el.type === 'meta') op = lerp(0.5, 0.15, d); // see-through, so the algedonic signal shows behind it
     else if (el.type === 'envTotal') op = lerp(1, 0.45, d);
     else if (el.type === 'op' && minisShown) op = lerp(0.55, 0.2, d);
     const related = !focusSet || focusSet.has(id);

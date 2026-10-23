@@ -30,7 +30,7 @@ The layout follows Beer's diagram from *Brain of the Firm* and *Diagnosing the S
 - The central command axis is two of Beer's six vertical channels from *Diagnosing the System*: Corporate Intervention (down) and the Resource Bargain with accountability (both ways), from System Three to each local management. The other four are the operational linkages, the environmental intersects, System Two and the audit.
 - System Two's anti-oscillation triangles sit beside each local management, linked to the regulatory centre inside the metasystem.
 - The Three-Star audit channel reaches the operations directly from the environment side, past local management.
-- The algedonic signal rises from every local management parallel to the Resource Bargain, behind Systems Three, Four and Five (a plane behind them in 3D), and breaks through to System Five.
+- The algedonic signal branches from every local management and rises parallel to the Resource Bargain, one layer behind Systems Three, Four and Five (in front of the environment in 3D), and breaks through to System Five. The metasystem box is see-through so the signal shows behind it.
 - System Five links to System Four and monitors the Three–Four homeostat; it has no direct line to System Three.
 
 Terminology follows Beer's books as collected in the [Pure VSM](https://wiki.cybernetic-futures.org/pure-vsm/) source set: inside-and-now (System Three), outside-and-then (System Four), closure and identity (System Five), anti-oscillation and regulatory centre (System Two), System-in-Focus, local management.

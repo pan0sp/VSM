@@ -209,6 +209,40 @@ button { cursor: pointer; }
   z-index: 2;
 }
 .depth input { width: 110px; accent-color: var(--accent); }
+.focusbar {
+  position: absolute;
+  top: 54px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 5px 6px 5px 14px;
+  box-shadow: var(--shadow);
+  z-index: 3;
+  font-size: 12.5px;
+  max-width: calc(100% - 24px);
+}
+.focusbar.on { border-color: var(--accent); }
+.focusbar .fx { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); }
+.focusbar .fx b { color: var(--ink); font-weight: 650; }
+.focusbar .fk { font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-2); white-space: nowrap; }
+.focusbar button {
+  flex: none;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.focusbar button.go { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.focusbar button:hover { border-color: var(--accent); }
+@media (max-width: 860px) { .focusbar .fk { display: none; } }
+@media (max-width: 1180px) { .app.insp-open .focusbar .fk { display: none; } }
 .recentre {
   position: absolute;
   right: 12px;
@@ -818,7 +852,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.6"/><path d="M8 2.4v11.2A5.6 5.6 0 0 0 8 2.4z" fill="currentColor" stroke="none"/></svg>
         <span class="t" id="themeTx">Auto</span>
       </button>
-      <button class="tool" id="btnFrame" type="button" title="Recentre the model and reset the view angle (key F)">
+      <button class="tool" id="btnFrame" type="button" title="Recentre the model face-on, as in 2D (key F)">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5V2h3.5M10.5 2H14v3.5M14 10.5V14h-3.5M5.5 14H2v-3.5"/><circle cx="8" cy="8" r="1.6" fill="currentColor" stroke="none"/></svg>
         <span class="t">Recentre</span>
       </button>
@@ -979,11 +1013,13 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
           <kbd>Right-drag</kbd><span>Pan; Shift-drag also works</span>
           <kbd>Scroll</kbd><span>Zoom; pinch on touch screens</span>
           <kbd>Click</kbd><span>Select an element and read about it</span>
+          <kbd>Shift-click</kbd><span>Add to or remove from the selection</span>
+          <kbd>I</kbd><span>Focus: show only the selection and what connects directly to it</span>
           <kbd>Double-click</kbd><span>Step into an operation's own viable system</span>
           <kbd>Scroll into</kbd><span>Zoom toward the pointer; keep going into an operation to enter its recursion</span>
           <kbd>2 / 3</kbd><span>Switch between 2D and 3D</span>
           <kbd>F</kbd><span>Recentre the model and reset the view angle</span>
-          <kbd>Esc</kbd><span>Clear the selection</span>
+          <kbd>Esc</kbd><span>Leave focus, then clear the selection</span>
         </div>
       </div>
       <div class="block">
@@ -1003,9 +1039,10 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
         <span id="upTx">Up one level</span>
       </button>
     </div>
+    <div class="focusbar" id="focusBar" role="toolbar" aria-label="Selection" hidden></div>
     <div class="tip" id="tip" hidden></div>
     <div class="hint" id="hint"></div>
-    <button class="recentre" id="btnRecentre" type="button" title="Recentre the model and reset the view angle (key F)">
+    <button class="recentre" id="btnRecentre" type="button" title="Recentre the model face-on, as in 2D (key F)">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="5.2"/><circle cx="8" cy="8" r="1.6" fill="currentColor" stroke="none"/><path d="M8 0.8v2.4M8 12.8v2.4M0.8 8h2.4M12.8 8h2.4"/></svg>
       <span>Recentre</span>
     </button>
@@ -1887,6 +1924,8 @@ let pickables = [];
 let minis = [];          // nested previews
 let dirty = true;
 let selected = null, hovered = null;
+let selSet = new Set();   // everything selected (shift-click adds); `selected` is the one shown in the inspector
+let focusMode = false;    // when on, only the selection and what connects directly to it is drawn
 let focusSet = null;
 
 const SZ = d => lerp(0.012, 1, d);
@@ -1999,6 +2038,7 @@ function disposeGroup(g) {
 
 function buildScene() {
   resetWorld();
+  focusMode = false; selSet = new Set(selected ? [selected] : []);
   disposeGroup(world);
   while (world.children.length) world.remove(world.children[0]);
   els.clear(); chs.clear(); pickables = []; minis = [];
@@ -2142,7 +2182,7 @@ function refreshVisuals() {
     let em = lerp(0.26, 0.05, d);
     if (hovered === id) em += 0.12;
     o.fill.material.emissive.copy(fill).multiplyScalar(em);
-    if (selected === id) o.fill.material.emissive.lerp(theme.accent, 0.14);
+    if (selSet.has(id)) o.fill.material.emissive.lerp(theme.accent, 0.14);
     setOpacity(o.fill.material, op * dimF);
     strokeColor(base, o.band.material.color);
     if (selected === id) o.band.material.color.copy(theme.accent);
@@ -2154,15 +2194,20 @@ function refreshVisuals() {
       o.edges.material.opacity = lerp(0, el.container ? 0.5 : 0.85, d) * (related ? 1 : 0.25);
       o.edges.visible = d > 0.02;
     }
-    updateRing(o, selected === id);
+    updateRing(o, selSet.has(id));
+    // focus mode: hide what is not directly connected; containers stay as faint context
+    o.group.visible = !isHidden(id) || !!el.container;
+    if (isHidden(id) && el.container) setOpacity(o.fill.material, op * 0.35);
   });
+  minis.forEach(m => { if (m.holder.visible && isHidden(m.op)) m.holder.visible = false; else if (!isHidden(m.op)) m.holder.visible = minisShown; });
   chs.forEach((o, id) => {
     const base = new THREE.Color(colorOf(lv, id, L));
     const related = !focusSet || focusSet.has(id);
-    const c = selected === id ? theme.accent.clone() : base;
+    const c = selSet.has(id) ? theme.accent.clone() : base;
     o.mat.color.copy(c);
     o.mat.emissive.copy(c).multiplyScalar(lerp(0.3, 0.12, d) + (hovered === id ? 0.25 : 0));
     setOpacity(o.mat, related ? 1 : 0.18);
+    o.group.visible = !isHidden(id);
   });
   if (particles) {
     particleSpecs.forEach((p, i) => {
@@ -2235,6 +2280,7 @@ function updateParticles(time) {
   if (!particles || !prefs.flows || !particleSpecs.length) return;
   const speed = 9;
   particleSpecs.forEach((s, i) => {
+    if (isHidden(s.id)) { tmpM.makeScale(0, 0, 0); particles.setMatrixAt(i, tmpM); return; }
     const part = chs.get(s.id).parts[s.part];
     const total = part.cum[part.cum.length - 1] || 1;
     let u = ((time * speed / total) + s.phase) % 1;
@@ -2362,7 +2408,8 @@ function updateLabelText(id) {
 function updateLabelClasses() {
   labelNodes.forEach((n, id) => {
     const dim = focusSet && !focusSet.has(id) && !n.el.container;
-    [n.div, n.codeDiv].forEach(dv => { if (!dv) return; dv.classList.toggle('dim', !!dim); dv.classList.toggle('sel', selected === id); });
+    const off = isHidden(id) && !n.el.container;
+    [n.div, n.codeDiv].forEach(dv => { if (!dv) return; dv.classList.toggle('dim', !!dim); dv.classList.toggle('off', off); dv.classList.toggle('sel', selSet.has(id)); });
   });
 }
 const projV = new THREE.Vector3(), camDir = new THREE.Vector3();
@@ -2433,8 +2480,8 @@ function setCam(s) {
   camera.lookAt(s.target);
   dirty = true;
 }
-function fitState(forD) {
-  const b = L.bbox, w = stage.clientWidth || 800, h = stage.clientHeight || 600;
+function fitState(forD, bbox) {
+  const b = bbox || L.bbox, w = stage.clientWidth || 800, h = stage.clientHeight || 600;
   const aspect = w / h, tanHalf = Math.tan(camera.fov * Math.PI / 360);
   const bw = (b.x1 - b.x0) + 8, bh = (b.y1 - b.y0) + 8;
   let dist = Math.max(bh / 2 / tanHalf, bw / 2 / (tanHalf * aspect)) * 1.04;
@@ -2524,7 +2571,8 @@ function pickAt(cx, cy) {
   const r = canvas.getBoundingClientRect();
   ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(ndc, camera);
-  const hits = ray.intersectObjects(pickables, false);
+  const shown = o => { for (; o; o = o.parent) if (!o.visible) return false; return true; };
+  const hits = ray.intersectObjects(pickables, false).filter(h => shown(h.object) && !isHidden(h.object.userData.pick && h.object.userData.pick.id));
   if (!hits.length) return null;
   let firstEl = null, firstCh = null, container = null;
   for (const h of hits) {
@@ -2550,15 +2598,83 @@ function computeFocus(id) {
   return set;
 }
 
+function computeFocusAll() {
+  if (!selSet.size) return null;
+  const set = new Set();
+  selSet.forEach(id => { const f = computeFocus(id); if (f) f.forEach(x => set.add(x)); });
+  return set;
+}
 function select(id, opts) {
+  opts = opts || {};
+  if (id && !(L.byId[id] || L.chanById[id])) id = null;
+  if (opts.add && id) {
+    if (selSet.has(id)) { selSet.delete(id); id = selSet.size ? Array.from(selSet).pop() : null; }
+    else selSet.add(id);
+  } else {
+    selSet = new Set(id ? [id] : []);
+  }
   selected = id || null;
-  focusSet = computeFocus(selected);
+  focusSet = computeFocusAll();
+  if (focusMode && !selSet.size) focusMode = false;
+  renderFocusBar();
   refreshVisuals();
   renderInspector();
-  document.querySelectorAll('.erow').forEach(r => r.classList.toggle('sel', r.dataset.id === selected));
+  document.querySelectorAll('.erow').forEach(r => r.classList.toggle('sel', selSet.has(r.dataset.id)));
   document.querySelectorAll('.fch').forEach(r => r.classList.toggle('sel', r.dataset.ch === selected));
   if (opts && opts.reveal && selected) revealInList(selected);
   if (selected && narrowQ.matches && !busy) keepAboveSheet(selected);
+}
+const isHidden = id => focusMode && focusSet && !focusSet.has(id);
+function shownName(id) { const lv = level(); const c = codeOf(lv, id); return (c ? c + ' ' : '') + labelOf(lv, id); }
+function renderFocusBar() {
+  const bar = $('#focusBar');
+  if (!selSet.size) { bar.hidden = true; bar.classList.remove('on'); return; }
+  const ids = Array.from(selSet), n = ids.length;
+  const linked = Math.max(0, (focusSet ? focusSet.size : 0) - n);
+  const who = n === 1 ? '<b>' + esc(shownName(ids[0])) + '</b>' : '<b>' + n + ' selected</b>';
+  bar.hidden = false;
+  bar.classList.toggle('on', focusMode);
+  bar.innerHTML = focusMode
+    ? '<span class="fx">Focused on ' + who + ' · ' + linked + ' directly connected</span>' +
+      '<button type="button" id="fReframe">Reframe</button><button type="button" class="go" id="fExit">Show all</button>'
+    : '<span class="fx">' + who + ' · ' + linked + ' directly connected</span><span class="fk">Shift-click to add</span>' +
+      '<button type="button" class="go" id="fEnter" title="Show only the selection and what connects to it (key I)">Focus</button><button type="button" id="fClear">Clear</button>';
+  const b = id => document.getElementById(id);
+  if (b('fEnter')) b('fEnter').onclick = enterFocus;
+  if (b('fClear')) b('fClear').onclick = () => select(null);
+  if (b('fExit')) b('fExit').onclick = exitFocus;
+  if (b('fReframe')) b('fReframe').onclick = frameFocus;
+}
+function focusBBox() {
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  const grow = (x, y) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); };
+  focusSet.forEach(id => {
+    const e = L.byId[id];
+    if (e && !e.container) e.outline.forEach(p => grow(p[0], p[1]));
+    const c = L.chanById[id];
+    if (c) c.paths.forEach(p => p.samples.forEach(q => grow(q.x, q.y)));
+  });
+  if (!isFinite(x0)) return null;
+  return { x0: x0 - 6, x1: x1 + 14, y0: y0 - 4, y1: y1 + 6 };
+}
+function frameFocus() {
+  if (busy || !focusSet) return;
+  const b = focusBBox(); if (!b) return;
+  const f = fitState(anim.d, b), cur = camState();
+  camTween(Object.assign(f, { az: cur.az, el: cur.el }), 650);
+}
+function enterFocus() {
+  if (!selSet.size) return;
+  focusMode = true;
+  tip.hidden = true;
+  refreshVisuals(); renderFocusBar(); frameFocus();
+}
+function exitFocus() {
+  if (!focusMode) return;
+  focusMode = false;
+  refreshVisuals(); renderFocusBar();
+  const f = fitState(), cur = camState();
+  camTween(Object.assign(f, { az: cur.az, el: cur.el }), 650);
 }
 function keepAboveSheet(id) {
   let p;
@@ -2600,7 +2716,10 @@ canvas.addEventListener('pointerup', e => {
     if (lastTap && now - lastTap.t < 450 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 10) { down = null; return; }
     const id = pickAt(e.clientX, e.clientY);
     lastTap = { t: now, x: e.clientX, y: e.clientY, id };
-    select(id === selected ? null : id, { reveal: true });
+    const add = e.shiftKey || e.metaKey || e.ctrlKey;
+    if (add) { if (id) select(id, { add: true, reveal: true }); }
+    else if (!id && focusMode) { /* empty space keeps the focus; use Show all or Esc to leave it */ }
+    else select(id === selected && selSet.size === 1 && !focusMode ? null : id, { reveal: true });
   }
   down = null;
 });
@@ -2864,7 +2983,7 @@ function renderElementList(colorsOnly) {
   }).join('');
   list.querySelectorAll('.erow').forEach(r => {
     const id = r.dataset.id;
-    r.querySelector('.ecode').addEventListener('click', () => select(id));
+    r.querySelector('.ecode').addEventListener('click', ev => select(id, { add: ev.shiftKey || ev.metaKey || ev.ctrlKey }));
     r.querySelector('.ename').addEventListener('input', ev => renameElement(id, ev.target.value, 'list'));
     r.querySelector('.ename').addEventListener('focus', () => { if (selected !== id) select(id); });
     r.querySelector('.sw').addEventListener('input', ev => recolorElement(id, ev.target.value, 'list'));
@@ -3058,6 +3177,7 @@ function renderAllPanels() {
   renderFlowsPane();
   renderTree();
   renderInspector();
+  renderFocusBar();
 }
 
 /* ---------- data flows: list, editor, coverage ---------- */
@@ -3322,7 +3442,9 @@ $('#btnNested').addEventListener('click', () => {
 function recentre() {
   if (busy) return;
   if (Math.abs(world.scale.x - 1) > 1e-6) resetWorld();
-  camTween(fitState(), 650);
+  // dead centre and face-on, as in 2D; the 3D depth stays and can be rotated into again
+  const f = fitState();
+  camTween(Object.assign(f, { az: 0, el: 0 }), 650);
 }
 $('#btnFrame').addEventListener('click', recentre);
 $('#btnRecentre').addEventListener('click', recentre);
@@ -3520,7 +3642,8 @@ window.addEventListener('keydown', e => {
   if (e.key === '2') setView('2d');
   else if (e.key === '3') setView('3d');
   else if (e.key === 'f' || e.key === 'F') recentre();
-  else if (e.key === 'Escape') { if (app.classList.contains('drawer-open')) { app.classList.remove('drawer-open'); syncSide(); } else select(null); }
+  else if (e.key === 'i' || e.key === 'I') { if (focusMode) exitFocus(); else enterFocus(); }
+  else if (e.key === 'Escape') { if (app.classList.contains('drawer-open')) { app.classList.remove('drawer-open'); syncSide(); } else if (focusMode) exitFocus(); else select(null); }
 });
 
 // theme changes: OS setting or the host's explicit choice

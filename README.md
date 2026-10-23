@@ -12,24 +12,28 @@ Open `index.html` in a recent browser. Everything is in that one file; it loads 
 | 3D navigation | Drag to rotate, right-drag or Shift-drag to pan, scroll or pinch to zoom. **Fit** (`F`) reframes the model. In 2D, dragging pans. |
 | Element interaction | Every system, environment and channel is clickable. Hovering shows a tooltip; clicking opens the inspector with Beer's definition, examples, diagnostic questions, common pathologies and the element's connections, and dims everything not connected to it. |
 | Custom labels | Rename anything in the inspector or in the **Model** panel's element list. Each element also takes free-text notes. Presets fill in a canonical set of labels or one of two worked examples. |
-| Recursion | Every system can be opened as a viable system of its own (double-click it, or use **Open level n** in the inspector, which also previews the subsystem as a small diagram). The breadcrumb trail, the level chip and the **Recursion map** tab always show which level is in focus. **Nested** draws each operation's own VSM inside it. |
+| Recursion | Recursion runs only through System One. Each operation holds its own viable system, drawn inside the circle and turned 45 degrees. Scroll toward an operation to zoom into it; past a threshold it becomes the System-in-Focus, and zooming far out rises to the containing level. Double-click or **Open level n** does the same in one step. The breadcrumb trail, the level chip and the **Recursion** tab always show which level is in focus. **Nested** keeps the inner systems visible at every zoom. |
 | Colours | Change any element's colour in the inspector or element list, and the four group colours (Environment, Operations, Metasystem, Channels) in the Model panel. Child levels inherit their parent's group colours. |
 | Data flows | The **Flows** tab names what travels on each channel and in which direction; the moving dots follow those directions, and a coverage bar shows which channels carry nothing. Load the model company, fill gaps with standard flows, or (in the Claude artifact) describe any organization and let Claude map it. |
 
 Labels, colours, notes, levels and view settings are saved in the browser's local storage.
+
+Use **Auto / Light / Dark** in the toolbar to override the system theme.
 
 ## Fidelity to the canonical diagram
 
 The layout follows Beer's diagram from *Brain of the Firm* and *Diagnosing the System for Organizations*:
 
 - Environments are amoebas on the left: the total environment, the future environment beside System 4, and one operational environment per operation.
-- System 1 operations are circles in a column, each with its management square up and to the right.
-- The vertical command channel runs from System 3 down through the management squares; System 2 coordination triangles sit to the right with their own channel up to the coordination centre.
-- Systems 3, 4 and 5 are squares inside the metasystem rhombus, with the 3–4 homeostat loop between 3 and 4. System 3* is the inverted triangle at the lower left, its audit channel reaching past local management into the operations.
-- The algedonic channel runs from the operations around the right side to System 5.
-- The System 2 coordination centre sits inside the metasystem.
-- System 5 links to System 4 and monitors the 3–4 homeostat; it has no direct line to System 3.
-- System 3 reaches each operation only through its management square (the operation's own metasystem) on the command channel. The 3* audit is the sporadic exception that reaches into the operations.
+- The operational elements of System One are circles in a column, each with its local management up and to the right.
+- **Drawing convention** (Model panel): *Square* draws the metasystem as a square box holding Systems Three, Three-Star, Four, Five and the System Two regulatory centre, with each local management as a square tilted 45 degrees (the next recursion's metasystem seen on the diagonal). *Diamond* draws the metasystem as a rhombus with upright local managements, the form Jon Walker prefers.
+- The central command axis is two of Beer's six vertical channels from *Diagnosing the System*: Corporate Intervention (down) and the Resource Bargain with accountability (both ways), from System Three to each local management. The other four are the operational linkages, the environmental intersects, System Two and the audit.
+- System Two's anti-oscillation triangles sit beside each local management, linked to the regulatory centre inside the metasystem.
+- The Three-Star audit channel reaches the operations directly from the environment side, past local management.
+- The algedonic signal ascends from every operation and breaks through to System Five.
+- System Five links to System Four and monitors the Three–Four homeostat; it has no direct line to System Three.
+
+Terminology follows Beer's books as collected in the [Pure VSM](https://wiki.cybernetic-futures.org/pure-vsm/) source set: inside-and-now (System Three), outside-and-then (System Four), closure and identity (System Five), anti-oscillation and regulatory centre (System Two), System-in-Focus, local management.
 
 ### Options in the Model panel
 
@@ -51,7 +55,11 @@ Each channel has two sides, A and B, and every flow runs A to B, B to A, or both
 
 ## Recursion notes
 
-Beer's recursion runs through System 1: every operation contains a whole viable system, and its management square becomes that system's metasystem. Opening a management square therefore opens its operation's level. One level down, the operation's environment becomes the total environment and its management square becomes the metasystem, and both labels follow the parent automatically. The explorer also lets you open Systems 2 to 5 as viable systems, for cases where a department carrying out one of those functions is worth modelling on its own; the inspector says so when you do.
+Beer's recursion runs only through System One: every operational element contains a whole viable system, and the metasystemic functions follow it down. Opening a local management therefore opens its operation's level. One level down, the operation's environment becomes the environment and its local management becomes the metasystem; both labels follow the parent automatically.
+
+## Map it with Claude, and hosting elsewhere
+
+The **Map** buttons call Claude through the claude.ai artifact runtime (`window.claude.use('sample')`). Each call runs on the viewer's own Claude account after they consent, and the page never holds an API key. A copy served anywhere else (GitHub Pages, a file on disk) has no `window.claude`, so the buttons hide themselves and the model company and standard flows remain. Making mapping work on a public site needs a small server-side proxy that holds an Anthropic API key and forwards the same prompt. The explorer also lets you open Systems 2 to 5 as viable systems, for cases where a department carrying out one of those functions is worth modelling on its own; the inspector says so when you do.
 
 ## Sources
 

@@ -794,6 +794,10 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.3"/><circle cx="8" cy="9.2" r="2.2"/><path d="M8 3.6l1.6 1.8L8 7.2 6.4 5.4z"/></svg>
         <span class="t">Nested</span>
       </button>
+      <button class="tool" id="btnTheme" type="button" title="Colour theme: automatic, light or dark">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.6"/><path d="M8 2.4v11.2A5.6 5.6 0 0 0 8 2.4z" fill="currentColor" stroke="none"/></svg>
+        <span class="t" id="themeTx">Auto</span>
+      </button>
       <button class="tool" id="btnFrame" type="button" title="Fit the model to the view (key F)">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5V2h3.5M10.5 2H14v3.5M14 10.5V14h-3.5M5.5 14H2v-3.5"/></svg>
         <span class="t">Fit</span>
@@ -817,7 +821,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
         <div class="eyebrow" id="focusEyebrow">System in focus · Level 0</div>
         <input class="focus-name" id="levelName" type="text" aria-label="Name of the system in focus">
         <div class="row">
-          <span>System 1 operations</span>
+          <span>System One operations</span>
           <div class="stepper">
             <button id="opMinus" type="button" aria-label="Remove an operation">−</button>
             <output id="opCount" aria-live="polite">3</output>
@@ -839,14 +843,21 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
       <div class="block">
         <div class="eyebrow">Diagram</div>
         <div class="row">
-          <span>System 2 centre</span>
-          <div class="seg small" role="group" aria-label="Where the System 2 centre sits">
+          <span>Drawing convention</span>
+          <div class="seg small" role="group" aria-label="Drawing convention">
+            <button id="stSquare" type="button" aria-pressed="true" title="Metasystem as a square box holding 3, 3*, 4, 5 and System Two; local managements as tilted squares">Square</button>
+            <button id="stDiamond" type="button" aria-pressed="false" title="Metasystem as a rhombus; local managements as upright squares (Jon Walker's preference)">Diamond</button>
+          </div>
+        </div>
+        <div class="row">
+          <span>System Two centre</span>
+          <div class="seg small" role="group" aria-label="Where the System Two regulatory centre sits">
             <button id="s2Inside" type="button" aria-pressed="true" title="Inside the metasystem, as usually drawn">Inside</button>
             <button id="s2Bridge" type="button" aria-pressed="false" title="On the metasystem boundary, bridging management and operations">Bridge</button>
           </div>
         </div>
-        <label class="chk"><input type="checkbox" id="extS4cmd"><span>S4 to command channel<small>Extension: anticipatory link into the resource bargain</small></span></label>
-        <label class="chk"><input type="checkbox" id="extS14"><span>S1 ↔ S4 direct<small>Extension: operations and intelligence talk directly</small></span></label>
+        <label class="chk"><input type="checkbox" id="extS4cmd"><span>System Four into the Resource Bargain<small>Extension: reads the command axis as anticipatory</small></span></label>
+        <label class="chk"><input type="checkbox" id="extS14"><span>System One ↔ System Four<small>Extension: operations and System Four exchange signals directly</small></span></label>
       </div>
 
       <div class="block">
@@ -884,7 +895,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
       </div>
       <div class="block ai" id="aiBlock">
         <div class="eyebrow">Map an organization with Claude</div>
-        <label class="fld"><span>Describe the organization: what it does, its main units, who it serves, how work is coordinated</span>
+        <label class="fld"><span>Describe the organization: what it does, its main units, who it serves, how the parts fit together</span>
           <textarea id="aiBrief" rows="5" placeholder="A regional food co-op with three grocery stores, a bakery and a delivery service…"></textarea></label>
         <div class="btn-row">
           <button class="btn primary" id="aiRun" type="button" disabled>Map this level</button>
@@ -901,7 +912,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
     <section class="pane" id="pane-map" role="tabpanel" aria-labelledby="tab-map" hidden>
       <div class="block">
         <div class="eyebrow">Recursive structure</div>
-        <p class="src" style="margin:0">Every System 1 operation contains a whole viable system. Open any branch to step into it; the highlighted node is the level in focus.</p>
+        <p class="src" style="margin:0">Recursion runs only through System One: every operational element contains a whole viable system, and its metasystemic functions follow it down. Open any operation to step into it, or zoom into it in the model. The highlighted node is the System-in-Focus.</p>
         <ul class="tree" id="tree"></ul>
       </div>
     </section>
@@ -910,30 +921,32 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
       <div class="block">
         <h3>What the model describes</h3>
         <p>Stafford Beer developed the Viable System Model in <i>Brain of the Firm</i> (1972), <i>The Heart of Enterprise</i> (1979) and <i>Diagnosing the System for Organizations</i> (1985). It sets out the functions any system needs to remain viable: to keep a separate existence in an environment that keeps changing.</p>
-        <p>The operations (System 1) do the work. The metasystem (Systems 2 to 5) exists to serve them: it coordinates, manages the whole in the present, looks to the future, and holds identity. Each operation is itself a viable system, so the same structure repeats at every level of recursion.</p>
+        <p>The operational elements of System One produce the system. The metasystem (Systems Two to Five, with Three-Star) exists to serve them: System Two damps oscillation, System Three manages the inside-and-now, System Four the outside-and-then, and System Five supplies closure and identity. Each operational element is itself a viable system, so the same structure repeats at every level of recursion, and only through System One.</p>
+        <p class="src">Terms follow Beer's books as collected in <a href="https://wiki.cybernetic-futures.org/pure-vsm/" target="_blank" rel="noopener">Pure VSM</a> (cybernetic-futures wiki).</p>
       </div>
       <div class="block">
         <h3>Beer's symbols</h3>
         <div class="legend">
           <div class="leg"><svg viewBox="0 0 34 26"><path d="M5 13c0-7 7-10 13-9s12 4 11 10-6 9-13 8S5 20 5 13z" fill="#4f9a63" fill-opacity=".25" stroke="#4f9a63" stroke-width="1.5"/></svg><div><b>Amoeba</b><span>Environment: fuzzy, changing, of far greater variety than the system</span></div></div>
-          <div class="leg"><svg viewBox="0 0 34 26"><circle cx="17" cy="13" r="9" fill="#2f74c0" fill-opacity=".25" stroke="#2f74c0" stroke-width="1.5"/></svg><div><b>Circle</b><span>Operation: a System 1 unit that does the primary work</span></div></div>
-          <div class="leg"><svg viewBox="0 0 34 26"><rect x="9" y="5" width="16" height="16" fill="#2f74c0" fill-opacity=".25" stroke="#2f74c0" stroke-width="1.5"/></svg><div><b>Square</b><span>Management: local management of an operation, and Systems 3, 4, 5</span></div></div>
-          <div class="leg"><svg viewBox="0 0 34 26"><path d="M17 4l9 16H8z" fill="#cf8a1f" fill-opacity=".25" stroke="#cf8a1f" stroke-width="1.5"/></svg><div><b>Triangle</b><span>System 2 coordination (pointing up) and System 3* audit (pointing down)</span></div></div>
-          <div class="leg"><svg viewBox="0 0 34 26"><path d="M17 2l11 11-11 11L6 13z" fill="#cf8a1f" fill-opacity=".14" stroke="#cf8a1f" stroke-width="1.5"/></svg><div><b>Rhombus</b><span>Metasystem: the management of the whole, enclosing 3, 4 and 5</span></div></div>
-          <div class="leg"><svg viewBox="0 0 34 26"><path d="M3 13h24" stroke="#d43d33" stroke-width="2"/><path d="M24 9l5 4-5 4" fill="none" stroke="#d43d33" stroke-width="2"/></svg><div><b>Algedonic channel</b><span>Alarm signals from operations straight to System 5</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><circle cx="17" cy="13" r="9" fill="#2f74c0" fill-opacity=".25" stroke="#2f74c0" stroke-width="1.5"/></svg><div><b>Circle</b><span>Operational element of System One</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><rect x="9" y="5" width="16" height="16" fill="#2f74c0" fill-opacity=".25" stroke="#2f74c0" stroke-width="1.5"/></svg><div><b>Square</b><span>Systems Three, Four and Five; local management (tilted in the square convention)</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><path d="M17 4l9 16H8z" fill="#cf8a1f" fill-opacity=".25" stroke="#cf8a1f" stroke-width="1.5"/></svg><div><b>Triangle</b><span>System Two anti-oscillation (pointing up) and Three-Star audit (pointing down)</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><path d="M17 2l11 11-11 11L6 13z" fill="#cf8a1f" fill-opacity=".14" stroke="#cf8a1f" stroke-width="1.5"/></svg><div><b>Box</b><span>Metasystem: a square box in one convention, a rhombus in the other</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><path d="M3 13h24" stroke="#d43d33" stroke-width="2"/><path d="M24 9l5 4-5 4" fill="none" stroke="#d43d33" stroke-width="2"/></svg><div><b>Algedonic signal</b><span>Alerts ascending from every operation, breaking through to System Five</span></div></div>
         </div>
       </div>
       <div class="block">
         <h3>Channels in this model</h3>
-        <p>System 5 connects to System 4 and monitors the 3–4 homeostat; it has no direct line to System 3. System 3 reaches each operation only through its management square, which is that operation's own metasystem, on the command channel. The 3* audit is the sporadic exception Beer drew reaching into the operations.</p>
-        <p>Two extensions can be switched on or off in the Model panel. One runs from System 4 into the command channel, reading the resource bargain as anticipatory. The other links the operations directly with System 4. Neither appears in the commonly reproduced diagram.</p>
-        <p>The System 2 centre sits inside the metasystem. The Bridge option draws it on the boundary instead and, in 3D, puts all of System 2 on its own plane between the operations and the metasystem. It is an interpretive option, prompted by a Stanford Medicine study (<i>Nature Neuroscience</i>, September 2026) reporting that the forebrain and midbrain arise from one progenitor lineage and the hindbrain from another.</p>
+        <p>Beer lists six vertical channels in <i>Diagnosing the System</i>: Corporate Intervention, the Resource Bargain (with accountability), operational linkages, environmental intersects, System Two, and audit. The central command axis is drawn as two lines, Corporate Intervention and the Resource Bargain, running from System Three to each local management, which is the operation's own metasystem. The Three-Star audit is the sporadic exception that reaches the operations directly, from the environment side. The algedonic signal ascends from every operation to System Five.</p>
+        <p>System Five links to System Four and monitors the Three–Four homeostat; it has no direct line to System Three.</p>
+        <p>Two extensions can be switched on or off in the Model panel: System Four feeding the Resource Bargain, which reads the command axis as anticipatory, and a direct link between System One and System Four. Neither appears in the commonly reproduced diagram.</p>
+        <p>The drawing convention switches between a square metasystem box holding 3, 3*, 4, 5 and the System Two centre, with local managements tilted 45 degrees, and a rhombus metasystem with upright local managements. The System Two centre sits inside the metasystem; the Bridge option draws it on the boundary and, in 3D, puts all of System Two on its own plane between operations and metasystem. It is an interpretive option, prompted by a Stanford Medicine study (<i>Nature Neuroscience</i>, September 2026) reporting that the forebrain and midbrain arise from one progenitor lineage and the hindbrain from another.</p>
       </div>
       <div class="block">
         <h3>Data flows and recursion</h3>
         <p>The Flows tab names what travels along each channel and in which direction; the moving dots follow those directions. The coverage bar shows how many channels carry something. An empty channel is worth asking about: in a real organization it often marks a missing function.</p>
         <p>Load the model company to see a bicycle maker mapped across three levels. Fill gaps with standard flows gives any level a neutral starting point. In a Claude artifact you can also describe an organization and let Claude map it, then map each operation one level down from the inspector.</p>
-        <p>When you open an operation, its environment becomes the total environment one level down and its management square becomes the metasystem, following Beer's recursion.</p>
+        <p>When you open an operation, its environment becomes the environment one level down and its local management becomes the metasystem, following Beer's recursion. Scroll toward any operation to zoom into it: the next recursion sits inside each circle, turned 45 degrees, and becomes the System-in-Focus as you arrive. Zoom far out to rise a level.</p>
       </div>
       <div class="block">
         <h3>How the 3D view uses depth</h3>
@@ -946,7 +959,8 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
           <kbd>Right-drag</kbd><span>Pan; Shift-drag also works</span>
           <kbd>Scroll</kbd><span>Zoom; pinch on touch screens</span>
           <kbd>Click</kbd><span>Select an element and read about it</span>
-          <kbd>Double-click</kbd><span>Step into a system's own viable system</span>
+          <kbd>Double-click</kbd><span>Step into an operation's own viable system</span>
+          <kbd>Scroll into</kbd><span>Zoom toward the pointer; keep going into an operation to enter its recursion</span>
           <kbd>2 / 3</kbd><span>Switch between 2D and 3D</span>
           <kbd>F</kbd><span>Fit the model to the view</span>
           <kbd>Esc</kbd><span>Clear the selection</span>
@@ -1034,200 +1048,207 @@ const MIN_OPS = 1, MAX_OPS = 6;
    ===================================================================== */
 const KB = {
   envTotal: {
-    kind: 'Environment', role: 'Total environment',
-    summary: 'Everything outside the system that it has to deal with. Beer drew the environment as an amoeba because its boundary is fuzzy and always shifting. Its variety vastly exceeds the system\'s, so the system survives only by amplifying its own variety and attenuating the environment\'s: Ashby\'s law of requisite variety.',
+    kind: 'Environment', role: 'Environment of the System-in-Focus',
+    summary: 'Everything outside the System-in-Focus that it has to deal with. Beer drew the environment as an amoeba because its boundary is fuzzy and always shifting. Its variety vastly exceeds the system\'s, so the system survives only by amplifying its own variety and attenuating the environment\'s: Ashby\'s Law of Requisite Variety.',
     practice: ['Markets, communities, ecosystems and institutions the organization lives among', 'Competitors, regulators, suppliers and the wider economy'],
     questions: ['Where does the system draw its boundary, and who would draw it differently?', 'Which parts of the environment does no one in the organization attend to?'],
     watch: ['Treating the environment as fixed rather than co-evolving with the organization']
   },
   envFuture: {
-    kind: 'Environment', role: 'Future environment',
-    summary: 'The wider and future environment watched by System 4: emerging technologies, shifting markets, regulation, demography and society. It is the space of possibilities the organization may need to adapt to, beyond the environments its operations serve today.',
+    kind: 'Environment', role: 'The future environment',
+    summary: 'The environment as it may become: the domain of System Four\'s outside-and-then. It holds the technologies, markets, regulation and social change the system may have to adapt to, beyond the environments its operations serve today.',
     practice: ['Technology trends, policy changes, new entrants', 'Changing expectations of customers, citizens or members'],
     questions: ['Which future developments could make the current operations irrelevant?', 'Who brings news of this environment into the organization?'],
-    watch: ['Scanning that only extrapolates the present']
+    watch: ['Looking outward only by extrapolating the present']
   },
   envOp: {
-    kind: 'Environment', role: 'Operational environment',
-    summary: 'The part of the environment that one operation directly serves and draws from: its customers, users, suppliers and local regulators. Operational environments overlap and interact, so a change in one can ripple through the others.',
+    kind: 'Environment', role: 'Environment of an operation',
+    summary: 'The part of the environment that one operational element directly serves and draws from. Beer calls the overlaps between these environments environmental intersects: a change in one reaches the others whether management notices or not.',
     practice: ['A customer segment, a region, a patient population, a user community'],
     questions: ['Who exactly does this operation serve?', 'How fast does this environment change, and does the operation keep pace?'],
     watch: ['An operation that has drifted away from the environment it was set up to serve']
   },
   op: {
-    kind: 'System 1', role: 'Operation',
-    summary: 'Operations do what the system exists to do: make the products, deliver the services, produce its identity in the world. Each operation is itself a viable system, with its own management, metasystem and environment. This is the recursion at the heart of the model: open it to see the viable system inside.',
+    kind: 'System One', role: 'Operational element',
+    summary: 'The operational elements of System One produce the system: they do what it exists to do. Each is an elemental viable system in its own right, with its own local management and its own environment; together they are the embedded viable systems of the next lower recursion. Recursion runs only through System One: open an operation to see the viable system inside it.',
     practice: ['Business units, product lines or regional branches', 'Clinical departments in a hospital', 'Teams that deliver a service from end to end'],
-    questions: ['Which activities produce the system\'s purpose? Could each survive on its own?', 'Does each operation have the autonomy and resources to absorb the variety of its environment?', 'Is the operation itself viable, with all five systems present inside it?'],
-    watch: ['Operations defined by internal function rather than by what they deliver', 'Autonomy so constrained that every decision escalates upward']
+    questions: ['Which activities produce the system\'s purpose? Could each maintain a separate existence?', 'Does each operation have the autonomy and resources to absorb the variety of its environment?', 'Beer suggests seven or eight elements at most: does a long list mean a level of recursion has been missed?'],
+    watch: ['Operations defined by internal function rather than by what they produce', 'Autonomy so constrained that every decision escalates upward']
   },
   mgmt: {
-    kind: 'System 1', role: 'Local management',
-    summary: 'Each operation has its own local management, drawn as a square. It regulates the operation directly, negotiates resources and accountability with System 3 along the command channel, and is coordinated with its siblings through System 2. Seen one level down, this square is the whole metasystem of the operation\'s own viable system.',
-    practice: ['Plant manager, branch head, ward manager, team lead, product owner'],
-    questions: ['Does local management have enough variety (information, authority, skill) to regulate its operation?', 'Which decisions can it take without referring to System 3?'],
+    kind: 'System One', role: 'Local management',
+    summary: 'Each operational element has its local management, where its autonomy lives. It regulates the operation, takes part in the Resource Bargain with System Three, and is damped against oscillation by System Two. One recursion down, this unit is the whole metasystem of the operation\'s own viable system: in the square convention it is drawn on the diagonal for that reason.',
+    practice: ['Plant manager, branch head, ward manager, team lead'],
+    questions: ['Does local management have enough variety (information, authority, skill) to regulate its operation?', 'Which decisions can it take without referring to System Three?'],
     watch: ['Local management bypassed by direct commands from above', 'Managers acting as messengers rather than regulators']
   },
   s2: {
-    kind: 'System 2', role: 'Coordination unit',
-    summary: 'System 2 damps oscillation between operations: the conflicts and hunting that arise when autonomous units share resources, customers or schedules. Each coordination unit sits beside one operation\'s management. Together they form a largely self-regulating channel that works through shared rules and information rather than commands.',
-    practice: ['Production schedules, timetables and rotas', 'Shared standards, protocols and IT systems', 'Booking systems and inter-team agreements'],
-    questions: ['Where do operations interfere with each other?', 'Is coordination achieved by agreed protocols, or by managers stepping in each time?'],
-    watch: ['Coordination used as a channel of control', 'Missing coordination, so every clash escalates to System 3']
+    kind: 'System Two', role: 'Anti-oscillation',
+    summary: 'System Two is an anti-oscillatory device: "the highly specific function of damping oscillations, and nothing else" (Beer, The Heart of Enterprise). Each unit sits beside one operation\'s local management. It is a service to System One, not part of the command axis: "Its function is not to command."',
+    practice: ['Timetables and schedules (Beer\'s example is the school timetable)', 'Shared standards, protocols and booking systems'],
+    questions: ['Where do the operations oscillate against each other over shared resources, customers or schedules?', 'Is the damping automatic, or do managers step in each time?'],
+    watch: ['System Two used as a channel of command', 'No damping, so every clash escalates to System Three']
   },
   s2c: {
-    kind: 'System 2', role: 'Coordination centre',
-    summary: 'The regulatory centre of System 2 sits inside the metasystem and links the coordination channel to System 3. It holds the overall picture of schedules and shared services, so that System 3 can see where oscillation is building and tune the rules, without intervening in each operation. The bridge view (Model panel) draws it on the metasystem boundary instead, as the region joining management and operations.',
-    practice: ['A central planning office, a patient-flow hub, an engineering programme office'],
-    questions: ['Who maintains the shared rules, and how are they changed?', 'Does System 3 rely on this centre, or bypass it?'],
-    watch: ['A coordination centre that grows into a second line of management']
+    kind: 'System Two', role: 'Regulatory centre',
+    summary: 'The regulatory centre of System Two, inside the metasystem. Beer describes System Two as an interface between Systems One and Three that "partakes of both": the centre relays changes among the operations\' regulatory centres automatically, and lets System Three see where oscillation is building. The Bridge option draws it on the metasystem boundary instead.',
+    practice: ['A central scheduling office, a dispatch desk, a programme office'],
+    questions: ['Who maintains the anti-oscillation rules, and how are they changed?', 'Does System Three use this centre, or work around it?'],
+    watch: ['A regulatory centre that grows into a second line of management']
   },
   s3: {
-    kind: 'System 3', role: 'Control and cohesion',
-    summary: 'System 3 manages the inside and now: the operations taken together. It allocates resources, agrees performance with each operation (the resource bargain), and looks for synergy that no single operation could achieve on its own. It is the operational management of the whole.',
+    kind: 'System Three', role: 'Inside-and-now',
+    summary: 'System Three manages the "inside and now of the enterprise", synoptically and synergistically concerned with the optimal operation of System One as a whole. It conducts the Resource Bargain (resources against accountability) and the Corporate Intervention on the command axis, and runs the sporadic audit of System Three-Star.',
     practice: ['Chief operating officer or executive team', 'Budgeting, performance agreements, resource allocation'],
-    questions: ['How are resources bargained against accountability?', 'What synergy does System 3 create that the operations could not create alone?', 'How often does it intervene beyond the agreed bargain?'],
-    watch: ['Micromanagement that soaks up the operations\' autonomy', 'Treating operations as cost centres rather than the reason the system exists']
+    questions: ['How are resources bargained against accountability?', 'What does the whole gain that no single operation could achieve alone?', 'How much Corporate Intervention goes beyond what cohesion needs?'],
+    watch: ['Intervention that soaks up the operations\' autonomy', 'Treating the operations as cost centres rather than the reason the system exists']
   },
   s3s: {
-    kind: 'System 3*', role: 'Audit and monitoring',
-    summary: 'System 3* is the audit channel. It lets System 3 look directly into the operations, sporadically and by agreement, to see what routine reports cannot show. It gives System 3 high-variety information without routing everything through local management.',
-    practice: ['Internal audit, quality inspections, safety walks', 'Staff surveys, site visits, spot checks'],
-    questions: ['How does System 3 validate the reports it receives?', 'Is audit sporadic and agreed, or constant surveillance?'],
-    watch: ['Audit so heavy that it erodes trust and autonomy', 'No independent view, so System 3 only hears what it wants to hear']
+    kind: 'System Three-Star', role: 'Audit',
+    summary: 'The audit channel works sporadically: System Three looks directly into the operations to see what the routine reports cannot show. In Diagnosing the System audit is "a typical 3* function". It reaches the operations from the outside, past their local management.',
+    practice: ['Internal audits, quality inspections, safety walks', 'Site visits and spot checks'],
+    questions: ['How does System Three validate what reaches it on the command axis?', 'Is audit sporadic and agreed, or constant surveillance?'],
+    watch: ['Audit so heavy that it erodes trust and autonomy', 'No independent view, so System Three hears only what it wants to hear']
   },
   s4: {
-    kind: 'System 4', role: 'Intelligence',
-    summary: 'System 4 looks outside and then: the total environment and the future. It scans for threats and opportunities, keeps a model of the organization and its environment, and proposes adaptation. It works in constant dialogue with System 3, so that plans for the future stay grounded in what the operations can actually do.',
-    practice: ['Strategy, research and development, market research', 'Business development, foresight and horizon scanning'],
-    questions: ['Who scans the environment beyond current customers?', 'Does System 4 hold a working model of the organization itself?', 'How are its proposals negotiated with System 3?'],
-    watch: ['System 4 missing or reduced to forecasting', 'Strategy disconnected from what the operations can deliver']
+    kind: 'System Four', role: 'Outside-and-then',
+    summary: 'System Four manages the outside-and-then: the total environment and the future. Beer called it the development directorate, and wanted it housed in a management centre or operations room where a model of the system and its environment can be explored. It works in constant exchange with System Three across the Three–Four homeostat.',
+    practice: ['Development, research, market studies, planning', 'An operations room where models of the system and its environment are explored'],
+    questions: ['Who looks beyond current customers and the present year?', 'Does System Four hold a working model of the system itself?', 'How are its proposals tested against what System Three knows of current capability?'],
+    watch: ['System Four missing or reduced to forecasting', 'Development disconnected from what the operations can do']
   },
   s5: {
-    kind: 'System 5', role: 'Policy and identity',
-    summary: 'System 5 provides identity, purpose and policy: the ethos that defines what the system is. It closes the system by balancing the present (System 3) against the future (System 4), and is the final arbiter when they cannot agree. Beer described it as supplying closure to the whole.',
-    practice: ['Board, owners, members or founders', 'Constitution, mission, values and policy'],
-    questions: ['What is the purpose of this system, as it is actually practised?', 'How does System 5 hear the debate between Systems 3 and 4?', 'Does it reach directly into operations, collapsing into System 3?'],
-    watch: ['System 5 collapsing into System 3', 'An identity that is declared but never acted on']
+    kind: 'System Five', role: 'Closure and identity',
+    summary: 'System Five supplies logical closure: the viable system "turns in on itself to become an identity". It sets the ethos within which the other systems act and monitors the Three–Four homeostat, which Beer called "the organ of adaptation". It does not run System Three directly.',
+    practice: ['Board, owners, members or founders', 'Purpose, ethos and the rules that follow from them'],
+    questions: ['What is the identity of this system, as it is actually practised?', 'How does System Five hear the Three–Four debate?', 'Does it reach into the operations, collapsing into System Three?'],
+    watch: ['System Five collapsing into System Three', 'An identity that is declared but never acted on']
   },
   meta: {
-    kind: 'Metasystem', role: 'Management of the whole',
-    summary: 'The metasystem is the management of the whole system: Systems 2, 3, 4 and 5 together, drawn here as Beer\'s rhombus around 3, 4, 5 and the System 2 centre. It exists to serve the operations, providing the cohesion and adaptation they cannot provide for themselves. "Meta" means a higher logical order, not a higher status.',
+    kind: 'Metasystem', role: 'Systems Two to Five',
+    summary: 'The metasystem is the management of the whole: Systems Two, Three, Three-Star, Four and Five. It exists to serve System One, providing the cohesion and adaptation the operations cannot provide for themselves. "Meta" means a higher logical order, not higher status.',
     practice: ['The leadership and support functions taken together'],
-    questions: ['Does the metasystem add value the operations recognize?', 'Is its variety enough to manage the operations without smothering them?'],
-    watch: ['A metasystem that serves itself rather than the operations']
+    questions: ['Does the metasystem add value the operations recognize?', 'Has it requisite variety to manage the operations without smothering them?'],
+    watch: ['A metasystem that serves itself rather than System One']
   },
   /* channels */
   eo: {
-    kind: 'Channel', role: 'Environment and operation',
-    summary: 'Each operation exchanges variety with its environment: products and services flow out, demand, feedback and disturbance flow back. Requisite variety has to hold across this boundary, so the operation must match the complexity its environment presents.',
+    kind: 'Channel', role: 'Operation and its environment',
+    summary: 'Each operational element exchanges variety with its own environment: products and services go out, demand and disturbance come back. Requisite variety has to hold across this boundary.',
     practice: ['Sales, service delivery, customer feedback, complaints'],
-    questions: ['Is the operation\'s variety a match for its environment\'s?', 'How does it amplify its own variety and filter the environment\'s?'],
-    watch: ['Feedback from the environment that never reaches management']
+    questions: ['Is the operation\'s variety a match for its environment\'s?', 'Where does it amplify its own variety, and where does it attenuate the environment\'s?'],
+    watch: ['Feedback from the environment that never reaches local management']
   },
   ee: {
-    kind: 'Channel', role: 'Environmental interaction',
-    summary: 'Operational environments affect each other: customers overlap, markets move together, a change in one community touches another. These interactions reach the operations whether management notices them or not.',
+    kind: 'Channel', role: 'Environmental intersect',
+    summary: 'One of the vertical channels Beer lists in Diagnosing the System: the environments of the operations intersect, so customers overlap and markets move together. These constraints arise by happenstance, not by design.',
     practice: ['Shared customers, overlapping regions, linked supply chains'],
     questions: ['Which environments overlap, and does anyone track the overlap?'],
     watch: ['Operations surprised by changes that began in a neighbouring environment']
   },
   om: {
-    kind: 'Channel', role: 'Management loop',
-    summary: 'Local management regulates its operation and the operation reports back. This loop needs requisite variety: the manager must have enough information and authority to match what the operation is doing.',
+    kind: 'Channel', role: 'Local management and its operation',
+    summary: 'Local management regulates its operation and the operation reports back, on the horizontal axis where local autonomy lives. The loop needs requisite variety: the manager must know enough, soon enough, to match what the operation is doing.',
     practice: ['Daily stand-ups, local reporting, team decisions'],
     questions: ['Can local management see what the operation is doing in time to act?'],
     watch: ['Reports that arrive too late to regulate anything']
   },
   oo: {
-    kind: 'Channel', role: 'Operational interaction',
-    summary: 'Operations interact directly: they supply each other, share staff and customers, and compete for resources. These interactions are a source of synergy and also of oscillation, which System 2 exists to damp.',
+    kind: 'Channel', role: 'Operational linkage',
+    summary: 'The operations interact directly: Beer draws these as squiggly lines and lists them among the vertical channels. They supply each other and compete for resources, a source of synergy and of the oscillation that System Two damps.',
     practice: ['Internal supply, shared staff, hand-offs between units'],
-    questions: ['Where do operations depend on one another?', 'Which interactions cause recurring conflict?'],
-    watch: ['Hidden dependencies that only surface in a crisis']
+    questions: ['Where do operations depend on one another?', 'Which interactions cause recurring oscillation?'],
+    watch: ['Hidden dependencies that surface only in a crisis']
   },
   ms2: {
-    kind: 'Channel', role: 'Coordination link',
-    summary: 'Links one operation\'s management to the coordination system. Schedules, standards and early signs of conflict flow in both directions.',
-    practice: ['Planning meetings, shared calendars, protocol updates'],
-    questions: ['Does each operation take part in setting the shared rules it follows?'],
+    kind: 'Channel', role: 'Local management and System Two',
+    summary: 'Links one operation\'s local management to its System Two unit. Schedules, standards and early signs of oscillation travel both ways.',
+    practice: ['Scheduling meetings, shared calendars, protocol updates'],
+    questions: ['Does each operation take part in setting the rules that damp it?'],
     watch: ['Rules imposed on operations without their involvement']
   },
   s2ch: {
-    kind: 'Channel', role: 'Coordination channel',
-    summary: 'The System 2 channel runs along all the coordination units, so the operations can adjust to each other without escalation. In a healthy system it carries agreements and information rather than instructions.',
+    kind: 'Channel', role: 'System Two channel',
+    summary: 'The anti-oscillation channel links the System Two units with the regulatory centre, so the operations adjust to one another mostly without escalation. It is one of the three vertical channels Beer says "must needs be designed".',
     practice: ['Common scheduling, shared ledgers, protocols every unit uses'],
-    questions: ['How much oscillation is absorbed here before reaching System 3?'],
+    questions: ['How much oscillation is absorbed here before it reaches System Three?'],
     watch: ['The channel used to transmit commands']
   },
   s2s3: {
-    kind: 'Channel', role: 'Coordination and control',
-    summary: 'Connects the coordination centre to System 3, so operational management can see the overall picture of scheduling and shared resources and tune the rules System 2 applies.',
+    kind: 'Channel', role: 'Regulatory centre and System Three',
+    summary: 'Connects System Two\'s regulatory centre to System Three, so System Three can see the state of scheduling and shared resources and adjust the rules System Two applies.',
     practice: ['Capacity reports, scheduling reviews'],
-    questions: ['Does System 3 learn from patterns of oscillation?'],
-    watch: ['System 3 bypassing coordination and issuing direct fixes']
+    questions: ['Does System Three learn from patterns of oscillation?'],
+    watch: ['System Three bypassing System Two and issuing direct fixes']
   },
-  cmd: {
-    kind: 'Channel', role: 'Command channel',
-    summary: 'The vertical channel links System 3 with the management of each operation. It carries the resource bargain (resources down, accountability up), corporate and legal requirements, and the limits of autonomy. Beer argued it should carry as little variety as possible: most regulation belongs to the operations themselves and to System 2.',
-    practice: ['Budgets and targets, performance reviews, policies and legal requirements'],
-    questions: ['What is negotiated here, and what is simply imposed?', 'How much traffic does this channel carry compared with the others?'],
-    watch: ['Overloading the command channel with detail', 'Bargains that are never revisited']
+  ci: {
+    kind: 'Channel', role: 'Corporate Intervention',
+    summary: 'One of the two strands of the central command axis: the requirements System Three places on every operation because they belong to the whole (legal duties, corporate policy, safety). Beer argued it should carry as little variety as possible, since every intervention reduces the autonomy of System One.',
+    practice: ['Legal and regulatory requirements, group policies, mandatory standards'],
+    questions: ['Which interventions are truly needed for cohesion?', 'How much of the operations\' variety does intervention absorb?'],
+    watch: ['Intervention used where a resource bargain or System Two would do']
+  },
+  rb: {
+    kind: 'Channel', role: 'Resource Bargain and accountability',
+    summary: 'The other strand of the command axis: System Three and each local management agree resources against results, and accountability comes back up. Beer draws the Resource Bargain and ACCOUNT-ABILITY together in Diagnosing the System.',
+    practice: ['Budgets and targets, performance reviews, monthly reporting'],
+    questions: ['What is negotiated here, and what is simply imposed?', 'Are bargains revisited when circumstances change?'],
+    watch: ['Accountability reports so detailed that they become control', 'Bargains that are never revisited']
   },
   audit: {
-    kind: 'Channel', role: 'Audit channel (3*)',
-    summary: 'The 3* channel bypasses local management and reaches directly into the operations. It carries sporadic audits and monitoring, giving System 3 an independent check on what it hears through the command channel.',
+    kind: 'Channel', role: 'Audit (System Three-Star)',
+    summary: 'The audit channel reaches from System Three, through Three-Star, directly into the operations, entering from the outside rather than through local management. It works sporadically, giving System Three an independent check on what it hears through the Resource Bargain.',
     practice: ['Audits, inspections, site visits, surveys'],
     questions: ['Do operations know and accept how they are audited?'],
     watch: ['Audit perceived as surveillance']
   },
   s34: {
-    kind: 'Channel', role: '3–4 homeostat',
-    summary: 'A continuous, two-way conversation between the inside and now (System 3) and the outside and then (System 4). Adaptation depends on this balance: too much System 3 and the organization ossifies; too much System 4 and it chases futures it cannot deliver.',
-    practice: ['Joint planning between operations and strategy', 'Scenario work that tests plans against current capability'],
-    questions: ['Who takes part in the conversation, and how often?', 'Which side usually wins?'],
-    watch: ['Systems 3 and 4 that never meet']
+    kind: 'Channel', role: 'Three–Four homeostat',
+    summary: 'The continuous two-way exchange between the inside-and-now (System Three) and the outside-and-then (System Four), which "do not share the same managerial nor technological languages". Beer called it the organ of adaptation. Too much Three and the system ossifies; too much Four and it chases futures it cannot reach.',
+    practice: ['Joint planning between operations and development', 'Scenario work that tests plans against current capability'],
+    questions: ['Who takes part, and how often?', 'Which side usually prevails?'],
+    watch: ['Turning the homeostat into a committee: Beer warns it will lack requisite variety']
   },
   s45: {
-    kind: 'Channel', role: 'Policy and intelligence',
-    summary: 'System 5 and System 4 inform each other: identity and policy shape what System 4 looks for, and what System 4 finds can challenge identity.',
-    practice: ['Board strategy sessions, horizon reports to the board'],
-    questions: ['Does what System 4 learns ever change policy?'],
+    kind: 'Channel', role: 'Systems Four and Five',
+    summary: 'System Five and System Four inform each other: identity shapes what System Four looks for, and what System Four finds can challenge identity.',
+    practice: ['Board development sessions, horizon reports to the board'],
+    questions: ['Does what System Four learns ever change the system\'s identity?'],
     watch: ['A board captured by the latest opportunity']
   },
   s5h: {
-    kind: 'Channel', role: 'System 5 and the 3–4 homeostat',
-    summary: 'System 5 does not manage System 3 directly. It monitors the conversation between System 3 and System 4, and steps in only when the two cannot settle the balance between the present and the future on their own.',
-    practice: ['Board reviews of plans against current capacity', 'Strategy days where operations and strategy present together'],
-    questions: ['How does System 5 hear both sides of the 3–4 debate?', 'When did it last have to arbitrate, and how?'],
-    watch: ['System 5 bypassing the homeostat and instructing System 3']
-  },
-  s4cmd: {
-    kind: 'Channel', role: 'System 4 to the command channel',
-    summary: 'An extension: System 4 feeds the command channel directly, so forecasts and plans shape the resource bargain before it reaches the operations. Read this way, the command channel is anticipatory rather than only reactive. It is not part of the commonly reproduced diagram; switch it off in the Model panel to see the canonical form.',
-    practice: ['Demand forecasts feeding next quarter\'s budgets', 'Planned capability changes built into targets'],
-    questions: ['Which forecasts change what the operations are asked to do?', 'How far ahead does the resource bargain look?'],
-    watch: ['Plans imposed through the command channel without System 3\'s view of current capacity']
-  },
-  s14: {
-    kind: 'Channel', role: 'Operations and System 4',
-    summary: 'An extension: a direct link between the operations and System 4. The operations sit closest to customers and suppliers, so they see early signals about the future; System 4 can test ideas with them. Switch it off in the Model panel to see the canonical form.',
-    practice: ['Field insights from front-line staff', 'Pilots and prototype trials run inside an operation'],
-    questions: ['How do signals noticed in the operations reach System 4?', 'Where does System 4 test its ideas before they become plans?'],
-    watch: ['System 4 working from desk research alone']
+    kind: 'Channel', role: 'System Five monitoring the homeostat',
+    summary: 'System Five monitors "the variety sponge between Systems Three and Four" and steps in only when the two cannot settle the balance between present and future on their own. It has no direct line to System Three.',
+    practice: ['Board reviews of plans against current capacity'],
+    questions: ['How does System Five hear both sides of the Three–Four exchange?', 'When did it last have to arbitrate, and how?'],
+    watch: ['System Five bypassing the homeostat and instructing System Three']
   },
   s4f: {
-    kind: 'Channel', role: 'Environmental scanning',
-    summary: 'System 4 monitors the future and wider environment, and the organization\'s actions shape that environment in turn. This is where research, market intelligence and foresight enter the system.',
+    kind: 'Channel', role: 'System Four and the future environment',
+    summary: 'System Four reaches out to the total and future environment, and the system\'s actions shape that environment in turn. Development, research and market intelligence enter the system here.',
     practice: ['Research partnerships, market studies, policy engagement'],
     questions: ['How does what is learned out there reach decisions in here?'],
-    watch: ['Scanning that produces reports nobody reads']
+    watch: ['Reports that nobody acts on']
+  },
+  s4cmd: {
+    kind: 'Channel', role: 'System Four into the Resource Bargain',
+    summary: 'An extension: System Four feeds the Resource Bargain directly, so forecasts and plans shape what operations are asked to deliver before the bargain is struck. Read this way, the command axis is anticipatory as well as reactive. It is not part of the commonly reproduced diagram; switch it off in the Model panel to see the canonical form.',
+    practice: ['Demand forecasts feeding next quarter\'s budgets', 'Planned capability changes built into targets'],
+    questions: ['Which forecasts change what the operations are asked to do?', 'How far ahead does the Resource Bargain look?'],
+    watch: ['Plans imposed through the bargain without System Three\'s view of current capacity']
+  },
+  s14: {
+    kind: 'Channel', role: 'System One and System Four',
+    summary: 'An extension: a direct link between the operations and System Four. The operations sit closest to customers and suppliers, so they see early signals about the future, and System Four can test ideas with them. Switch it off in the Model panel to see the canonical form.',
+    practice: ['Field insights from front-line staff', 'Pilots and prototype trials run inside an operation'],
+    questions: ['How do signals noticed in the operations reach System Four?', 'Where does System Four test its ideas before they become plans?'],
+    watch: ['System Four working from desk research alone']
   },
   alg: {
-    kind: 'Channel', role: 'Algedonic channel',
-    summary: 'The algedonic channel (from the Greek for pain and pleasure) carries alerts straight from the operations to System 5, bypassing the usual filters. It fires when something exceeds tolerance and has not been resolved through ordinary channels in time.',
+    kind: 'Channel', role: 'Algedonic signal',
+    summary: 'The algedonic signal (from the Greek for pain and pleasure) is split from the ascending signal coming from every operation of System One. An algedonic filter decides whether to alert System Five; "alone of all the signals in the enterprise", it is organized to break through recursivity.',
     practice: ['Whistleblowing lines, safety stop signals, critical-incident alerts'],
-    questions: ['Can a front-line alarm reach the top within hours?', 'Are false alarms tolerated so real ones are raised?'],
+    questions: ['Can an alarm from any operation reach System Five within hours?', 'Are false alarms tolerated so that real ones are raised?'],
     watch: ['No algedonic route, so crises are discovered late']
   }
 };
@@ -1265,7 +1286,10 @@ function outlineOf(s) {
         : [[s.cx - hw, s.cy - hh], [s.cx + hw, s.cy - hh], [s.cx, s.cy + hh]];
     }
     case 'rhombus':
+    case 'diamond':
       return [[s.cx, s.cy - s.hh], [s.cx + s.hw, s.cy], [s.cx, s.cy + s.hh], [s.cx - s.hw, s.cy]];
+    case 'rect':
+      return [[s.cx - s.hw, s.cy - s.hh], [s.cx + s.hw, s.cy - s.hh], [s.cx + s.hw, s.cy + s.hh], [s.cx - s.hw, s.cy + s.hh]];
     case 'blob':
       for (let i = 0; i < 120; i++) pts.push(blobPoint(s, i / 120 * Math.PI * 2));
       return pts;
@@ -1301,35 +1325,46 @@ function buildLayout(n, opts) {
   const envTop = 80, envBottom = yLast - 17;
   const envCy = (envTop + envBottom) / 2, envRy = (envTop - envBottom) / 2;
   const bridge = opts.s2 === 'bridge';
-  const S2L = bridge ? LAYER.mid : LAYER.meta;     // the bridge view puts all of System 2 between the two planes
+  // Two drawing conventions. 'square': the metasystem is a square box holding 3, 3*, 4, 5 and the
+  // System Two regulatory centre, and each local management is a square tilted 45 degrees (the
+  // next recursion's metasystem seen on the diagonal). 'diamond': the metasystem is a rhombus and
+  // local managements are upright squares.
+  const sq = opts.style !== 'diamond';
+  const S2L = bridge ? LAYER.mid : LAYER.meta;
   const ops = Array.from({ length: n }, (_, i) => i);
 
   add({ id: 'env', type: 'envTotal', group: 'env', container: true, layer: LAYER.env, zoff: -6, z2: -0.6,
-    shape: { kind: 'blob', cx: -57, cy: envCy, rx: 20.5, ry: envRy, p: 3.4, amp: 0.03, seed: 2.1 },
+    shape: { kind: 'blob', cx: -63, cy: envCy, rx: 20.5, ry: envRy, p: 3.4, amp: 0.03, seed: 2.1 },
     label: { dx: 0, dy: envTop - envCy - 6, w: 32, big: true } });
   add({ id: 'fut', type: 'envFuture', group: 'env', layer: LAYER.env, z2: -0.45,
-    shape: { kind: 'blob', cx: -56, cy: 57, rx: 15, ry: 12.5, p: 2.2, amp: 0.07, seed: 7.3 },
+    shape: { kind: 'blob', cx: -62, cy: 57, rx: 15, ry: 12.5, p: 2.2, amp: 0.07, seed: 7.3 },
     label: { dx: 0, dy: 0, w: 24 } });
   ops.forEach(i => {
     const y = yOp(i);
     add({ id: 'e' + i, type: 'envOp', group: 'env', idx: i, layer: LAYER.env, z2: -0.45,
-      shape: { kind: 'blob', cx: -60, cy: y, rx: 12, ry: 9.5, p: 2.3, amp: 0.08, seed: 11.7 + i * 3.1 },
+      shape: { kind: 'blob', cx: -66, cy: y, rx: 12, ry: 9.5, p: 2.3, amp: 0.08, seed: 11.7 + i * 3.1 },
       label: { dx: 0, dy: 0, w: 20 } });
     add({ id: 'o' + i, type: 'op', group: 'ops', idx: i, layer: LAYER.ops, z2: 0,
       shape: { kind: 'circle', cx: -18, cy: y, r: 8.5 }, label: { dx: 0, dy: 0, w: 16, nestDy: 6.2 } });
     add({ id: 'm' + i, type: 'mgmt', group: 'ops', idx: i, layer: LAYER.ops, z2: 0,
-      shape: { kind: 'square', cx: 9, cy: y + 7, s: 10 }, label: { dx: 0, dy: 0, w: 14 } });
+      shape: sq ? { kind: 'diamond', cx: 9, cy: y + 7, hw: 7, hh: 7 } : { kind: 'square', cx: 9, cy: y + 7, s: 10 },
+      label: { dx: 0, dy: 0, w: 14 } });
     add({ id: 'a' + i, type: 's2', group: 'meta', idx: i, layer: S2L, z2: 0,
       shape: { kind: 'tri', cx: 27, cy: y + 7, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
   });
-  add({ id: 'meta', type: 'meta', group: 'meta', container: true, layer: LAYER.meta, z2: -0.3,
-    shape: { kind: 'rhombus', cx: 14, cy: 52, hw: 35, hh: 39 }, label: { dx: 0, dy: 39 + 4, w: 30, big: true, nameOnly: true } });
-  // System 2's regulatory centre: inside the metasystem (as usually drawn) or on its boundary as a bridge
+  const RECT = { x0: -16, x1: 35, y0: 18, y1: 80 };
+  add(sq
+    ? { id: 'meta', type: 'meta', group: 'meta', container: true, layer: LAYER.meta, z2: -0.3,
+        shape: { kind: 'rect', cx: (RECT.x0 + RECT.x1) / 2, cy: (RECT.y0 + RECT.y1) / 2, hw: (RECT.x1 - RECT.x0) / 2, hh: (RECT.y1 - RECT.y0) / 2 },
+        label: { dx: 0, dy: (RECT.y1 - RECT.y0) / 2 + 4, w: 30, big: true, nameOnly: true } }
+    : { id: 'meta', type: 'meta', group: 'meta', container: true, layer: LAYER.meta, z2: -0.3,
+        shape: { kind: 'rhombus', cx: 14, cy: 52, hw: 35, hh: 39 }, label: { dx: 0, dy: 39 + 4, w: 30, big: true, nameOnly: true } });
+  // System Two's regulatory centre: inside the metasystem, or on its boundary in the bridge view
   add({ id: 's2', type: 's2c', group: 'meta', layer: S2L, z2: 0.05,
-    shape: { kind: 'tri', cx: 27, cy: bridge ? 27.5 : 37, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
+    shape: { kind: 'tri', cx: 27, cy: bridge ? (sq ? RECT.y0 : 27.5) : 37, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
   add({ id: 's3', type: 's3', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: 37, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
   add({ id: 's3s', type: 's3s', group: 'meta', layer: LAYER.meta, z2: 0,
-    shape: { kind: 'tri', cx: -7, cy: 28, w: 9, h: 8, dir: 'down' }, label: { dx: -6, dy: 0, w: 14, align: 'r', codeIn: true } });
+    shape: { kind: 'tri', cx: -7, cy: 29, w: 9, h: 8, dir: 'down' }, label: { dx: -6, dy: 0, w: 14, align: 'r', codeIn: true } });
   add({ id: 's4', type: 's4', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: 53.5, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
   add({ id: 's5', type: 's5', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: 70, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
 
@@ -1341,11 +1376,11 @@ function buildLayout(n, opts) {
     paths.forEach(p => { if (p.sgn == null) p.sgn = 1; });
     chans.push(Object.assign({ id, type, ends, poles, paths, group: 'chan' }, extra || {}));
   };
-  const E = LAYER.env, O = LAYER.ops, M = LAYER.meta, MID = LAYER.mid;
+  const E = LAYER.env, O = LAYER.ops, M = LAYER.meta;
   const allO = ops.map(i => 'o' + i), allM = ops.map(i => 'm' + i), allA = ops.map(i => 'a' + i);
+  const X_AUD = -34, X_S14 = -29.5, X_ALG = -4;
 
   ops.forEach(i => {
-    const y = yOp(i);
     chan('eo' + i, 'eo', ['e' + i, 'o' + i], [['e' + i], ['o' + i]], [{ pts: [P(at('e' + i, 1, 0), E), P(at('o' + i, -1, 0), O)], arrows: 'both' }], { idx: i });
     chan('om' + i, 'om', ['o' + i, 'm' + i], [['o' + i], ['m' + i]], [{ pts: [P(at('o' + i, ...deg(25)), O), P(at('m' + i, -1, -0.4), O)], arrows: 'both' }], { idx: i });
     chan('ms' + i, 'ms2', ['m' + i, 'a' + i], [['m' + i], ['a' + i]], [{ pts: [P(at('m' + i, 1, 0), O), P(at('a' + i, -1, 0), S2L)], arrows: 'both' }], { idx: i });
@@ -1355,7 +1390,7 @@ function buildLayout(n, opts) {
     }
   });
 
-  // System 2: coordination channel and its link to System 3
+  // System Two: anti-oscillation channel and its link to System Three
   const s2paths = [{ pts: [P(at('s2', 0, -1), S2L), P(at('a0', 0, 1), S2L)], arrows: 'both' }];
   for (let i = 0; i < n - 1; i++) s2paths.push({ pts: [P(at('a' + i, 0, -1), S2L), P(at('a' + (i + 1), 0, 1), S2L)], arrows: 'both' });
   chan('c2', 's2ch', ['s2'].concat(allA), [['s2'], allA], s2paths);
@@ -1363,21 +1398,28 @@ function buildLayout(n, opts) {
     ? { pts: [P(at('s3', 1, -0.6), M), P([17.5, 33.7], M), P(at('s2', -1, 0), S2L)], corner: 2, arrows: 'both' }
     : { pts: [P(at('s3', 1, 0), M), P(at('s2', -1, 0), M)], arrows: 'both' }]);
 
-  // the vertical command channel: resource bargain, corporate intervention, accountability
-  const cmdTop = at('s3', 0, -1), cmdBot = at('m0', 0, 1);
-  const cmdPaths = [{ pts: [P(cmdTop, M), P(cmdBot, O)], arrows: 'both' }];
-  for (let i = 0; i < n - 1; i++) cmdPaths.push({ pts: [P(at('m' + i, 0, -1), O), P(at('m' + (i + 1), 0, 1), O)], arrows: 'both' });
-  chan('cmd', 'cmd', ['s3'].concat(allM), [['s3'], allM], cmdPaths);
+  // The central command axis carries two of Beer's designed vertical channels:
+  // Corporate Intervention (down) and the Resource Bargain with its accountability (both ways)
+  const axis = (dx, id, type, arrows) => {
+    const top = at('s3', dx, -5.5), m0 = at('m0', dx, 7);
+    const paths = [{ pts: [P(top, M), P(m0, O)], arrows }];
+    for (let i = 0; i < n - 1; i++) paths.push({ pts: [P(at('m' + i, dx, -7), O), P(at('m' + (i + 1), dx, 7), O)], arrows });
+    chan(id, type, ['s3'].concat(allM), [['s3'], allM], paths);
+    return { top, m0 };
+  };
+  axis(-1.9, 'ci', 'ci', 'end');
+  const rbAxis = axis(1.9, 'rb', 'rb', 'both');
 
-  // System 3*: sporadic audit, reaching past local management into the operations
+  // System Three-Star: sporadic audit, reaching past local management into the operations from the environment side
+  const s3s = byId.s3s.shape;
   const audPaths = [
     { pts: [P(at('s3', -1, -0.73), M), P(at('s3s', 4.5, 4), M)], arrows: 'both' },
-    { pts: [P(at('s3s', 0, -1), M), P([-5, 21], 6), P([-5, yLast - 4], 6)], corner: 2.5, arrows: 'none' }
+    { pts: [P(at('s3s', 0, -1), M), P([s3s.cx, 21], M), P([X_AUD, 21], 6), P([X_AUD, yLast + 4.25], 6)], corner: 3, arrows: 'none' }
   ];
-  ops.forEach(i => audPaths.push({ pts: [P([-5, yOp(i) - 4], 6), P(at('o' + i, ...deg(-28)), O)], arrows: 'end' }));
+  ops.forEach(i => audPaths.push({ pts: [P([X_AUD, yOp(i) + 4.25], 6), P(at('o' + i, ...deg(150)), O)], arrows: 'end' }));
   chan('aud', 'audit', ['s3', 's3s'].concat(allO), [['s3'], allO], audPaths);
 
-  // 3-4 homeostat, and System 5 monitoring it (System 5 does not reach System 3 directly)
+  // Three-Four homeostat, and System Five monitoring it (System Five has no direct line to System Three)
   chan('h34', 's34', ['s3', 's4'], [['s3'], ['s4']], [
     { pts: [P(at('s3', -3.5, 5.5), M), P([0.5, 45.25], M), P(at('s4', -3.5, -5.5), M)], mode: 'quad', arrows: 'end', oneWay: true },
     { pts: [P(at('s4', 3.5, -5.5), M), P([17.5, 45.25], M), P(at('s3', 3.5, 5.5), M)], mode: 'quad', arrows: 'end', oneWay: true, sgn: -1 }
@@ -1386,27 +1428,28 @@ function buildLayout(n, opts) {
   chan('s5h', 's5h', ['s5', 'h34'], [['s5'], ['h34']], [{ pts: [P(at('s5', 1, -0.36), M), P([18.5, 68], M), P([18.5, 45.25], M), P([15.1, 45.25], M)], corner: 2, arrows: 'both' }]);
   chan('c4f', 's4f', ['s4', 'fut'], [['s4'], ['fut']], [{ pts: [P(at('s4', -1, 0.36), M), P(at('fut', 1, 0), E)], arrows: 'both' }]);
 
-  // extensions: S4 feeding the command channel, and a direct S1-S4 link
+  // extensions: System Four into the Resource Bargain, and a direct System One - System Four link
   if (opts.s4cmd) {
-    const jy = 23, jL = M + (O - M) * (cmdTop[1] - jy) / (cmdTop[1] - cmdBot[1]);
-    chan('s4cmd', 's4cmd', ['s4', 'cmd'], [['s4'], ['cmd']], [{ pts: [P(at('s4', 1, -0.45), M), P([21, 51], M), P([21, jy], M), P([cmdTop[0], jy], jL)], corner: 2.5, arrows: 'end' }], { ext: true });
+    const jy = 23, jx = rbAxis.top[0];
+    const jL = M + (O - M) * (rbAxis.top[1] - jy) / (rbAxis.top[1] - rbAxis.m0[1]);
+    chan('s4cmd', 's4cmd', ['s4', 'rb'], [['s4'], ['rb']], [{ pts: [P(at('s4', 1, -0.45), M), P([21, 51], M), P([21, jy], M), P([jx, jy], jL)], corner: 2.5, arrows: 'end' }], { ext: true });
   }
   if (opts.s14) {
-    const tx = -30.5, top = 50.5;
-    const s14paths = [{ pts: [P([tx, yLast + 2.2], 5), P([tx, top], 5), P(at('s4', -1, -0.55), M)], corner: 3, arrows: 'end' }];
-    ops.forEach(i => s14paths.push({ pts: [P(at('o' + i, ...deg(165)), O), P([tx, yOp(i) + 2.2], 5)], arrows: 'none' }));
+    const s14paths = [{ pts: [P([X_S14, yLast - 3.6], 5), P([X_S14, 50.5], 5), P(at('s4', -1, -0.55), M)], corner: 3, arrows: 'end' }];
+    ops.forEach(i => s14paths.push({ pts: [P(at('o' + i, ...deg(205)), O), P([X_S14, yOp(i) - 3.6], 5)], arrows: 'none' }));
     chan('s14', 's14', allO.concat(['s4']), [allO, ['s4']], s14paths, { ext: true });
   }
 
-  const last = 'o' + (n - 1);
-  chan('alg', 'alg', [last, 's5'], [allO, ['s5']], [{
-    pts: [P(at(last, 0, -1), O), P([-18, yLast - 13], O), P([54, yLast - 13], O), P([54, 72.5], M), P(at('s5', 1, 0.45), M)],
+  // Algedonic signal: ascends from every operation and breaks through to System Five
+  const algPaths = [{
+    pts: [P([X_ALG, yOp(0) - 4.88], O), P([X_ALG, yLast - 13], O), P([54, yLast - 13], O), P([54, 72.5], M), P(at('s5', 1, 0.45), M)],
     corner: 3.5, arrows: 'end'
-  }]);
+  }];
+  ops.forEach(i => algPaths.push({ pts: [P(at('o' + i, ...deg(-35)), O), P([X_ALG, yOp(i) - 4.88], O)], arrows: 'none' }));
+  chan('alg', 'alg', allO.concat(['s5']), [allO, ['s5']], algPaths);
 
   chans.forEach(c => c.paths.forEach(p => { p.samples = samplePath(p); }));
 
-  // bounding box for framing (shapes, channels and label room)
   let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
   const grow = (x, y) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); };
   els.forEach(e => e.outline.forEach(p => grow(p[0], p[1])));
@@ -1461,15 +1504,15 @@ const DEFAULT_GROUP_COLORS = { env: '#4f9a63', ops: '#2f74c0', meta: '#cf8a1f', 
 const SPECIAL_DEFAULTS = { alg: '#d43d33' };
 const GROUP_INFO = {
   env: { name: 'Environment', hint: 'Total, future and operational environments' },
-  ops: { name: 'Operations', hint: 'System 1: operations and their management' },
-  meta: { name: 'Metasystem', hint: 'Systems 2, 3, 3*, 4 and 5' },
+  ops: { name: 'System One', hint: 'Operational elements and their local management' },
+  meta: { name: 'Metasystem', hint: 'Systems Two, Three, Three-Star, Four and Five' },
   chan: { name: 'Channels', hint: 'Every connection between elements' }
 };
 const STORE_KEY = 'vsm-explorer:v1';
 
 let db = null; // { seq, rootId, currentId, levels: {} }
-let prefs = { view: '3d', flows: !reduceMotion, nested: false, spread: 1, side: true, s2mode: 'inside', extS4cmd: true, extS14: true };
-function layoutOpts() { return { s2: prefs.s2mode === 'bridge' ? 'bridge' : 'inside', s4cmd: prefs.extS4cmd !== false, s14: prefs.extS14 !== false }; }
+let prefs = { view: '3d', flows: !reduceMotion, nested: false, spread: 1, side: true, s2mode: 'inside', extS4cmd: true, extS14: true, style: 'square', theme: 'auto' };
+function layoutOpts() { return { s2: prefs.s2mode === 'bridge' ? 'bridge' : 'inside', s4cmd: prefs.extS4cmd !== false, s14: prefs.extS14 !== false, style: prefs.style === 'diamond' ? 'diamond' : 'square' }; }
 
 function newLevel(parent, elId) {
   db.seq += 1;
@@ -1490,7 +1533,7 @@ function newLevel(parent, elId) {
 
 function childTag(parent, elId) {
   const m = /^[om](\d+)$/.exec(elId);
-  return m ? opTag(parent, +m[1]) : '';
+  return m ? opTag(parent, +m[1]) : '';  // only System One recurses
 }
 function opTag(lv, i) {
   const base = lv.tag;
@@ -1517,20 +1560,20 @@ function defaultLabel(lv, id) {
   }
   const t = i => opTag(lv, i);
   if ((m = /^o(\d+)$/.exec(id))) return 'Operation ' + t(+m[1]);
-  if ((m = /^m(\d+)$/.exec(id))) return 'Management ' + t(+m[1]);
-  if ((m = /^a(\d+)$/.exec(id))) return 'Coordination ' + t(+m[1]);
+  if ((m = /^m(\d+)$/.exec(id))) return 'Local management ' + t(+m[1]);
+  if ((m = /^a(\d+)$/.exec(id))) return 'Anti-oscillation ' + t(+m[1]);
   if ((m = /^e(\d+)$/.exec(id))) return 'Environment ' + t(+m[1]);
   if ((m = /^eo(\d+)$/.exec(id))) return 'Environment–operation ' + t(+m[1]);
-  if ((m = /^om(\d+)$/.exec(id))) return 'Management loop ' + t(+m[1]);
-  if ((m = /^ms(\d+)$/.exec(id))) return 'Coordination link ' + t(+m[1]);
-  if ((m = /^ee(\d+)$/.exec(id))) return 'Environmental interaction ' + t(+m[1]) + '–' + t(+m[1] + 1);
-  if ((m = /^oo(\d+)$/.exec(id))) return 'Operational interaction ' + t(+m[1]) + '–' + t(+m[1] + 1);
+  if ((m = /^om(\d+)$/.exec(id))) return 'Local management loop ' + t(+m[1]);
+  if ((m = /^ms(\d+)$/.exec(id))) return 'System Two link ' + t(+m[1]);
+  if ((m = /^ee(\d+)$/.exec(id))) return 'Environmental intersect ' + t(+m[1]) + '–' + t(+m[1] + 1);
+  if ((m = /^oo(\d+)$/.exec(id))) return 'Operational linkage ' + t(+m[1]) + '–' + t(+m[1] + 1);
   return ({
-    env: 'Total environment', fut: 'Future environment', meta: 'Metasystem',
-    s2: 'Coordination centre', s3: 'Control', s3s: 'Audit', s4: 'Intelligence', s5: 'Policy',
-    c2: 'Coordination channel', c23: 'Coordination–control link', cmd: 'Command channel', aud: 'Audit channel',
-    h34: '3–4 homeostat', c45: 'Policy–intelligence link', s5h: 'Policy–homeostat link', c4f: 'Environmental scanning', alg: 'Algedonic channel',
-    s4cmd: 'Anticipatory link to command', s14: 'Operations–intelligence link'
+    env: 'Environment', fut: 'Future environment', meta: 'Metasystem',
+    s2: 'Regulatory centre', s3: 'Inside-and-now', s3s: 'Audit', s4: 'Outside-and-then', s5: 'Identity',
+    c2: 'System Two channel', c23: 'Regulatory centre–System Three', ci: 'Corporate Intervention', rb: 'Resource Bargain',
+    aud: 'Audit channel', h34: 'Three–Four homeostat', c45: 'System Four–Five link', s5h: 'System Five monitoring',
+    c4f: 'Outside-and-then link', alg: 'Algedonic signal', s4cmd: 'System Four into the bargain', s14: 'System One–Four link'
   })[id] || id;
 }
 
@@ -1553,7 +1596,7 @@ function colorOf(lv, id, L) {
 }
 function ancestry(lv) { const out = []; let c = lv; while (c) { out.unshift(c); c = c.parent ? db.levels[c.parent.level] : null; } return out; }
 function typeOfId(L, id) { return L.byId[id] ? L.byId[id].type : (L.chanById[id] ? L.chanById[id].type : null); }
-function isSystemType(t) { return ['op', 'mgmt', 's2', 's2c', 's3', 's3s', 's4', 's5'].includes(t); }
+function isSystemType(t) { return t === 'op' || t === 'mgmt'; } // recursion runs only through System One
 function recursionKey(id) { const m = /^m(\d+)$/.exec(id); return m ? 'o' + m[1] : id; }
 
 function freshDb() {
@@ -1571,6 +1614,9 @@ function load() {
         db = data.db;
         if (!db.levels[db.currentId]) db.currentId = db.rootId;
         Object.values(db.levels).forEach(l => { l.flows = l.flows || {}; l.notes = l.notes || {}; l.labels = l.labels || {}; });
+        // recursion runs only through System One: drop levels opened from any other system
+        Object.values(db.levels).forEach(l => { if (l.parent && !/^o\d+$/.test(l.parent.el)) { const p = db.levels[l.parent.level]; if (p) delete p.children[l.parent.el]; deleteSubtree(l); delete db.levels[l.id]; } });
+        if (!db.levels[db.currentId]) db.currentId = db.rootId;
         Object.assign(prefs, data.prefs || {});
         return true;
       }
@@ -1619,13 +1665,13 @@ const PRESETS = {
 /* =====================================================================
    Data flows: named flows on channels, standard patterns, model company
    ===================================================================== */
-const POLE_GROUPS = { o: 'Operations', m: 'Local managements', a: 'Coordination units' };
+const POLE_GROUPS = { o: 'Operations', m: 'Local managements', a: 'System Two units' };
 function poleName(lv, pole) {
   if (pole.length === 1) return labelOf(lv, pole[0]);
   return POLE_GROUPS[pole[0].charAt(0)] || pole.map(id => labelOf(lv, id)).join(', ');
 }
 const flowsOf = (lv, chId) => (lv.flows && lv.flows[chId]) || [];
-const FULL_OPTS = { s2: 'inside', s4cmd: true, s14: true };
+const FULL_OPTS = { s2: 'inside', s4cmd: true, s14: true, style: 'square' };
 
 /* A neutral starting point for any level: what typically travels on each kind of channel */
 function standardFlows(lv, ch) {
@@ -1638,8 +1684,9 @@ function standardFlows(lv, ch) {
     case 'oo': return [f('Shared resources and hand-offs', 'both')];
     case 'ms2': return [f('Capacity and schedule requests', 'ab'), f('Agreed schedule and shared rules', 'ba')];
     case 's2ch': return [f('Shared schedule', 'ab'), f('Status of shared resources', 'both')];
-    case 's2s3': return [f('Coordination rules and priorities', 'ab'), f('Capacity and conflict reports', 'ba')];
-    case 'cmd': return [f('Resources and targets', 'ab'), f('Policies and legal requirements', 'ab'), f('Performance and accountability reports', 'ba')];
+    case 's2s3': return [f('Anti-oscillation rules and priorities', 'ab'), f('Capacity and oscillation reports', 'ba')];
+    case 'ci': return [f('Policies and legal requirements', 'ab')];
+    case 'rb': return [f('Resources and targets', 'ab'), f('Performance and accountability reports', 'ba')];
     case 'audit': return [f('Audits and spot checks', 'ab'), f('Audit findings', 'ba')];
     case 's34': return [f('Current capability and constraints', 'ab'), f('Plans, forecasts and proposals', 'ba')];
     case 's45': return [f('Strategic options', 'ab'), f('Identity and policy guidance', 'ba')];
@@ -1688,7 +1735,8 @@ const EXAMPLE = {
     ms2: [['Workshop capacity', 'ab'], ['Booked jobs', 'ba']],
     c2: [['Master production schedule', 'ab'], ['Shared parts stock levels', 'both']],
     c23: [['Scheduling rules and priorities', 'ab'], ['Capacity utilization report', 'ba']],
-    cmd: [['Annual budgets and targets', 'ab'], ['Group policies and legal requirements', 'ab'], ['Monthly P&L and KPIs', 'ba']],
+    ci: [['Group policies and legal requirements', 'ab'], ['Safety standards for every line', 'ab']],
+    rb: [['Annual budgets and targets', 'ab'], ['Monthly P&L and KPIs', 'ba']],
     aud: [['Audit visits and spot checks', 'ab'], ['Quality and safety findings', 'ba']],
     h34: [['Capacity and capability constraints', 'ab'], ['Product roadmap and demand forecast', 'ba']],
     c45: [['Strategic options and scenarios', 'ab'], ['Mission and risk appetite', 'ba']],
@@ -1786,7 +1834,7 @@ const camera = new THREE.PerspectiveCamera(30, 1, 4, 5000);
 const controls = new THREE.OrbitControls(camera, canvas);
 controls.enableDamping = true;
 controls.dampingFactor = 0.09;
-controls.minDistance = 25;
+controls.minDistance = 12;
 controls.maxDistance = 1600;
 controls.screenSpacePanning = true;
 
@@ -1817,7 +1865,7 @@ const elZ = (el, d) => d * (el.layer * prefs.spread + (el.zoff || 0)) + (1 - d) 
 const chZ = (Lz, d) => d * Lz * prefs.spread + (1 - d) * -0.15;
 
 const TINT = { envTotal: [0.88, 0.7], envFuture: [0.76, 0.32], envOp: [0.76, 0.32], meta: [0.9, 0.55], def: [0.74, 0.0] };
-const STROKE3D = { circle: 0, square: 0, tri: 0, rhombus: 0, blob: 0.45 };
+const STROKE3D = { circle: 0, square: 0, tri: 0, rhombus: 0, rect: 0, diamond: 0, blob: 0.45 };
 
 function shapeFromPts(pts) {
   const sh = new THREE.Shape();
@@ -1850,6 +1898,8 @@ function fillGeometry(el, quality) {
       return { g, half: 3.5 };
     }
     case 'rhombus': return { g: octahedron(s.hw, s.hh, 11), half: 11 };
+    case 'rect': return { g: new THREE.BoxGeometry(s.hw * 2, s.hh * 2, 22), half: 11 };
+    case 'diamond': { const side = s.hw * Math.SQRT2, g = new THREE.BoxGeometry(side, side, side); g.rotateZ(Math.PI / 4); return { g, half: side / 2 }; }
     case 'blob': {
       const big = el.type === 'envTotal';
       const depth = big ? 0.6 : 1, bt = big ? 1.6 : 2, bs = big ? 1.6 : 1.8;
@@ -1918,6 +1968,7 @@ function disposeGroup(g) {
 }
 
 function buildScene() {
+  resetWorld();
   disposeGroup(world);
   while (world.children.length) world.remove(world.children[0]);
   els.clear(); chs.clear(); pickables = []; minis = [];
@@ -1928,7 +1979,7 @@ function buildScene() {
     const group = new THREE.Group();
     group.position.set(el.shape.cx, el.shape.cy, 0);
     const fg = fillGeometry(el);
-    const mat = stdMat({ side: el.shape.kind === 'rhombus' ? THREE.DoubleSide : THREE.FrontSide });
+    const mat = stdMat({ side: el.container ? THREE.DoubleSide : THREE.FrontSide });
     const fill = new THREE.Mesh(fg.g, mat);
     fill.userData.pick = { kind: 'el', id: el.id, container: !!el.container };
     if (el.type === 'meta') fill.renderOrder = 2;
@@ -1936,7 +1987,7 @@ function buildScene() {
     group.add(fill);
     pickables.push(fill);
     let edges = null;
-    if (el.shape.kind === 'square' || el.shape.kind === 'tri' || el.shape.kind === 'rhombus') {
+    if (['square', 'tri', 'rhombus', 'rect', 'diamond'].includes(el.shape.kind)) {
       edges = new THREE.LineSegments(new THREE.EdgesGeometry(fg.g, 20), new THREE.LineBasicMaterial({ transparent: true }));
       fill.add(edges);
     }
@@ -1967,6 +2018,8 @@ function buildScene() {
   buildParticles();
   buildMinis();
   updateGeometry();
+  fitDistCache = fitState(anim.d).dist;
+  controls.maxDistance = level().parent ? fitDistCache * 2.6 : Math.max(1600, fitDistCache * 3);
   refreshVisuals();
   buildLabels();
   dirty = true;
@@ -2052,7 +2105,7 @@ function refreshVisuals() {
     let op = 1;
     if (el.type === 'meta') op = lerp(1, 0.15, d);
     else if (el.type === 'envTotal') op = lerp(1, 0.45, d);
-    else if (el.type === 'op' && prefs.nested) op = lerp(0.55, 0.2, d);
+    else if (el.type === 'op' && minisShown) op = lerp(0.55, 0.2, d);
     const related = !focusSet || focusSet.has(id);
     const dimF = related ? 1 : (el.container ? 0.5 : 0.22);
     o.fill.material.color.copy(fill);
@@ -2169,9 +2222,9 @@ function updateParticles(time) {
 }
 
 /* ---------- nested viable systems inside each operation ---------- */
-const MINI_K = 0.084;
+const MINI_K = 0.075, THETA = -Math.PI / 4;   // each recursion sits inside its operation, scaled and turned 45 degrees
+let minisShown = false, fitDistCache = 300;
 function buildMinis() {
-  if (!prefs.nested) return;
   const lv = level();
   for (let i = 0; i < lv.opCount; i++) {
     const childId = lv.children['o' + i];
@@ -2183,6 +2236,7 @@ function buildMinis() {
     inner.position.set(-cx, -cy, 0);
     holder.add(inner);
     holder.scale.setScalar(MINI_K);
+    holder.rotation.z = THETA;
     const parts = [];
     ML.els.forEach(el => {
       if (el.type === 'envTotal') return;
@@ -2198,8 +2252,9 @@ function buildMinis() {
       inner.add(line);
       parts.push({ kind: 'ch', ch, p, line });
     }));
+    holder.visible = minisShown;
     world.add(holder);
-    minis.push({ holder, parts, child, ML, op: 'o' + i });
+    minis.push({ holder, inner, parts, child, ML, op: 'o' + i, idx: i });
   }
 }
 function updateMini(m) {
@@ -2208,14 +2263,24 @@ function updateMini(m) {
   m.holder.position.set(o.el.shape.cx, o.el.shape.cy, elZ(o.el, d) + (1 - d) * (o.half * SZ(d) + 0.12));
   m.parts.forEach(pt => {
     if (pt.kind === 'el') {
-      pt.mesh.position.z = d * pt.el.layer * prefs.spread * 0.55 + (1 - d) * (pt.el.z2 * 4);
+      pt.mesh.position.z = d * (pt.el.layer * prefs.spread + (pt.el.zoff || 0)) + (1 - d) * (pt.el.z2 * 4);
       pt.mesh.scale.z = SZ(d);
     } else {
       const pos = pt.line.geometry.attributes.position;
-      pt.p.samples.forEach((s, i) => pos.setZ(i, d * s.L * prefs.spread * 0.55 + (1 - d) * -0.4));
+      pt.p.samples.forEach((s, i) => pos.setZ(i, d * s.L * prefs.spread + (1 - d) * -0.4));
       pos.needsUpdate = true;
     }
   });
+}
+/* Nested systems show when the Nested toggle is on, or when the camera comes close enough to read them */
+function updateMinisShown(force) {
+  const dist = camera.position.distanceTo(controls.target) / (world.scale.x || 1);
+  const show = prefs.nested || dist < fitDistCache * 0.45;
+  if (show === minisShown && !force) return;
+  minisShown = show;
+  minis.forEach(m => { m.holder.visible = show; });
+  refreshVisuals();
+  dirty = true;
 }
 function colorMini(m) {
   const src = m.child || null;
@@ -2279,16 +2344,16 @@ function updateLabels() {
     const el = n.el, lab = el.label;
     const z = elZ(el, anim.d);
     const place = (dv, x, y, align, wUnits, isCode) => {
-      projV.set(x, y, z);
+      projV.set(x, y, z).applyMatrix4(world.matrixWorld);
       const depth = projV.clone().sub(camera.position).dot(camDir);
       if (depth <= camera.near) { dv.style.visibility = 'hidden'; return; }
-      const ppu = h / (2 * depth * tanHalf);
+      const ppu = h / (2 * depth * tanHalf) * world.scale.x;
       projV.project(camera);
       const sx = (projV.x * 0.5 + 0.5) * w, sy = (-projV.y * 0.5 + 0.5) * h;
       const last = n.last;
       const codeSize = clamp(ppu * (lab.big ? 2.2 : 2.7), 9.5, lab.big ? 15 : 17);
       const nameSize = clamp(ppu * (lab.big ? 2.6 : 2.05), 8.5, lab.big ? 17 : 13.5);
-      const showName = (ppu * 1.95 >= 6.8 || lab.big) && !(prefs.nested && lab.nestDy);
+      const showName = (ppu * 1.95 >= 6.8 || lab.big) && !(minisShown && lab.nestDy);
       const key = (isCode ? 'c' : 'n');
       const fs = Math.round((isCode ? codeSize : nameSize) * 2) / 2;
       if (last[key + 'fs'] !== fs) {
@@ -2314,7 +2379,7 @@ function updateLabels() {
       const cy = el.shape.cy + (el.shape.dir === 'down' ? el.shape.h / 7 : -el.shape.h / 7);
       place(n.codeDiv, el.shape.cx, cy, 'c', 0, true);
     }
-    const dy = prefs.nested && lab.nestDy ? lab.nestDy : lab.dy;
+    const dy = minisShown && lab.nestDy ? lab.nestDy : lab.dy;
     place(n.div, el.shape.cx + lab.dx, el.shape.cy + dy, lab.align || 'c', lab.w, false);
   });
 }
@@ -2538,7 +2603,8 @@ canvas.addEventListener('pointermove', e => {
   });
 });
 canvas.addEventListener('pointerleave', () => { tip.hidden = true; if (hovered) { hovered = null; refreshVisuals(); } });
-controls.addEventListener('change', () => { dirty = true; });
+let camMoved = false; // OrbitControls applies wheel zoom inside its own handler, so note every change here
+controls.addEventListener('change', () => { dirty = true; camMoved = true; });
 controls.addEventListener('start', () => { tip.hidden = true; });
 
 /* =====================================================================
@@ -2551,33 +2617,22 @@ function ensureChild(lv, elId) {
 }
 async function dive(elId) {
   if (busy) return;
-  const lv = level();
-  const o = els.get(elId);
+  const m = /^[om](\d+)$/.exec(elId);
+  if (!m) return; // recursion runs only through System One
+  const k = +m[1], o = els.get('o' + k);
+  if (!o) return;
   busy = true; controls.enabled = false; tip.hidden = true;
-  if (o) {
-    const s = camState();
-    const p = o.group.position.clone();
-    await camTween({ target: p, dist: Math.max(40, s.dist * 0.18), az: s.az, el: s.el }, 520);
-  }
-  canvas.classList.add('fade');
-  labelsEl.style.opacity = 0;
-  await wait(reduceMotion ? 0 : 170);
-  const child = ensureChild(lv, elId);
-  db.currentId = child.id; save();
-  selected = null; focusSet = null;
-  buildScene();
-  renderAllPanels();
-  const fit = fitState();
-  setCam({ target: fit.target, dist: fit.dist * 0.22, az: fit.az, el: fit.el });
-  canvas.classList.remove('fade');
-  labelsEl.style.opacity = '';
-  await camTween(fit, 760);
-  controls.enabled = true; busy = false;
+  const s = camState();
+  world.updateMatrixWorld(true);
+  await camTween({ target: o.group.getWorldPosition(new THREE.Vector3()), dist: D_IN * 0.85, az: s.az, el: s.el }, reduceMotion ? 0 : 700);
+  busy = false;
+  await enterOp(k);
 }
 async function goToLevel(id) {
   if (busy || id === db.currentId) return;
   const cur = level(), target = db.levels[id];
   if (!target) return;
+  if (cur.parent && cur.parent.level === id) { exitToParent(); return; }
   busy = true; controls.enabled = false; tip.hidden = true;
   // when moving up, find the element in the target level that leads back down to where we were
   let focusEl = null;
@@ -2602,6 +2657,99 @@ async function goToLevel(id) {
   controls.enabled = true; busy = false;
 }
 const wait = ms => new Promise(r => setTimeout(r, ms));
+/* =====================================================================
+   Recursion by zooming: an operation's own viable system sits inside it,
+   turned 45 degrees. Zoom far enough into it and it becomes the
+   System-in-Focus; zoom far out and the containing system returns.
+   ===================================================================== */
+const D_IN = 30;
+let lastRecurse = 0;
+function decomposeM(m) { const p = new THREE.Vector3(), q = new THREE.Quaternion(), sc = new THREE.Vector3(); m.decompose(p, q, sc); return { p, q, s: sc.x }; }
+function applyWorld(m) { const d = decomposeM(m); world.position.copy(d.p); world.quaternion.copy(d.q); world.scale.setScalar(d.s); world.updateMatrixWorld(true); }
+function resetWorld() { world.position.set(0, 0, 0); world.quaternion.identity(); world.scale.setScalar(1); world.updateMatrixWorld(true); }
+/* Ease the world from transform `from` back to identity, keeping the camera locked on the same model point */
+function transitionWorld(from, targetLocal, s0, dur) {
+  const A = decomposeM(from), q1 = new THREE.Quaternion();
+  return tween(dur, k => {
+    const sc = Math.exp(lerp(Math.log(A.s), 0, k));
+    world.position.copy(A.p).multiplyScalar(1 - k);
+    world.quaternion.copy(A.q).slerp(q1, k);
+    world.scale.setScalar(sc);
+    world.updateMatrixWorld(true);
+    setCam({ target: targetLocal.clone().applyMatrix4(world.matrixWorld), dist: s0.dist * sc / A.s, az: s0.az, el: s0.el });
+    updateMinisShown();
+  }).then(() => { resetWorld(); setCam({ target: targetLocal.clone(), dist: s0.dist / A.s, az: s0.az, el: s0.el }); });
+}
+async function enterOp(k) {
+  const lv = level(), m = minis.find(x => x.idx === k);
+  if (busy || !m) return;
+  busy = true; controls.enabled = false; tip.hidden = true;
+  m.holder.visible = true;
+  world.updateMatrixWorld(true);
+  const T = m.inner.matrixWorld.clone();
+  const s0 = camState();
+  const targetLocal = s0.target.clone().applyMatrix4(T.clone().invert());
+  const child = ensureChild(lv, 'o' + k);
+  db.currentId = child.id; save();
+  selected = null; focusSet = null;
+  buildScene();
+  applyWorld(T);
+  setCam(s0);
+  updateMinisShown(true);
+  renderAllPanels();
+  await transitionWorld(T, targetLocal, s0, reduceMotion ? 0 : 950);
+  await camTween(fitState(), reduceMotion ? 0 : 650);
+  controls.enabled = true; busy = false; lastRecurse = performance.now();
+}
+async function exitToParent() {
+  const cur = level();
+  if (busy || !cur.parent) return;
+  const mo = /^o(\d+)$/.exec(cur.parent.el);
+  if (!mo) { goToLevel(cur.parent.level); return; }
+  busy = true; controls.enabled = false; tip.hidden = true;
+  const s0 = camState();
+  db.currentId = cur.parent.level; save();
+  selected = null; focusSet = null;
+  buildScene();
+  const m = minis.find(x => x.idx === +mo[1]);
+  world.updateMatrixWorld(true);
+  const T = m.inner.matrixWorld.clone(), Tinv = T.clone().invert();
+  applyWorld(Tinv);
+  m.holder.visible = true;
+  setCam(s0);
+  updateMinisShown(true);
+  renderAllPanels();
+  await transitionWorld(Tinv, s0.target.clone().applyMatrix4(T), s0, reduceMotion ? 0 : 950);
+  await camTween(fitState(), reduceMotion ? 0 : 650);
+  controls.enabled = true; busy = false; lastRecurse = performance.now();
+}
+function checkRecursionZoom(now) {
+  if (busy || now - lastRecurse < 600 || Math.abs(world.scale.x - 1) > 1e-6) return;
+  const s = camState();
+  if (s.dist < D_IN) {
+    let best = null, bd = Infinity;
+    els.forEach(o => {
+      if (o.el.type !== 'op') return;
+      const dd = Math.hypot(o.group.position.x - s.target.x, o.group.position.y - s.target.y);
+      if (dd < bd) { bd = dd; best = o; }
+    });
+    if (best && bd < best.el.shape.r * 1.4) enterOp(best.el.idx);
+  } else if (level().parent && s.dist > fitDistCache * 2.4) exitToParent();
+}
+/* Scroll zooms toward the pointer, so you can steer into an operation */
+canvas.addEventListener('wheel', e => {
+  if (busy || e.deltaY >= 0) return;
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0).applyMatrix4(world.matrixWorld);
+  const hit = ray.ray.intersectPlane(plane, new THREE.Vector3());
+  if (!hit) return;
+  const delta = hit.sub(controls.target).multiplyScalar(0.16);
+  controls.target.add(delta); camera.position.add(delta);
+  dirty = true;
+}, { passive: true });
+
 
 /* =====================================================================
    Panels
@@ -2725,7 +2873,6 @@ function renderTree() {
       if (childId && db.levels[childId]) rows.push(node(db.levels[childId]));
       else rows.push('<li class="tnode"><button class="tbtn unexplored" type="button" data-from="' + lv.id + '" data-el="' + key + '"><span class="cd">' + esc(codeOf(lv, key)) + '</span><span class="tn">' + esc(labelOf(lv, key)) + '</span></button></li>');
     }
-    Object.keys(lv.children).forEach(k => { if (!/^o\d+$/.test(k) && db.levels[lv.children[k]]) rows.push(node(db.levels[lv.children[k]])); });
     if (rows.length) html += '<ul>' + rows.join('') + '</ul>';
     return html + '</li>';
   };
@@ -2828,10 +2975,9 @@ function renderRecursion() {
   const childId = lv.children[key];
   const child = childId ? db.levels[childId] : null;
   const name = labelOf(lv, key);
-  const isS1 = t === 'op' || t === 'mgmt';
-  const note = isS1
-    ? (t === 'mgmt' ? 'This square belongs to System 1 ' + codeOf(lv, key) + '. One level down it becomes the metasystem of ' + name + '.' : 'Every operation is a viable system in its own right. Its management square becomes the metasystem one level down.')
-    : 'Strictly, Beer\'s recursion runs through System 1. The unit that performs this function, such as a department, can still be modelled as a viable system of its own.';
+  const note = t === 'mgmt'
+    ? 'This local management belongs to operation ' + codeOf(lv, key) + '. One level down it becomes the metasystem of ' + name + '.'
+    : 'Every operational element is a viable system in its own right. Its local management becomes the metasystem one level down, and its environment the environment.';
   box.innerHTML = '<div class="recur"><div class="t">Viable system inside ' + esc(name) + '</div>' +
     '<div class="prev">' + previewSVG(child, lv) + '</div><p>' + esc(note) + (child ? ' Explored: ' + child.opCount + ' operations.' : '') + '</p>' +
     '<div class="btn-row"><button class="btn primary" type="button" id="iDive">Open level ' + (lv.depth + 1) + ' · ' + esc(name) + '</button>' +
@@ -2981,18 +3127,19 @@ const CHANNEL_GUIDE = [
   'ee{i} (i up to N-2): A = environment i, B = environment i+1. How the environments affect each other.',
   'om{i}: A = operation i, B = its local management. Operational reporting and local direction.',
   'oo{i} (i up to N-2): A = operation i, B = operation i+1. Direct interactions between operations.',
-  'ms{i}: A = local management i, B = coordination unit i (System 2). Schedules, standards, conflicts.',
-  'c2: A = System 2 coordination centre, B = all coordination units.',
-  'c23: A = System 3, B = System 2 coordination centre.',
-  'cmd: A = System 3, B = all local managements. Resource bargain and corporate intervention down, accountability up.',
-  'aud: A = System 3 via 3*, B = the operations. Sporadic audit and monitoring.',
-  'h34: A = System 3, B = System 4. The 3-4 homeostat: present against future.',
-  'c45: A = System 4, B = System 5.',
-  's5h: A = System 5, B = the 3-4 homeostat. System 5 monitors the S3-S4 conversation.',
-  'c4f: A = System 4, B = the future environment.',
-  's4cmd: A = System 4, B = the command channel. Forecasts that shape the resource bargain in advance.',
-  's14: A = the operations, B = System 4. Front-line signals and trials.',
-  'alg: A = the operations, B = System 5. Algedonic alarms that bypass the normal channels.'
+  'ms{i}: A = local management i, B = System Two unit i. Schedules, standards, early signs of oscillation.',
+  'c2: A = System Two regulatory centre, B = all System Two units. Anti-oscillation.',
+  'c23: A = System Three, B = System Two regulatory centre.',
+  'ci: A = System Three, B = all local managements. Corporate Intervention: requirements imposed for the whole.',
+  'rb: A = System Three, B = all local managements. Resource Bargain: resources down, accountability up.',
+  'aud: A = System Three via Three-Star, B = the operations. Sporadic audit.',
+  'h34: A = System Three (inside-and-now), B = System Four (outside-and-then). The Three-Four homeostat.',
+  'c45: A = System Four, B = System Five.',
+  's5h: A = System Five, B = the Three-Four homeostat, which System Five monitors.',
+  'c4f: A = System Four, B = the future environment.',
+  's4cmd: A = System Four, B = the Resource Bargain. Forecasts that shape the bargain in advance.',
+  's14: A = the operations, B = System Four. Front-line signals and trials.',
+  'alg: A = all operations, B = System Five. Algedonic signals that break through the normal channels.'
 ];
 function typeOfIdFor(lv, id) { return typeOfId(buildLayout(lv.opCount, FULL_OPTS), id); }
 function mappingPrompt(lv, brief) {
@@ -3003,7 +3150,7 @@ function mappingPrompt(lv, brief) {
     ctx = 'This is a recursion inside a larger system: ' + chain.join(' > ') + '. Map only "' + levelName(lv) + '".';
     if (m) {
       const k = +m[1], PL = buildLayout(p.opCount, FULL_OPTS), lines = [];
-      ctx += ' In the parent model it is an operation (System 1 unit). Its environment there is "' + labelOf(p, 'e' + k) + '" and its management unit is "' + labelOf(p, 'm' + k) + '": treat these as this level\'s total environment and metasystem.';
+      ctx += ' In the parent model it is an operational element of System One. Its environment there is "' + labelOf(p, 'e' + k) + '" and its management unit is "' + labelOf(p, 'm' + k) + '": treat these as this level\'s total environment and metasystem.';
       PL.chans.forEach(ch => {
         const has = pole => pole.includes('o' + k) || pole.includes('m' + k);
         const side = has(ch.poles[0]) ? 0 : has(ch.poles[1]) ? 1 : -1;
@@ -3013,10 +3160,10 @@ function mappingPrompt(lv, brief) {
       if (lines.length) ctx += '\nFlows that reach or leave it in the parent model:\n' + lines.slice(0, 30).join('\n');
     } else ctx += ' In the parent model it is the unit performing ' + ((KB[typeOfIdFor(p, lv.parent.el)] || {}).kind || 'a management function') + '.';
     const sib = Array.from({ length: p.opCount }, (_, i) => labelOf(p, 'o' + i)).join(', ');
-    ctx += '\nOperations of the parent: ' + sib + '. Parent System 3: ' + labelOf(p, 's3') + '; System 4: ' + labelOf(p, 's4') + '; System 5: ' + labelOf(p, 's5') + '.';
+    ctx += '\nOperations of the parent: ' + sib + '. Parent System Three: ' + labelOf(p, 's3') + '; System Four: ' + labelOf(p, 's4') + '; System Five: ' + labelOf(p, 's5') + '.';
   }
   return [
-    'Map an organization onto Stafford Beer\'s Viable System Model. Your answer fills an interactive diagram, so follow the format exactly.',
+    'Map an organization onto Stafford Beer\'s Viable System Model, using Beer\'s own terms. Your answer fills an interactive diagram, so follow the format exactly.',
     '',
     '<description>',
     brief || 'No description was given. Infer what you reasonably can from the names and context below.',
@@ -3024,13 +3171,13 @@ function mappingPrompt(lv, brief) {
     ctx,
     '',
     'Reply with only one JSON object of this shape:',
-    '{"name": "system in focus", "operations": [{"name": "...", "environment": "part of the environment it serves", "management": "who manages it", "coordination": "its System 2 unit, such as a schedule, standard or shared service", "sub_operations": ["primary activity inside it", "..."]}], "labels": {"env": "total environment", "fut": "future environment", "meta": "management of the whole", "s2": "System 2 coordination centre", "s3": "System 3", "s3s": "System 3* audit", "s4": "System 4", "s5": "System 5"}, "notes": {"s3": "one sentence on who or what performs this here"}, "flows": {"cmd": [{"name": "Annual budget and targets", "dir": "ab"}, {"name": "Monthly KPIs", "dir": "ba"}]}}',
+    '{"name": "system in focus", "operations": [{"name": "...", "environment": "part of the environment it serves", "management": "who manages it", "antioscillation": "its System Two unit, such as a schedule, timetable or shared standard", "sub_operations": ["operational element inside it", "..."]}], "labels": {"env": "environment", "fut": "future environment", "meta": "metasystem", "s2": "System Two regulatory centre", "s3": "System Three (inside-and-now)", "s3s": "Three-Star audit", "s4": "System Four (outside-and-then)", "s5": "System Five (closure and identity)"}, "notes": {"s3": "one sentence on who or what performs this here"}, "flows": {"rb": [{"name": "Annual budget and targets", "dir": "ab"}, {"name": "Monthly KPIs", "dir": "ba"}]}}',
     '',
     'Rules:',
-    '- 2 to 5 operations: the primary activities that produce what the system exists to do, each able to be viable on its own. Never support functions such as HR, finance or IT; those belong to Systems 2 to 5.',
+    '- 2 to 5 operations: the operational elements of System One, which produce what the system exists to do and could each maintain a separate existence. Never support functions such as HR, finance or IT; those belong to the metasystem (Systems Two to Five).',
     '- Names and labels at most 5 words. Flow names at most 7 words and concrete to this organization.',
     '- notes are optional, keyed by env, fut, meta, s2, s3, s3s, s4, s5, o0, m0, a0, e0 and so on.',
-    '- sub_operations: 2 to 4 per operation, its own System 1 one level down.',
+    '- sub_operations: 2 to 4 per operation, its own System One one level down. Recursion applies only to System One.',
     '- flows: 1 to 3 per channel, for every channel id below that exists for your number of operations N (i runs from 0 to N-1). "dir" is "ab" from A to B, "ba" from B to A, or "both".',
     '',
     'Channel ids:',
@@ -3055,7 +3202,7 @@ function applyMapping(lv, r) {
   });
   applySpec(lv, {
     name: S(r.name) || null,
-    ops: opsIn.map(o => ({ o: S(o.name), e: S(o.environment), m: S(o.management), a: S(o.coordination) })),
+    ops: opsIn.map(o => ({ o: S(o.name), e: S(o.environment), m: S(o.management), a: S(o.antioscillation || o.coordination) })),
     labels, notes, flows,
     children: opsIn.map(o => {
       const subs = Array.isArray(o.sub_operations) ? o.sub_operations.map(x => S(x)).filter(Boolean).slice(0, MAX_OPS) : [];
@@ -3139,11 +3286,10 @@ $('#btnFlows').addEventListener('click', () => {
 $('#btnNested').addEventListener('click', () => {
   prefs.nested = !prefs.nested; save();
   $('#btnNested').setAttribute('aria-pressed', String(prefs.nested));
-  const cam = camState();
-  buildScene(); setCam(cam); renderInspector();
+  updateMinisShown(true);
 });
 $('#btnFrame').addEventListener('click', () => { if (!busy) camTween(fitState(), 650); });
-$('#upBtn').addEventListener('click', () => { const lv = level(); if (lv.parent) goToLevel(lv.parent.level); });
+$('#upBtn').addEventListener('click', () => exitToParent());
 $('#iClose').addEventListener('click', () => select(null));
 $('#iName').addEventListener('input', e => renameElement(selected, e.target.value, 'insp'));
 $('#iColor').addEventListener('input', e => recolorElement(selected, e.target.value, 'insp'));
@@ -3217,7 +3363,9 @@ $('#resetAll').addEventListener('click', e => {
 
 // diagram options: where System 2's centre sits, and the two extension channels
 function syncDiagramControls() {
-  const bridge = prefs.s2mode === 'bridge';
+  const bridge = prefs.s2mode === 'bridge', diamond = prefs.style === 'diamond';
+  $('#stSquare').setAttribute('aria-pressed', String(!diamond));
+  $('#stDiamond').setAttribute('aria-pressed', String(diamond));
   $('#s2Inside').setAttribute('aria-pressed', String(!bridge));
   $('#s2Bridge').setAttribute('aria-pressed', String(bridge));
   $('#extS4cmd').checked = prefs.extS4cmd !== false;
@@ -3233,6 +3381,23 @@ function relayout() {
   syncDiagramControls();
   renderAllPanels();
 }
+$('#stSquare').addEventListener('click', () => { if (prefs.style === 'diamond') { prefs.style = 'square'; save(); relayout(); } });
+$('#stDiamond').addEventListener('click', () => { if (prefs.style !== 'diamond') { prefs.style = 'diamond'; save(); relayout(); } });
+
+// theme: follow the system (or the host page), or force light or dark
+const hostTheme = document.documentElement.getAttribute('data-theme');
+function applyThemePref() {
+  const r = document.documentElement, t = prefs.theme;
+  if (t === 'light' || t === 'dark') r.setAttribute('data-theme', t);
+  else if (hostTheme) r.setAttribute('data-theme', hostTheme);
+  else r.removeAttribute('data-theme');
+  $('#themeTx').textContent = { light: 'Light', dark: 'Dark' }[t] || 'Auto';
+  $('#btnTheme').setAttribute('aria-label', 'Colour theme: ' + ({ light: 'light', dark: 'dark' }[t] || 'automatic') + '. Click to change.');
+}
+$('#btnTheme').addEventListener('click', () => {
+  prefs.theme = { auto: 'light', light: 'dark', dark: 'auto' }[prefs.theme] || 'light';
+  save(); applyThemePref();
+});
 $('#s2Inside').addEventListener('click', () => { if (prefs.s2mode !== 'inside') { prefs.s2mode = 'inside'; save(); relayout(); } });
 $('#s2Bridge').addEventListener('click', () => { if (prefs.s2mode !== 'bridge') { prefs.s2mode = 'bridge'; save(); relayout(); } });
 $('#extS4cmd').addEventListener('change', e => { prefs.extS4cmd = e.target.checked; save(); relayout(); });
@@ -3342,6 +3507,7 @@ new ResizeObserver(resize).observe(stage);
    Boot
    ===================================================================== */
 const hadSaved = load();
+applyThemePref();
 readTheme();
 prefs.spread = clamp(+prefs.spread || 1, 0.3, 2.2);
 $('#spread').value = prefs.spread;
@@ -3364,6 +3530,8 @@ function frame(now) {
   requestAnimationFrame(frame);
   const tw = runTweens(now);
   const moved = controls.update();
+  if ((moved || camMoved) && !tw) { updateMinisShown(); checkRecursionZoom(now); }
+  camMoved = false;
   if (prefs.flows && particles) { updateParticles((now - t0) / 1000); dirty = true; }
   if (dirty || tw || moved) {
     renderer.render(scene, camera);

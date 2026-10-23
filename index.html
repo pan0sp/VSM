@@ -932,12 +932,12 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
           <div class="leg"><svg viewBox="0 0 34 26"><rect x="9" y="5" width="16" height="16" fill="#2f74c0" fill-opacity=".25" stroke="#2f74c0" stroke-width="1.5"/></svg><div><b>Square</b><span>Systems Three, Four and Five; local management (tilted in the square convention)</span></div></div>
           <div class="leg"><svg viewBox="0 0 34 26"><path d="M17 4l9 16H8z" fill="#cf8a1f" fill-opacity=".25" stroke="#cf8a1f" stroke-width="1.5"/></svg><div><b>Triangle</b><span>System Two anti-oscillation (pointing up) and Three-Star audit (pointing down)</span></div></div>
           <div class="leg"><svg viewBox="0 0 34 26"><path d="M17 2l11 11-11 11L6 13z" fill="#cf8a1f" fill-opacity=".14" stroke="#cf8a1f" stroke-width="1.5"/></svg><div><b>Box</b><span>Metasystem: a square box in one convention, a rhombus in the other</span></div></div>
-          <div class="leg"><svg viewBox="0 0 34 26"><path d="M3 13h24" stroke="#d43d33" stroke-width="2"/><path d="M24 9l5 4-5 4" fill="none" stroke="#d43d33" stroke-width="2"/></svg><div><b>Algedonic signal</b><span>Alerts ascending from every operation, breaking through to System Five</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><path d="M3 13h24" stroke="#d43d33" stroke-width="2"/><path d="M24 9l5 4-5 4" fill="none" stroke="#d43d33" stroke-width="2"/></svg><div><b>Algedonic signal</b><span>Alerts rising from every local management, behind 3, 4 and 5, to System Five</span></div></div>
         </div>
       </div>
       <div class="block">
         <h3>Channels in this model</h3>
-        <p>Beer lists six vertical channels in <i>Diagnosing the System</i>: Corporate Intervention, the Resource Bargain (with accountability), operational linkages, environmental intersects, System Two, and audit. The central command axis is drawn as two lines, Corporate Intervention and the Resource Bargain, running from System Three to each local management, which is the operation's own metasystem. The Three-Star audit is the sporadic exception that reaches the operations directly, from the environment side. The algedonic signal ascends from every operation to System Five.</p>
+        <p>Beer lists six vertical channels in <i>Diagnosing the System</i>: Corporate Intervention, the Resource Bargain (with accountability), operational linkages, environmental intersects, System Two, and audit. The central command axis is drawn as two lines, Corporate Intervention and the Resource Bargain, running from System Three to each local management, which is the operation's own metasystem. The Three-Star audit is the sporadic exception that reaches the operations directly, from the environment side. The algedonic signal rises from every local management parallel to the Resource Bargain, behind Systems Three, Four and Five, to System Five; in 3D it runs on a plane behind the model.</p>
         <p>System Five links to System Four and monitors the Three–Four homeostat; it has no direct line to System Three.</p>
         <p>Two extensions can be switched on or off in the Model panel: System Four feeding the Resource Bargain, which reads the command axis as anticipatory, and a direct link between System One and System Four. Neither appears in the commonly reproduced diagram.</p>
         <p>The drawing convention switches between a square metasystem box holding 3, 3*, 4, 5 and the System Two centre, with local managements tilted 45 degrees, and a rhombus metasystem with upright local managements. The System Two centre sits inside the metasystem; the Bridge option draws it on the boundary and, in 3D, puts all of System Two on its own plane between operations and metasystem. It is an interpretive option, prompted by a Stanford Medicine study (<i>Nature Neuroscience</i>, September 2026) reporting that the forebrain and midbrain arise from one progenitor lineage and the hindbrain from another.</p>
@@ -1246,7 +1246,7 @@ const KB = {
   },
   alg: {
     kind: 'Channel', role: 'Algedonic signal',
-    summary: 'The algedonic signal (from the Greek for pain and pleasure) is split from the ascending signal coming from every operation of System One. An algedonic filter decides whether to alert System Five; "alone of all the signals in the enterprise", it is organized to break through recursivity.',
+    summary: 'The algedonic signal (from the Greek for pain and pleasure) is split from the ascending signal coming from System One, through each local management. It runs parallel to the Resource Bargain, behind Systems Three, Four and Five, and an algedonic filter decides whether to alert System Five; "alone of all the signals in the enterprise", it is organized to break through recursivity.',
     practice: ['Whistleblowing lines, safety stop signals, critical-incident alerts'],
     questions: ['Can an alarm from any operation reach System Five within hours?', 'Are false alarms tolerated so that real ones are raised?'],
     watch: ['No algedonic route, so crises are discovered late']
@@ -1383,7 +1383,7 @@ function buildLayout(n, opts) {
   };
   const E = LAYER.env, O = LAYER.ops, M = LAYER.meta;
   const allO = ops.map(i => 'o' + i), allM = ops.map(i => 'm' + i), allA = ops.map(i => 'a' + i);
-  const X_AUD = S3SX, X_S14 = -25, X_ALG = -30, X_RISE = 60;
+  const X_AUD = S3SX, X_S14 = -25;
 
   ops.forEach(i => {
     chan('eo' + i, 'eo', ['e' + i, 'o' + i], [['e' + i], ['o' + i]], [{ pts: [P(at('e' + i, 1, 0), E), P(at('o' + i, -1, 0), O)], arrows: 'both' }], { idx: i });
@@ -1446,13 +1446,13 @@ function buildLayout(n, opts) {
     chan('s14', 's14', allO.concat(['s4']), [allO, ['s4']], s14paths, { ext: true });
   }
 
-  // Algedonic signal: ascends from every operation and breaks through to System Five
-  const algPaths = [{
-    pts: [P([X_ALG, yC(0) - 5.46], O), P([X_ALG, yCL - 13], O), P([X_RISE, yCL - 13], O), P([X_RISE, 72.5], M), P(at('s5', 1, 0.45), M)],
-    corner: 3.5, arrows: 'end'
-  }];
-  ops.forEach(i => algPaths.push({ pts: [P(at('o' + i, ...deg(220)), O), P([X_ALG, yC(i) - 5.46], O)], arrows: 'none' }));
-  chan('alg', 'alg', allO.concat(['s5']), [allO, ['s5']], algPaths);
+  // Algedonic signal: rises from the local managements parallel to the Resource Bargain, behind
+  // Systems Three, Four and Five (a layer behind them in 3D), and breaks through to System Five
+  const X_ALG = 13, Z_ALG = -6;
+  chan('alg', 'alg', allM.concat(['s5']), [allM, ['s5']], [{
+    pts: [P([X_ALG, yLast + 7], O), P([X_ALG, yLast + 9], Z_ALG), P([X_ALG, 68], Z_ALG), P([X_ALG, 70], M)],
+    arrows: 'none'
+  }]);
 
   chans.forEach(c => c.paths.forEach(p => { p.samples = samplePath(p); }));
 
@@ -3145,7 +3145,7 @@ const CHANNEL_GUIDE = [
   'c4f: A = System Four, B = the future environment.',
   's4cmd: A = System Four, B = the Resource Bargain. Forecasts that shape the bargain in advance.',
   's14: A = the operations, B = System Four. Front-line signals and trials.',
-  'alg: A = all operations, B = System Five. Algedonic signals that break through the normal channels.'
+  'alg: A = all local managements, B = System Five. Algedonic signals that break through the normal channels.'
 ];
 function typeOfIdFor(lv, id) { return typeOfId(buildLayout(lv.opCount, FULL_OPTS), id); }
 function mappingPrompt(lv, brief) {

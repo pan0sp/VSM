@@ -1352,7 +1352,7 @@ function buildLayout(n, opts) {
     add({ id: 'a' + i, type: 's2', group: 'meta', idx: i, layer: S2L, z2: 0,
       shape: { kind: 'tri', cx: 27, cy: y + 7, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
   });
-  const RECT = { x0: -16, x1: 35, y0: 18, y1: 80 };
+  const RECT = { x0: -41, x1: 35, y0: 18, y1: 80 };
   add(sq
     ? { id: 'meta', type: 'meta', group: 'meta', container: true, layer: LAYER.meta, z2: -0.3,
         shape: { kind: 'rect', cx: (RECT.x0 + RECT.x1) / 2, cy: (RECT.y0 + RECT.y1) / 2, hw: (RECT.x1 - RECT.x0) / 2, hh: (RECT.y1 - RECT.y0) / 2 },
@@ -1364,7 +1364,7 @@ function buildLayout(n, opts) {
     shape: { kind: 'tri', cx: 27, cy: bridge ? (sq ? RECT.y0 : 27.5) : 37, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
   add({ id: 's3', type: 's3', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: 37, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
   add({ id: 's3s', type: 's3s', group: 'meta', layer: LAYER.meta, z2: 0,
-    shape: { kind: 'tri', cx: -7, cy: 29, w: 9, h: 8, dir: 'down' }, label: { dx: -6, dy: 0, w: 14, align: 'r', codeIn: true } });
+    shape: { kind: 'tri', cx: -36, cy: 29, w: 9, h: 8, dir: 'down' }, label: { dx: 0, dy: 6.5, w: 14, codeIn: true } });
   add({ id: 's4', type: 's4', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: 53.5, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
   add({ id: 's5', type: 's5', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: 70, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
 
@@ -1378,7 +1378,7 @@ function buildLayout(n, opts) {
   };
   const E = LAYER.env, O = LAYER.ops, M = LAYER.meta;
   const allO = ops.map(i => 'o' + i), allM = ops.map(i => 'm' + i), allA = ops.map(i => 'a' + i);
-  const X_AUD = -34, X_S14 = -29.5, X_ALG = -4;
+  const X_AUD = -36, X_S14 = -29.5, X_ALG = -4;
 
   ops.forEach(i => {
     chan('eo' + i, 'eo', ['e' + i, 'o' + i], [['e' + i], ['o' + i]], [{ pts: [P(at('e' + i, 1, 0), E), P(at('o' + i, -1, 0), O)], arrows: 'both' }], { idx: i });
@@ -1401,9 +1401,10 @@ function buildLayout(n, opts) {
   // The central command axis carries two of Beer's designed vertical channels:
   // Corporate Intervention (down) and the Resource Bargain with its accountability (both ways)
   const axis = (dx, id, type, arrows) => {
-    const top = at('s3', dx, -5.5), m0 = at('m0', dx, 7);
+    const dyM = sq ? 7 - Math.abs(dx) : 5; // hit the management outline directly above or below, so the lines stay vertical
+    const top = at('s3', dx, -5.5), m0 = at('m0', dx, dyM);
     const paths = [{ pts: [P(top, M), P(m0, O)], arrows }];
-    for (let i = 0; i < n - 1; i++) paths.push({ pts: [P(at('m' + i, dx, -7), O), P(at('m' + (i + 1), dx, 7), O)], arrows });
+    for (let i = 0; i < n - 1; i++) paths.push({ pts: [P(at('m' + i, dx, -dyM), O), P(at('m' + (i + 1), dx, dyM), O)], arrows });
     chan(id, type, ['s3'].concat(allM), [['s3'], allM], paths);
     return { top, m0 };
   };
@@ -1414,7 +1415,7 @@ function buildLayout(n, opts) {
   const s3s = byId.s3s.shape;
   const audPaths = [
     { pts: [P(at('s3', -1, -0.73), M), P(at('s3s', 4.5, 4), M)], arrows: 'both' },
-    { pts: [P(at('s3s', 0, -1), M), P([s3s.cx, 21], M), P([X_AUD, 21], 6), P([X_AUD, yLast + 4.25], 6)], corner: 3, arrows: 'none' }
+    { pts: [P(at('s3s', 0, -1), M), P([X_AUD, yLast + 4.25], 6)], arrows: 'none' }
   ];
   ops.forEach(i => audPaths.push({ pts: [P([X_AUD, yOp(i) + 4.25], 6), P(at('o' + i, ...deg(150)), O)], arrows: 'end' }));
   chan('aud', 'audit', ['s3', 's3s'].concat(allO), [['s3'], allO], audPaths);

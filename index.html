@@ -1448,11 +1448,11 @@ function buildLayout(n, opts) {
 
   // Algedonic signal: rises from the local managements parallel to the Resource Bargain, behind
   // Systems Three, Four and Five (a layer behind them in 3D), and breaks through to System Five
-  const X_ALG = 13, Z_ALG = -6;
+  const X_ALG = 13, Z_ALG = LAYER.env - 14; // behind the whole model, environment included
   chan('alg', 'alg', allM.concat(['s5']), [allM, ['s5']], [{
     pts: [P([X_ALG, yLast + 7], O), P([X_ALG, yLast + 9], Z_ALG), P([X_ALG, 68], Z_ALG), P([X_ALG, 70], M)],
     arrows: 'none'
-  }]);
+  }], { z2: -0.22, behind: true });
 
   chans.forEach(c => c.paths.forEach(p => { p.samples = samplePath(p); }));
 
@@ -1868,7 +1868,7 @@ let focusSet = null;
 
 const SZ = d => lerp(0.012, 1, d);
 const elZ = (el, d) => d * (el.layer * prefs.spread + (el.zoff || 0)) + (1 - d) * el.z2;
-const chZ = (Lz, d) => d * Lz * prefs.spread + (1 - d) * -0.15;
+const chZ = (Lz, d, z2) => d * Lz * prefs.spread + (1 - d) * (z2 == null ? -0.15 : z2);
 
 const TINT = { envTotal: [0.88, 0.7], envFuture: [0.76, 0.32], envOp: [0.76, 0.32], meta: [0.9, 0.55], def: [0.74, 0.0] };
 const STROKE3D = { circle: 0, square: 0, tri: 0, rhombus: 0, rect: 0, diamond: 0, blob: 0.45 };
@@ -2044,7 +2044,7 @@ function updateGeometry() {
     o.group.scale.z = sz;
     o.ch.paths.forEach((p, k) => {
       const part = o.parts[k];
-      const pts = p.samples.map(s => new THREE.Vector3(s.x, s.y, chZ(s.L, d) / sz));
+      const pts = p.samples.map(s => new THREE.Vector3(s.x, s.y, chZ(s.L, d, o.ch.z2) / sz));
       const curve = new PolyCurve(pts);
       const segs = clamp(Math.round(curve.total * 1.2), 6, 180);
       part.tube.geometry.dispose();
@@ -2074,7 +2074,7 @@ function updateGeometry() {
       if (p.arrows === 'both' || p.arrows === 'end') addCone(pts[pts.length - 1], back(pts, pts.length - 1, 2.2));
       if (p.arrows === 'both') addCone(pts[0], fwd(pts, 2.2));
       // world-space polyline for flow particles
-      part.world = p.samples.map(s => new THREE.Vector3(s.x, s.y, chZ(s.L, d)));
+      part.world = p.samples.map(s => new THREE.Vector3(s.x, s.y, chZ(s.L, d, o.ch.z2)));
       part.cum = [0];
       for (let i = 1; i < part.world.length; i++) part.cum.push(part.cum[i - 1] + part.world[i].distanceTo(part.world[i - 1]));
     });
@@ -2186,14 +2186,14 @@ function buildParticles() {
     if (!dataMode) {
       const count = Math.max(1, Math.round(len / 16));
       const dirs = p.oneWay || p.arrows === 'end' ? [1] : [1, -1];
-      dirs.forEach(dir => { for (let j = 0; j < count; j++) particleSpecs.push({ id: ch.id, part: k, dir, phase: (j + (dir < 0 ? 0.5 : 0)) / count }); });
+      dirs.forEach(dir => { for (let j = 0; j < count; j++) particleSpecs.push({ id: ch.id, part: k, dir, behind: !!ch.behind, phase: (j + (dir < 0 ? 0.5 : 0)) / count }); });
       return;
     }
     // data mode: one stream of particles per mapped flow, in that flow's direction
     const flows = lv.flows[ch.id] || [];
     const count = Math.max(1, Math.round(len / 22));
     flows.forEach((f, fi) => flowDirsOnPath(f.dir, p).forEach(dir => {
-      for (let j = 0; j < count; j++) particleSpecs.push({ id: ch.id, part: k, dir, phase: (j + (fi + 0.5) / (flows.length + 1)) / count });
+      for (let j = 0; j < count; j++) particleSpecs.push({ id: ch.id, part: k, dir, behind: !!ch.behind, phase: (j + (fi + 0.5) / (flows.length + 1)) / count });
     }));
   }));
   const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
@@ -2221,7 +2221,7 @@ function updateParticles(time) {
     tmpV.copy(part.world[lo]).lerp(part.world[hi], (dist - c[lo]) / ((c[hi] - c[lo]) || 1));
     const fadeEnds = Math.min(1, Math.min(dist, total - dist) / 2.5);
     const sc = 0.35 + 0.65 * fadeEnds;
-    tmpM.makeScale(sc, sc, Math.max(SZ(anim.d), 0.05) * sc).setPosition(tmpV.x, tmpV.y, tmpV.z + (1 - anim.d) * 0.4);
+    tmpM.makeScale(sc, sc, Math.max(SZ(anim.d), 0.05) * sc).setPosition(tmpV.x, tmpV.y, tmpV.z + (1 - anim.d) * (s.behind ? 0 : 0.4));
     particles.setMatrixAt(i, tmpM);
   });
   particles.instanceMatrix.needsUpdate = true;

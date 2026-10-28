@@ -26,6 +26,7 @@ The layout follows Beer's diagram from *Brain of the Firm* and *Diagnosing the S
 
 - Environments are amoebas on the left: the total environment, the future environment beside System 4, and one operational environment per operation.
 - The operational elements of System One are circles in a column, each with its local management up and to the right.
+- A large circle (a translucent sphere in 3D) encloses all of System One: every operation and its local management. It is sized from the column, so the rows drop below the metasystem and the System Two units and environment move outward as operations are added.
 - **Drawing convention** (Model panel): *Square* draws the metasystem as a square box holding Systems Three, Three-Star, Four, Five and the System Two regulatory centre, with each local management as a square tilted 45 degrees (the next recursion's metasystem seen on the diagonal). *Diamond* draws the metasystem as a rhombus with upright local managements, the form Jon Walker prefers.
 - The central command axis is two of Beer's six vertical channels from *Diagnosing the System*: Corporate Intervention (down) and the Resource Bargain with accountability (both ways), from System Three to each local management. The other four are the operational linkages, the environmental intersects, System Two and the audit.
 - System Two's anti-oscillation triangles sit beside each local management, linked to the regulatory centre inside the metasystem.

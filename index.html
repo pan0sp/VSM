@@ -1185,6 +1185,13 @@ const KB = {
     questions: ['What is the identity of this system, as it is actually practised?', 'How does System Five hear the Three–Four debate?', 'Does it reach into the operations, collapsing into System Three?'],
     watch: ['System Five collapsing into System Three', 'An identity that is declared but never acted on']
   },
+  sys1: {
+    kind: 'System One', role: 'The operational elements together',
+    summary: 'System One taken as a whole: every operational element with its local management. Beer drew the operations as one domain because their environments intersect and their operational linkages make them a set, not a list. The metasystem exists to serve this domain, and each element in it contains a viable system of its own.',
+    practice: ['All the business units, clinical services or teams that produce what the organization exists for'],
+    questions: ['Do the operations together produce the purpose of the whole?', 'Beer suggests seven or eight elements at most: is a level of recursion missing?'],
+    watch: ['Treating System One as a collection of departments rather than viable systems']
+  },
   meta: {
     kind: 'Metasystem', role: 'Systems Two to Five',
     summary: 'The metasystem is the management of the whole: Systems Two, Three, Three-Star, Four and Five. It exists to serve System One, providing the cohesion and adaptation the operations cannot provide for themselves. "Meta" means a higher logical order, not higher status.',
@@ -1380,34 +1387,53 @@ function edgePoint(el, dx, dy) {
 function buildLayout(n, opts) {
   opts = opts || layoutOpts();
   const els = [], chans = [], byId = {};
-  const yOp = i => -OP_GAP * i;
-  const yLast = yOp(n - 1);
+  const sq = opts.style !== 'diamond';
   const OPX = -3.34, OPDY = -5.34;          // operation centre relative to its row
+  // System One circle: one circle around every operation and its local management. Size it from the
+  // column, then lower the rows so its top clears the metasystem.
+  const MH = sq ? 7 : 5, MX = 9, MDY = 7;
+  const s1pts = [];
+  for (let i = 0; i < n; i++) {
+    const y = -OP_GAP * i;
+    for (let k = 0; k < 24; k++) { const t = k / 24 * Math.PI * 2; s1pts.push([OPX + 8.5 * Math.cos(t), y + OPDY + 8.5 * Math.sin(t)]); }
+    s1pts.push([MX, y + MDY + MH], [MX + MH, y + MDY], [MX, y + MDY - MH], [MX - MH, y + MDY]);
+  }
+  const s1x0 = Math.min(...s1pts.map(p => p[0])), s1x1 = Math.max(...s1pts.map(p => p[0]));
+  const s1y0 = Math.min(...s1pts.map(p => p[1])), s1y1 = Math.max(...s1pts.map(p => p[1]));
+  const S1CX = (s1x0 + s1x1) / 2;
+  let S1CY = (s1y0 + s1y1) / 2;
+  const S1R = Math.max(...s1pts.map(p => Math.hypot(p[0] - S1CX, p[1] - S1CY))) + 3.5;
+  const S1TOP = sq ? 15 : 11;
+  const DROP = Math.max(0, S1CY + S1R - S1TOP);
+  S1CY -= DROP;
+  const yOp = i => -OP_GAP * i - DROP;
+  const yLast = yOp(n - 1);
   const yC = i => yOp(i) + OPDY, yCL = yC(n - 1);
+  const S2UX = S1CX + S1R + 6;              // System Two units stand just outside the circle
+  const ENVDX = Math.min(0, (S1CX - S1R - 4) - (-42.5)); // move the environment left when the circle grows
   const add = o => { o.outline = outlineOf(o.shape); els.push(o); byId[o.id] = o; return o; };
-  const envTop = 80, envBottom = yLast - 23;
+  const envTop = 80, envBottom = Math.min(yLast - 23, S1CY - S1R - 6);
   const envCy = (envTop + envBottom) / 2, envRy = (envTop - envBottom) / 2;
   const bridge = opts.s2 === 'bridge';
   // Two drawing conventions. 'square': the metasystem is a square box holding 3, 3*, 4, 5 and the
   // System Two regulatory centre, and each local management is a square tilted 45 degrees (the
   // next recursion's metasystem seen on the diagonal). 'diamond': the metasystem is a rhombus and
   // local managements are upright squares.
-  const sq = opts.style !== 'diamond';
   const S2L = bridge ? LAYER.mid : LAYER.meta;
   // System Two and Three-Star sit at the same distance either side of System Three (x = 9)
   const S2X = sq ? 33 : 27, S3SX = -15;
   const ops = Array.from({ length: n }, (_, i) => i);
 
   add({ id: 'env', type: 'envTotal', group: 'env', container: true, layer: LAYER.env, zoff: 0, z2: -0.6,
-    shape: { kind: 'blob', cx: -63, cy: envCy, rx: 20.5, ry: envRy, p: 3.4, amp: 0.03, seed: 2.1 },
+    shape: { kind: 'blob', cx: -63 + ENVDX, cy: envCy, rx: 20.5, ry: envRy, p: 3.4, amp: 0.03, seed: 2.1 },
     label: { dx: 0, dy: envTop - envCy - 6, w: 32, big: true } });
   add({ id: 'fut', type: 'envFuture', group: 'env', layer: LAYER.env, z2: -0.45,
-    shape: { kind: 'blob', cx: -62, cy: 57, rx: 15, ry: 12.5, p: 2.2, amp: 0.07, seed: 7.3 },
+    shape: { kind: 'blob', cx: -62 + ENVDX, cy: 57, rx: 15, ry: 12.5, p: 2.2, amp: 0.07, seed: 7.3 },
     label: { dx: 0, dy: 0, w: 24 } });
   ops.forEach(i => {
     const y = yOp(i);
     add({ id: 'e' + i, type: 'envOp', group: 'env', idx: i, layer: LAYER.env, z2: -0.45,
-      shape: { kind: 'blob', cx: -66, cy: y + OPDY, rx: 12, ry: 9.5, p: 2.3, amp: 0.08, seed: 11.7 + i * 3.1 },
+      shape: { kind: 'blob', cx: -66 + ENVDX, cy: y + OPDY, rx: 12, ry: 9.5, p: 2.3, amp: 0.08, seed: 11.7 + i * 3.1 },
       label: { dx: 0, dy: 0, w: 20 } });
     add({ id: 'o' + i, type: 'op', group: 'ops', idx: i, layer: LAYER.ops, z2: 0,
       // each operation sits below and to the left of its local management, on the 45 degree diagonal
@@ -1416,8 +1442,10 @@ function buildLayout(n, opts) {
       shape: sq ? { kind: 'diamond', cx: 9, cy: y + 7, hw: 7, hh: 7 } : { kind: 'square', cx: 9, cy: y + 7, s: 10 },
       label: { dx: 0, dy: 0, w: 21, nestDy: 10 } });
     add({ id: 'a' + i, type: 's2', group: 'meta', idx: i, layer: S2L, z2: 0,
-      shape: { kind: 'tri', cx: S2X, cy: y + 7, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
+      shape: { kind: 'tri', cx: S2UX, cy: y + 7, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
   });
+  add({ id: 'sys1', type: 'sys1', group: 'ops', container: true, layer: LAYER.ops, z2: -0.5, zs: 0.55,
+    shape: { kind: 'circle', cx: S1CX, cy: S1CY, r: S1R }, label: { dx: 0, dy: -S1R - 4, w: 30, big: true, nameOnly: true } });
   const RECT = { x0: -22, x1: 40, y0: 18, y1: 80 };
   add(sq
     ? { id: 'meta', type: 'meta', group: 'meta', container: true, layer: LAYER.meta, z2: -0.3,
@@ -1457,7 +1485,8 @@ function buildLayout(n, opts) {
   });
 
   // System Two: anti-oscillation channel and its link to System Three
-  const s2paths = [{ pts: [P(at('s2', 0, -1), S2L), P(at('a0', 0, 1), S2L)], arrows: 'both' }];
+  const s2b = at('s2', 0, -1), yE = Math.min(s2b[1] - 2, S1TOP + 1);
+  const s2paths = [{ pts: [P(s2b, S2L), P([s2b[0], yE], S2L), P([S2UX, yE], S2L), P(at('a0', 0, 1), S2L)], corner: 2.5, arrows: 'both' }];
   for (let i = 0; i < n - 1; i++) s2paths.push({ pts: [P(at('a' + i, 0, -1), S2L), P(at('a' + (i + 1), 0, 1), S2L)], arrows: 'both' });
   chan('c2', 's2ch', ['s2'].concat(allA), [['s2'], allA], s2paths);
   chan('c23', 's2s3', ['s3', 's2'], [['s3'], ['s2']], [bridge
@@ -1636,7 +1665,7 @@ function defaultLabel(lv, id) {
   if ((m = /^ee(\d+)$/.exec(id))) return 'Environmental intersect ' + t(+m[1]) + '–' + t(+m[1] + 1);
   if ((m = /^oo(\d+)$/.exec(id))) return 'Operational linkage ' + t(+m[1]) + '–' + t(+m[1] + 1);
   return ({
-    env: 'Environment', fut: 'Future environment', meta: 'Metasystem',
+    env: 'Environment', fut: 'Future environment', meta: 'Metasystem', sys1: 'System One',
     s2: 'Regulatory centre', s3: 'Inside-and-now', s3s: 'Audit', s4: 'Outside-and-then', s5: 'Identity',
     c2: 'System Two channel', c23: 'Regulatory centre–System Three', ci: 'Corporate Intervention', rb: 'Resource Bargain',
     aud: 'Audit channel', h34: 'Three–Four homeostat', c45: 'System Four–Five link', s5h: 'System Five monitoring',
@@ -1934,7 +1963,7 @@ const SZ = d => lerp(0.012, 1, d);
 const elZ = (el, d) => d * (el.layer * prefs.spread + (el.zoff || 0)) + (1 - d) * el.z2;
 const chZ = (Lz, d, z2) => d * Lz * prefs.spread + (1 - d) * (z2 == null ? -0.15 : z2);
 
-const TINT = { envTotal: [0.88, 0.7], envFuture: [0.76, 0.32], envOp: [0.76, 0.32], meta: [0.9, 0.55], def: [0.74, 0.0] };
+const TINT = { envTotal: [0.88, 0.7], envFuture: [0.76, 0.32], envOp: [0.76, 0.32], meta: [0.9, 0.55], sys1: [0.92, 0.6], def: [0.74, 0.0] };
 const STROKE3D = { circle: 0, square: 0, tri: 0, rhombus: 0, rect: 0, diamond: 0, blob: 0.45 };
 
 function shapeFromPts(pts) {
@@ -2055,6 +2084,7 @@ function buildScene() {
     const fill = new THREE.Mesh(fg.g, mat);
     fill.userData.pick = { kind: 'el', id: el.id, container: !!el.container };
     if (el.type === 'meta') fill.renderOrder = 2;
+    if (el.type === 'sys1') fill.renderOrder = 1;
     if (el.type === 'envTotal') fill.renderOrder = -1;
     group.add(fill);
     pickables.push(fill);
@@ -2102,9 +2132,10 @@ function updateGeometry() {
   const d = anim.d, sz = SZ(d);
   els.forEach(o => {
     o.group.position.z = elZ(o.el, d);
-    o.fill.scale.z = sz;
-    o.band.position.z = lerp(o.half * sz + 0.04, 0, d);
-    if (o.ring) o.ring.position.z = lerp(o.half * sz + 0.06, 0, d);
+    const zs = o.el.zs || 1; // the System One sphere is flattened a little so it stays within its layer
+    o.fill.scale.z = sz * zs;
+    o.band.position.z = lerp(o.half * sz * zs + 0.04, 0, d);
+    if (o.ring) o.ring.position.z = lerp(o.half * sz * zs + 0.06, 0, d);
   });
   chs.forEach(o => {
     o.group.scale.z = sz;
@@ -2176,6 +2207,7 @@ function refreshVisuals() {
     const fill = base.clone().lerp(theme.stage, lerp(tint[0], tint[1], d));
     let op = 1;
     if (el.type === 'meta') op = lerp(0.5, 0.15, d); // see-through, so the algedonic signal shows behind it
+    else if (el.type === 'sys1') op = lerp(0.55, 0.12, d);
     else if (el.type === 'envTotal') op = lerp(1, 0.16, d);
     else if ((el.type === 'op' || el.type === 'mgmt') && minisShown) op = lerp(0.45, 0.18, d);
     const related = !focusSet || focusSet.has(id);
@@ -2604,6 +2636,7 @@ function computeFocus(id) {
   if (L.byId[id]) {
     L.chans.forEach(c => { if (c.ends.includes(id)) { set.add(c.id); c.ends.forEach(e => set.add(e)); } });
     if (id === 'meta') L.els.forEach(e => { if (e.group === 'meta') set.add(e.id); });
+    if (id === 'sys1') L.els.forEach(e => { if (e.group === 'ops') set.add(e.id); });
     if (id === 'env') L.els.forEach(e => { if (e.group === 'env') set.add(e.id); });
   } else if (L.chanById[id]) L.chanById[id].ends.forEach(e => set.add(e));
   return set;

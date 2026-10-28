@@ -1411,10 +1411,10 @@ function buildLayout(n, opts) {
       label: { dx: 0, dy: 0, w: 20 } });
     add({ id: 'o' + i, type: 'op', group: 'ops', idx: i, layer: LAYER.ops, z2: 0,
       // each operation sits below and to the left of its local management, on the 45 degree diagonal
-      shape: { kind: 'circle', cx: OPX, cy: y + OPDY, r: 8.5 }, label: { dx: 0, dy: 0, w: 16, nestDy: 6.2 } });
+      shape: { kind: 'circle', cx: OPX, cy: y + OPDY, r: 8.5 }, label: { dx: 0, dy: 0, w: 16, nestDy: -10.5 } });
     add({ id: 'm' + i, type: 'mgmt', group: 'ops', idx: i, layer: LAYER.ops, z2: 0,
       shape: sq ? { kind: 'diamond', cx: 9, cy: y + 7, hw: 7, hh: 7 } : { kind: 'square', cx: 9, cy: y + 7, s: 10 },
-      label: { dx: 0, dy: 0, w: 21 } });
+      label: { dx: 0, dy: 0, w: 21, nestDy: 10 } });
     add({ id: 'a' + i, type: 's2', group: 'meta', idx: i, layer: S2L, z2: 0,
       shape: { kind: 'tri', cx: S2X, cy: y + 7, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
   });
@@ -1481,7 +1481,8 @@ function buildLayout(n, opts) {
   const s3s = byId.s3s.shape;
   const audPaths = [
     { pts: [P(at('s3', -1, 0), M), P(at('s3s', 1, 0), M)], arrows: 'both' },
-    { pts: [P(at('s3s', 0, -1), M), P([X_AUD, yCL + 11.65], 6)], arrows: 'none' }
+    // drop to the audit layer just below Three-Star, then run straight down at one depth so every branch meets it
+    { pts: [P(at('s3s', 0, -1), M), P([X_AUD, at('s3s', 0, -1)[1] - 6], 6), P([X_AUD, yCL + 11.65], 6)], arrows: 'none' }
   ];
   ops.forEach(i => audPaths.push({ pts: [P([X_AUD, yC(i) + 11.65], 6), P(at('o' + i, ...deg(135)), O)], arrows: 'end' }));
   chan('aud', 'audit', ['s3', 's3s'].concat(allO), [['s3'], allO], audPaths);
@@ -2176,7 +2177,7 @@ function refreshVisuals() {
     let op = 1;
     if (el.type === 'meta') op = lerp(0.5, 0.15, d); // see-through, so the algedonic signal shows behind it
     else if (el.type === 'envTotal') op = lerp(1, 0.16, d);
-    else if (el.type === 'op' && minisShown) op = lerp(0.55, 0.2, d);
+    else if ((el.type === 'op' || el.type === 'mgmt') && minisShown) op = lerp(0.45, 0.18, d);
     const related = !focusSet || focusSet.has(id);
     const dimF = related ? 1 : (el.container ? 0.5 : 0.22);
     o.fill.material.color.copy(fill);
@@ -2299,7 +2300,9 @@ function updateParticles(time) {
 }
 
 /* ---------- nested viable systems inside each operation ---------- */
-const MINI_K = 0.075, THETA = -Math.PI / 4;   // each recursion sits inside its operation, scaled and turned 45 degrees
+// Each recursion spans its operation and that operation's local management: the inner operations sit in the
+// circle and the inner metasystem on the tilted square, so the whole lower-level viable system reads as one unit
+let MINI_K = 0.075, THETA = -Math.PI / 4;
 let minisShown = false, fitDistCache = 300;
 function buildMinis() {
   const lv = level();
@@ -2309,21 +2312,28 @@ function buildMinis() {
     const ML = buildLayout(child ? child.opCount : 3);
     const holder = new THREE.Group();
     const inner = new THREE.Group();
-    const cx = (ML.bbox.x0 + ML.bbox.x1) / 2, cy = (ML.bbox.y0 + ML.bbox.y1) / 2;
-    inner.position.set(-cx, -cy, 0);
+    // map the inner operations' centre onto the operation and the inner metasystem's centre onto the local management
+    const innerOps = ML.els.filter(e => e.type === 'op'), innerMeta = ML.byId.meta.shape;
+    const oc = innerOps.reduce((a, e) => [a[0] + e.shape.cx / innerOps.length, a[1] + e.shape.cy / innerOps.length], [0, 0]);
+    const po = L.byId['o' + i].shape, pm = L.byId['m' + i].shape;
+    const pd = [pm.cx - po.cx, pm.cy - po.cy], cd = [innerMeta.cx - oc[0], innerMeta.cy - oc[1]];
+    MINI_K = Math.hypot(pd[0], pd[1]) / Math.hypot(cd[0], cd[1]);
+    THETA = Math.atan2(pd[1], pd[0]) - Math.atan2(cd[1], cd[0]);
+    inner.position.set(-oc[0], -oc[1], 0);
     holder.add(inner);
     holder.scale.setScalar(MINI_K);
     holder.rotation.z = THETA;
     const parts = [];
+    const isEnv = id => ML.byId[id] && ML.byId[id].group === 'env';
     ML.els.forEach(el => {
-      if (el.type === 'envTotal') return;
+      if (el.group === 'env') return; // the parent already draws this operation's environment
       const fg = fillGeometry(el, 0.5);
       const m = new THREE.Mesh(fg.g, new THREE.MeshStandardMaterial({ roughness: 0.6, transparent: !!el.container, opacity: el.container ? 0.3 : 1, depthWrite: !el.container, side: el.container ? THREE.DoubleSide : THREE.FrontSide }));
       m.position.set(el.shape.cx, el.shape.cy, 0);
       inner.add(m);
       parts.push({ kind: 'el', el, mesh: m });
     });
-    ML.chans.forEach(ch => ch.paths.forEach(p => {
+    ML.chans.filter(ch => !ch.ends.some(isEnv)).forEach(ch => ch.paths.forEach(p => {
       const g = new THREE.BufferGeometry().setFromPoints(p.samples.map(s => new THREE.Vector3(s.x, s.y, 0)));
       const line = new THREE.Line(g, new THREE.LineBasicMaterial({ transparent: true, opacity: 0.9 }));
       inner.add(line);

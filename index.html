@@ -1410,9 +1410,10 @@ function buildLayout(n, opts) {
   const yLast = yOp(n - 1);
   const yC = i => yOp(i) + OPDY, yCL = yC(n - 1);
   const S2UX = S1CX + S1R + 6;              // System Two units stand just outside the circle
-  const ENVDX = Math.min(0, (S1CX - S1R - 4) - (-42.5)); // move the environment left when the circle grows
+  const metaLeft = sq ? 9 - (S2UX - 9) - 8 : 9 - Math.max(35, 1.63 * (S2UX - 9) + 6);
+  const ENVDX = Math.min(0, Math.min(S1CX - S1R, metaLeft) - 4 - (-42.5)); // move the environment left when System One or the metasystem grows
   const add = o => { o.outline = outlineOf(o.shape); els.push(o); byId[o.id] = o; return o; };
-  const envTop = 80, envBottom = Math.min(yLast - 23, S1CY - S1R - 6);
+  const envTop = Math.max(80, (sq ? 18 + 2 * ((S2UX - 9) + 8) : 80)), envBottom = Math.min(yLast - 23, S1CY - S1R - 6);
   const envCy = (envTop + envBottom) / 2, envRy = (envTop - envBottom) / 2;
   const bridge = opts.s2 === 'bridge';
   // Two drawing conventions. 'square': the metasystem is a square box holding 3, 3*, 4, 5 and the
@@ -1420,15 +1421,18 @@ function buildLayout(n, opts) {
   // next recursion's metasystem seen on the diagonal). 'diamond': the metasystem is a rhombus and
   // local managements are upright squares.
   const S2L = bridge ? LAYER.mid : LAYER.meta;
-  // System Two and Three-Star sit at the same distance either side of System Three (x = 9)
-  const S2X = sq ? 33 : 27, S3SX = -15;
+  // The System Two regulatory centre stands directly above its units, and Three-Star mirrors it on the
+  // other side, so both stay the same distance from System Three (x = 9)
+  const S2X = S2UX, S3SX = 9 - (S2UX - 9);
+  const MHALF = (S2UX - 9) + 8;                         // square metasystem: wide enough for both, and as tall as it is wide
+  const RHW = Math.max(35, 1.63 * (S2UX - 9) + 6);     // rhombus: wide enough to hold both triangles
   const ops = Array.from({ length: n }, (_, i) => i);
 
   add({ id: 'env', type: 'envTotal', group: 'env', container: true, layer: LAYER.env, zoff: 0, z2: -0.6,
     shape: { kind: 'blob', cx: -63 + ENVDX, cy: envCy, rx: 20.5, ry: envRy, p: 3.4, amp: 0.03, seed: 2.1 },
     label: { dx: 0, dy: envTop - envCy - 6, w: 32, big: true } });
   add({ id: 'fut', type: 'envFuture', group: 'env', layer: LAYER.env, z2: -0.45,
-    shape: { kind: 'blob', cx: -62 + ENVDX, cy: 57, rx: 15, ry: 12.5, p: 2.2, amp: 0.07, seed: 7.3 },
+    shape: { kind: 'blob', cx: -62 + ENVDX, cy: envTop - 23, rx: 15, ry: 12.5, p: 2.2, amp: 0.07, seed: 7.3 },
     label: { dx: 0, dy: 0, w: 24 } });
   ops.forEach(i => {
     const y = yOp(i);
@@ -1446,21 +1450,23 @@ function buildLayout(n, opts) {
   });
   add({ id: 'sys1', type: 'sys1', group: 'ops', container: true, layer: LAYER.ops, z2: -0.5, zs: 0.55,
     shape: { kind: 'circle', cx: S1CX, cy: S1CY, r: S1R }, label: { dx: 0, dy: -S1R - 4, w: 30, big: true, nameOnly: true } });
-  const RECT = { x0: -22, x1: 40, y0: 18, y1: 80 };
+  const RECT = { x0: 9 - MHALF, x1: 9 + MHALF, y0: 18, y1: Math.max(80, 18 + 2 * MHALF) };
+  // Systems Three, Four and Five spread up the box, so the square is filled rather than empty at the top
+  const Y3 = 37, GAP = sq ? Math.max(16.5, (RECT.y1 - 14 - Y3) / 2) : 16.5, Y4 = Y3 + GAP, Y5 = Y3 + 2 * GAP, YH = (Y3 + Y4) / 2;
   add(sq
     ? { id: 'meta', type: 'meta', group: 'meta', container: true, layer: LAYER.meta, z2: -0.3,
         shape: { kind: 'rect', cx: (RECT.x0 + RECT.x1) / 2, cy: (RECT.y0 + RECT.y1) / 2, hw: (RECT.x1 - RECT.x0) / 2, hh: (RECT.y1 - RECT.y0) / 2 },
         label: { dx: 0, dy: (RECT.y1 - RECT.y0) / 2 + 4, w: 30, big: true, nameOnly: true } }
     : { id: 'meta', type: 'meta', group: 'meta', container: true, layer: LAYER.meta, z2: -0.3,
-        shape: { kind: 'rhombus', cx: 14, cy: 52, hw: 35, hh: 39 }, label: { dx: 0, dy: 39 + 4, w: 30, big: true, nameOnly: true } });
+        shape: { kind: 'rhombus', cx: 9, cy: 52, hw: RHW, hh: 39 }, label: { dx: 0, dy: 39 + 4, w: 30, big: true, nameOnly: true } });
   // System Two's regulatory centre: inside the metasystem, or on its boundary in the bridge view
   add({ id: 's2', type: 's2c', group: 'meta', layer: S2L, z2: 0.05,
     shape: { kind: 'tri', cx: S2X, cy: bridge ? (sq ? RECT.y0 : 27.5) : 37, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
   add({ id: 's3', type: 's3', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: 37, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
   add({ id: 's3s', type: 's3s', group: 'meta', layer: LAYER.meta, z2: 0,
-    shape: { kind: 'tri', cx: S3SX, cy: 37, w: 9, h: 8, dir: 'down' }, label: { dx: -6, dy: 0, w: 14, align: 'r', codeIn: true } });
-  add({ id: 's4', type: 's4', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: 53.5, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
-  add({ id: 's5', type: 's5', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: 70, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
+    shape: { kind: 'tri', cx: S3SX, cy: 37, w: 9, h: 8, dir: 'down' }, label: { dx: -6, dy: 0, w: 12, align: 'r', codeIn: true } });
+  add({ id: 's4', type: 's4', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: Y4, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
+  add({ id: 's5', type: 's5', group: 'meta', layer: LAYER.meta, z2: 0, shape: { kind: 'square', cx: 9, cy: Y5, s: 11 }, label: { dx: 0, dy: 0, w: 13 } });
 
   const at = (id, dx, dy) => edgePoint(byId[id], dx, dy);
   const P = (xy, L) => ({ x: xy[0], y: xy[1], L });
@@ -1472,7 +1478,7 @@ function buildLayout(n, opts) {
   };
   const E = LAYER.env, O = LAYER.ops, M = LAYER.meta;
   const allO = ops.map(i => 'o' + i), allM = ops.map(i => 'm' + i), allA = ops.map(i => 'a' + i);
-  const X_AUD = S3SX, X_S14 = -25;
+  const X_AUD = S3SX, X_S14 = S3SX - 5;
 
   ops.forEach(i => {
     chan('eo' + i, 'eo', ['e' + i, 'o' + i], [['e' + i], ['o' + i]], [{ pts: [P(at('e' + i, 1, 0), E), P(at('o' + i, -1, 0), O)], arrows: 'both' }], { idx: i });
@@ -1485,8 +1491,7 @@ function buildLayout(n, opts) {
   });
 
   // System Two: anti-oscillation channel and its link to System Three
-  const s2b = at('s2', 0, -1), yE = Math.min(s2b[1] - 2, S1TOP + 1);
-  const s2paths = [{ pts: [P(s2b, S2L), P([s2b[0], yE], S2L), P([S2UX, yE], S2L), P(at('a0', 0, 1), S2L)], corner: 2.5, arrows: 'both' }];
+  const s2paths = [{ pts: [P(at('s2', 0, -1), S2L), P(at('a0', 0, 1), S2L)], arrows: 'both' }];
   for (let i = 0; i < n - 1; i++) s2paths.push({ pts: [P(at('a' + i, 0, -1), S2L), P(at('a' + (i + 1), 0, 1), S2L)], arrows: 'both' });
   chan('c2', 's2ch', ['s2'].concat(allA), [['s2'], allA], s2paths);
   chan('c23', 's2s3', ['s3', 's2'], [['s3'], ['s2']], [bridge
@@ -1518,21 +1523,21 @@ function buildLayout(n, opts) {
 
   // Three-Four homeostat, and System Five monitoring it (System Five has no direct line to System Three)
   chan('h34', 's34', ['s3', 's4'], [['s3'], ['s4']], [
-    { pts: [P(at('s3', -3.5, 5.5), M), P([0.5, 45.25], M), P(at('s4', -3.5, -5.5), M)], mode: 'quad', arrows: 'end', oneWay: true },
-    { pts: [P(at('s4', 3.5, -5.5), M), P([17.5, 45.25], M), P(at('s3', 3.5, 5.5), M)], mode: 'quad', arrows: 'end', oneWay: true, sgn: -1 }
+    { pts: [P(at('s3', -3.5, 5.5), M), P([0.5, YH], M), P(at('s4', -3.5, -5.5), M)], mode: 'quad', arrows: 'end', oneWay: true },
+    { pts: [P(at('s4', 3.5, -5.5), M), P([17.5, YH], M), P(at('s3', 3.5, 5.5), M)], mode: 'quad', arrows: 'end', oneWay: true, sgn: -1 }
   ]);
   chan('c45', 's45', ['s4', 's5'], [['s4'], ['s5']], [{ pts: [P(at('s4', 0, 1), M), P(at('s5', 0, -1), M)], arrows: 'both' }]);
-  chan('s5h', 's5h', ['s5', 'h34'], [['s5'], ['h34']], [{ pts: [P(at('s5', 1, -0.36), M), P([18.5, 68], M), P([18.5, 45.25], M), P([15.1, 45.25], M)], corner: 2, arrows: 'both' }]);
+  chan('s5h', 's5h', ['s5', 'h34'], [['s5'], ['h34']], [{ pts: [P(at('s5', 1, -0.36), M), P([18.5, Y5 - 2], M), P([18.5, YH], M), P([15.1, YH], M)], corner: 2, arrows: 'both' }]);
   chan('c4f', 's4f', ['s4', 'fut'], [['s4'], ['fut']], [{ pts: [P(at('s4', -1, 0.36), M), P(at('fut', 1, 0), E)], arrows: 'both' }]);
 
   // extensions: System Four into the Resource Bargain, and a direct System One - System Four link
   if (opts.s4cmd) {
     const jy = 23, jx = rbAxis.top[0];
     const jL = M + (O - M) * (rbAxis.top[1] - jy) / (rbAxis.top[1] - rbAxis.m0[1]);
-    chan('s4cmd', 's4cmd', ['s4', 'rb'], [['s4'], ['rb']], [{ pts: [P(at('s4', 1, -0.45), M), P([21, 51], M), P([21, jy], M), P([jx, jy], jL)], corner: 2.5, arrows: 'end' }], { ext: true });
+    chan('s4cmd', 's4cmd', ['s4', 'rb'], [['s4'], ['rb']], [{ pts: [P(at('s4', 1, -0.45), M), P([21, Y4 - 2.5], M), P([21, jy], M), P([jx, jy], jL)], corner: 2.5, arrows: 'end' }], { ext: true });
   }
   if (opts.s14) {
-    const s14paths = [{ pts: [P([X_S14, yCL - 3.6], 5), P([X_S14, 50.5], 5), P(at('s4', -1, -0.55), M)], corner: 3, arrows: 'end' }];
+    const s14paths = [{ pts: [P([X_S14, yCL - 3.6], 5), P([X_S14, Y4 - 3], 5), P(at('s4', -1, -0.55), M)], corner: 3, arrows: 'end' }];
     ops.forEach(i => s14paths.push({ pts: [P(at('o' + i, ...deg(205)), O), P([X_S14, yC(i) - 3.6], 5)], arrows: 'none' }));
     chan('s14', 's14', allO.concat(['s4']), [allO, ['s4']], s14paths, { ext: true });
   }
@@ -1540,7 +1545,7 @@ function buildLayout(n, opts) {
   // Algedonic signal: rises from every local management (the operation's own metasystem), parallel to
   // the Resource Bargain and one layer behind Systems Three, Four and Five, and breaks through to System Five
   const X_ALG = 13, Z_ALG = -8; // directly behind the command axis
-  const algPaths = [{ pts: [P([X_ALG, yLast + 2], Z_ALG), P([X_ALG, 62], Z_ALG), P([X_ALG, 64.5], M)], arrows: 'end' }];
+  const algPaths = [{ pts: [P([X_ALG, yLast + 2], Z_ALG), P([X_ALG, Y5 - 8], Z_ALG), P([X_ALG, Y5 - 5.5], M)], arrows: 'end' }];
   ops.forEach(i => algPaths.push({ pts: [P(at('m' + i, 1, -1), O), P([X_ALG, yOp(i) + 2], Z_ALG)], arrows: 'none' }));
   chan('alg', 'alg', allM.concat(['s5']), [allM, ['s5']], algPaths, { z2: -0.36, behind: true });
 

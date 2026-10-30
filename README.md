@@ -69,3 +69,9 @@ The **Map** buttons call Claude through the claude.ai artifact runtime (`window.
 - Stafford Beer, *Brain of the Firm* (1972; 2nd ed. 1981)
 - Stafford Beer, *The Heart of Enterprise* (1979)
 - Stafford Beer, *Diagnosing the System for Organizations* (1985)
+
+## Right-click menu, recursion control and diagnosis
+
+- **Right-click** (long-press on touch, or the Menu key) opens a menu. On an element: show details, focus, add to the selection, centre here, rename, create, open or delete its level, and set its diagnosis. On empty space: centre here, recentre, show all, switch 2D/3D, nested systems on or off, and up one level.
+- **Recursion levels are created on purpose.** Double-click, **Create level** in the details pane, or the menu creates one. Zooming into an operation that has no level yet asks first, unless *Create levels by zooming in* is ticked in the Recursion tab. The Recursion tab and the details pane both have a two-step **Delete** that removes a level and everything below it.
+- **Diagnosis** marks any element or channel with one of Beer's diagnostic states: *Missing*, *Nominal only* (on paper but not "effectively there"), *Lacks requisite variety* (*Insufficient capacity* for channels), *Malfunctioning*, *Collapsed into another system* (for example System Five diving into System Three) and *Pathologically autopoietic* (serving its own continuation). A coloured badge appears beside the element; missing elements are greyed and struck through. Each mark takes a note of the evidence, the Model panel lists every flag on the level, and the Recursion tab counts flags per level.

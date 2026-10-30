@@ -600,6 +600,106 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 .lbl.big .nm { font-family: var(--f-display); font-stretch: 110%; font-weight: 650; letter-spacing: .01em; }
 .lbl.sel .code { background: var(--accent); color: var(--accent-ink); text-shadow: none; border-radius: 3px; padding: 0 4px; }
 .lbl.dim { opacity: .28; }
+.lbl.absent .nm { text-decoration: line-through; opacity: .6; }
+.lbl.absent .code { opacity: .6; }
+.dg {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.45em;
+  height: 1.45em;
+  padding: 0 .2em;
+  border-radius: 999px;
+  font-family: var(--f-mono);
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1;
+  color: #fff;
+  text-shadow: none;
+  box-shadow: 0 0 0 2px var(--halo);
+  margin-bottom: 2px;
+}
+.lbl .dg:empty, .chdg:empty { display: none; }
+.chdg { position: absolute; left: 0; top: 0; pointer-events: none; will-change: transform; }
+.labels.nodiag .dg, .labels.nodiag .chdg { display: none; }
+.ctx {
+  position: fixed;
+  z-index: 30;
+  min-width: 220px;
+  max-width: 290px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 5px;
+  font-size: 13px;
+}
+.ctx .ch { padding: 6px 9px 7px; border-bottom: 1px solid var(--rule); margin-bottom: 4px; }
+.ctx .ch .k { display: block; font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-2); letter-spacing: .06em; text-transform: uppercase; }
+.ctx .ch b { font-weight: 650; }
+.ctx button {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  border-radius: 6px;
+  padding: 6px 9px;
+  font-size: 13px;
+}
+.ctx button:hover, .ctx button:focus { background: var(--surface-2); outline: none; }
+.ctx button .ic { font-family: var(--f-mono); color: var(--ink-2); text-align: center; }
+.ctx button kbd { font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-2); }
+.ctx button.warn { color: var(--accent); }
+.ctx button[aria-checked="true"] { font-weight: 650; }
+.ctx hr { border: 0; border-top: 1px solid var(--rule); margin: 4px 2px; }
+.ctx .sub { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); padding: 6px 9px 2px; }
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  padding: 6px 6px 6px 16px;
+  z-index: 4;
+  font-size: 12.5px;
+  max-width: calc(100% - 24px);
+}
+.toast button { border: 1px solid var(--rule); background: var(--surface); border-radius: 999px; padding: 5px 12px; font-weight: 600; font-size: 12.5px; flex: none; }
+.toast button.go { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.dgrid { display: flex; flex-wrap: wrap; gap: 5px; }
+.dchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 4px 10px 4px 5px;
+  font-size: 12.5px;
+}
+.dchip .dg { box-shadow: none; margin: 0; }
+.dchip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.dnote { margin: 6px 0 0; font-size: 12.5px; color: var(--ink-2); }
+.dlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.dlist button { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: center; width: 100%; border: 0; background: transparent; text-align: left; padding: 4px 6px; border-radius: 6px; font-size: 13px; }
+.dlist button:hover { background: var(--surface-2); }
+.dlist small { display: block; color: var(--ink-2); font-size: 11.5px; }
+.tdel { flex: none; border: 1px solid transparent; background: transparent; color: var(--ink-2); border-radius: 6px; font-size: 12px; padding: 2px 7px; }
+.tdel:hover { border-color: var(--accent); color: var(--accent); }
+.tdel.armed { color: var(--accent-ink); background: var(--accent); }
+.trow { display: flex; align-items: center; gap: 4px; }
+.trow .tbtn { flex: 1; min-width: 0; }
+.tflag { font-family: var(--f-mono); font-size: 10.5px; color: var(--accent); flex: none; }
 .lbl.off { opacity: 0; }
 
 .tip {
@@ -916,6 +1016,12 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
       </div>
 
       <div class="block">
+        <div class="eyebrow">Diagnosis · this level</div>
+        <label class="chk"><input type="checkbox" id="diagShow"><span>Show diagnosis marks<small>Badges beside flagged elements; missing ones are greyed and struck through</small></span></label>
+        <ul class="dlist" id="diagList"></ul>
+      </div>
+
+      <div class="block">
         <div class="eyebrow">Group colours</div>
         <div class="row">
           <span>Colour scheme</span>
@@ -978,6 +1084,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
       <div class="block">
         <div class="eyebrow">Recursive structure</div>
         <p class="src" style="margin:0">Recursion runs only through System One: every operational element contains a whole viable system, and its metasystemic functions follow it down. Open any operation to step into it, or zoom into it in the model. The highlighted node is the System-in-Focus.</p>
+        <label class="chk"><input type="checkbox" id="autoLevels"><span>Create levels by zooming in<small>Off: zooming into an operation without a level asks first. Double-click or Open always creates one.</small></span></label>
         <ul class="tree" id="tree"></ul>
       </div>
     </section>
@@ -1030,6 +1137,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
           <kbd>Scroll into</kbd><span>Zoom toward the pointer; keep going into an operation to enter its recursion</span>
           <kbd>2 / 3</kbd><span>Switch between 2D and 3D</span>
           <kbd>C</kbd><span>Recentre the model face-on</span>
+          <kbd>Right-click</kbd><span>Menu: details, focus, centre here, recursion, diagnosis</span>
           <kbd>Esc</kbd><span>Leave focus, then clear the selection</span>
         </div>
       </div>
@@ -1052,6 +1160,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
     </div>
     <div class="focusbar" id="focusBar" role="toolbar" aria-label="Selection" hidden></div>
     <div class="tip" id="tip" hidden></div>
+    <div class="toast" id="toast" role="status" hidden></div>
     <div class="hint" id="hint"></div>
     <button class="recentre" id="btnRecentre" type="button" title="Recentre the model face-on, as in 2D (key C)">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="5.2"/><circle cx="8" cy="8" r="1.6" fill="currentColor" stroke="none"/><path d="M8 0.8v2.4M8 12.8v2.4M0.8 8h2.4M12.8 8h2.4"/></svg>
@@ -1065,6 +1174,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
       <div><b>WebGL is not available in this browser.</b><br>The explorer needs WebGL to draw the model. Try a recent version of Chrome, Firefox, Safari or Edge.</div>
     </div>
   </main>
+  <div class="ctx" id="ctx" role="menu" hidden></div>
 
   <aside class="insp" id="insp" aria-label="Element details" hidden>
     <div class="insp-head">
@@ -1085,6 +1195,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
         </div>
       </div>
       <p class="summary" id="iSummary"></p>
+      <div class="isec" id="iDiagSec"><h4>Diagnosis</h4><div id="iDiag"></div></div>
       <div class="isec" id="iFlowSec"><h4>Data flows</h4><div id="iFlows"></div></div>
       <div class="isec" id="iIOSec"><h4>Information in and out</h4><ul class="io" id="iIO"></ul></div>
       <div id="iRecur"></div>
@@ -1629,6 +1740,28 @@ const GROUP_INFO = {
 };
 const STORE_KEY = 'vsm-explorer:v1';
 
+/* Diagnosis states, drawn from Beer's own diagnostic language (Heart of Enterprise; Diagnosing the System;
+   Think Before You Think): a system may be absent, lack requisite variety, malfunction, collapse into another
+   system, turn pathologically autopoietic, or exist on paper without being "effectively there". */
+const DIAG = {
+  absent:      { glyph: '∅', color: '#7d8a87', name: 'Missing', short: 'Missing',
+    text: 'The function is not performed at all. Beer: without System Four, "the whole metasystem collapses into System Three".' },
+  nominal:     { glyph: '?', color: '#5b7fa6', name: 'Nominal only', short: 'Nominal',
+    text: 'It exists on the chart but is not "effectively there": a role, committee or report that changes nothing.' },
+  weak:        { glyph: '↓', color: '#c98314', name: 'Lacks requisite variety', short: 'Too weak',
+    text: 'Present but under-resourced: it cannot absorb the variety it faces, so problems pass it by or pile up.' },
+  malfunction: { glyph: '!', color: '#d43d33', name: 'Malfunctioning', short: 'Malfunction',
+    text: '"Some inadequacy in the system can be traced to malfunction in one of the five subsystems": present, but doing the wrong thing or doing it badly.' },
+  collapsed:   { glyph: '⇣', color: '#8a5cc7', name: 'Collapsed into another system', short: 'Collapsed',
+    text: 'Its function has been absorbed by another system, as when System Five dives "straight into System Three" and the metasystem collapses.', notFor: ['chan', 'env'] },
+  autopoietic: { glyph: '↺', color: '#c4457a', name: 'Pathologically autopoietic', short: 'Self-serving',
+    text: 'It serves its own continuation rather than the whole: "self-production turned into an end-in-itself" (Beer\'s Establishment).', notFor: ['chan', 'env'] }
+};
+const DIAG_CH_NAMES = { weak: 'Insufficient capacity', malfunction: 'Distorted or blocked' };
+function diagOf(lv, id) { return (lv.diag && lv.diag[id]) || null; }
+function diagName(key, isCh) { return (isCh && DIAG_CH_NAMES[key]) || DIAG[key].name; }
+function diagAllowed(key, id) { const g = L.chanById[id] ? 'chan' : (L.byId[id] ? L.byId[id].group : ''); return !(DIAG[key].notFor || []).includes(g); }
+
 /* Model-wide colour schemes. Element ids are the same at every level, so one scheme repeats across recursions. */
 const COLOR_SCHEMES = {
   // Beer's E–O–M reading of every recursion: environment green, operations red, management blue.
@@ -1656,7 +1789,7 @@ function schemeColors(key) {
 }
 
 let db = null; // { seq, rootId, currentId, levels: {} }
-let prefs = { view: '3d', flows: !reduceMotion, nested: false, spread: 1, side: true, s2mode: 'inside', extS4cmd: true, extS14: true, style: 'square', theme: 'auto' };
+let prefs = { view: '3d', flows: !reduceMotion, nested: false, spread: 1, side: true, diagShow: true, autoLevels: false, s2mode: 'inside', extS4cmd: true, extS14: true, style: 'square', theme: 'auto' };
 function layoutOpts() { return { s2: prefs.s2mode === 'bridge' ? 'bridge' : 'inside', s4cmd: prefs.extS4cmd !== false, s14: prefs.extS14 !== false, style: prefs.style === 'diamond' ? 'diamond' : 'square', localS2: prefs.localS2 !== false }; }
 
 function newLevel(parent, elId) {
@@ -1667,7 +1800,7 @@ function newLevel(parent, elId) {
     id, depth: parent ? parent.depth + 1 : 0, tag,
     parent: parent ? { level: parent.id, el: elId } : null,
     name: parent ? null : 'Organization',
-    opCount: 3, labels: {}, colors: {}, notes: {}, flows: {},
+    opCount: 3, labels: {}, colors: {}, notes: {}, flows: {}, diag: {},
     groupColors: Object.assign({}, parent ? parent.groupColors : DEFAULT_GROUP_COLORS),
     children: {}
   };
@@ -1760,7 +1893,7 @@ function load() {
       if (data && data.db && data.db.levels && data.db.levels[data.db.rootId]) {
         db = data.db;
         if (!db.levels[db.currentId]) db.currentId = db.rootId;
-        Object.values(db.levels).forEach(l => { l.flows = l.flows || {}; l.notes = l.notes || {}; l.labels = l.labels || {}; });
+        Object.values(db.levels).forEach(l => { l.flows = l.flows || {}; l.notes = l.notes || {}; l.labels = l.labels || {}; l.diag = l.diag || {}; });
         // recursion runs only through System One: drop levels opened from any other system
         Object.values(db.levels).forEach(l => { if (l.parent && !/^o\d+$/.test(l.parent.el)) { const p = db.levels[l.parent.level]; if (p) delete p.children[l.parent.el]; deleteSubtree(l); delete db.levels[l.id]; } });
         if (!db.levels[db.currentId]) db.currentId = db.rootId;
@@ -2263,6 +2396,9 @@ function refreshVisuals() {
     else if ((el.type === 'op' || el.type === 'mgmt') && minisShown) op = lerp(0.45, 0.18, d);
     const related = !focusSet || focusSet.has(id);
     const dimF = related ? 1 : (el.container ? 0.5 : 0.22);
+    const dgn = prefs.diagShow && diagOf(lv, id);
+    if (dgn && dgn.s === 'absent') { fill.lerp(tmpC2.setRGB(0.6, 0.62, 0.62), 0.75); op *= 0.4; }
+    else if (dgn && dgn.s === 'nominal') op *= 0.65;
     o.fill.material.color.copy(fill);
     let em = lerp(0.26, 0.05, d);
     if (hovered === id) em += 0.12;
@@ -2270,6 +2406,7 @@ function refreshVisuals() {
     if (selSet.has(id)) o.fill.material.emissive.lerp(theme.accent, 0.14);
     setOpacity(o.fill.material, op * dimF);
     strokeColor(base, o.band.material.color);
+    if (dgn && dgn.s === 'absent') o.band.material.color.lerp(tmpC2.setRGB(0.55, 0.57, 0.57), 0.8);
     if (selected === id) o.band.material.color.copy(theme.accent);
     o.band.material.opacity = lerp(1, STROKE3D[el.shape.kind], d) * (related ? 1 : 0.25) * (el.container ? 0.8 : 1);
     o.band.visible = o.band.material.opacity > 0.01;
@@ -2289,9 +2426,11 @@ function refreshVisuals() {
     const base = new THREE.Color(colorOf(lv, id, L));
     const related = !focusSet || focusSet.has(id);
     const c = selSet.has(id) ? theme.accent.clone() : base;
+    const cd = prefs.diagShow && diagOf(lv, id);
+    if (cd && cd.s === 'absent' && !selSet.has(id)) c.lerp(tmpC2.setRGB(0.6, 0.62, 0.62), 0.7);
     o.mat.color.copy(c);
     o.mat.emissive.copy(c).multiplyScalar(lerp(0.3, 0.12, d) + (hovered === id ? 0.25 : 0));
-    setOpacity(o.mat, related ? 1 : 0.18);
+    setOpacity(o.mat, (related ? 1 : 0.18) * (cd && cd.s === 'absent' ? 0.35 : cd && cd.s === 'nominal' ? 0.6 : 1));
     o.group.visible = !isHidden(id);
   });
   if (particles) {
@@ -2490,7 +2629,7 @@ function buildLabels() {
     const lab = el.label;
     div.className = 'lbl ' + (lab.align || 'c') + (lab.big ? ' big' : '');
     const code = lab.nameOnly ? '' : '<span class="code">' + esc(codeOf(lv, el.id)) + '</span>';
-    div.innerHTML = code + '<span class="nm">' + esc(labelOf(lv, el.id)) + '</span>';
+    div.innerHTML = '<span class="dg"></span>' + code + '<span class="nm">' + esc(labelOf(lv, el.id)) + '</span>';
     labelsEl.appendChild(div);
     let codeDiv = null;
     if (lab.codeIn) { // triangles: code sits inside, name beside
@@ -2502,7 +2641,35 @@ function buildLabels() {
     }
     labelNodes.set(el.id, { div, codeDiv, el, last: {} });
   });
+  chBadges = new Map();
+  L.chans.forEach(ch => {
+    const dv = document.createElement('div');
+    dv.className = 'chdg';
+    dv.innerHTML = '<span class="dg"></span>';
+    labelsEl.appendChild(dv);
+    chBadges.set(ch.id, dv);
+  });
+  updateDiagBadges();
   updateLabelClasses();
+}
+let chBadges = new Map();
+function setBadge(span, d, isCh) {
+  if (!d || !DIAG[d.s]) { span.textContent = ''; span.removeAttribute('title'); return; }
+  const k = DIAG[d.s];
+  span.textContent = k.glyph;
+  span.style.background = k.color;
+  span.title = diagName(d.s, isCh) + (d.note ? ': ' + d.note : '');
+}
+function updateDiagBadges() {
+  const lv = level();
+  labelsEl.classList.toggle('nodiag', !prefs.diagShow);
+  labelNodes.forEach((n, id) => {
+    const d = diagOf(lv, id);
+    setBadge(n.div.querySelector('.dg'), d, false);
+    n.div.classList.toggle('absent', !!(prefs.diagShow && d && d.s === 'absent'));
+  });
+  chBadges.forEach((dv, id) => setBadge(dv.querySelector('.dg'), diagOf(lv, id), true));
+  dirty = true;
 }
 function updateLabelText(id) {
   const n = labelNodes.get(id);
@@ -2518,6 +2685,17 @@ function updateLabelClasses() {
 const projV = new THREE.Vector3(), camDir = new THREE.Vector3();
 function updateLabels() {
   const w = stage.clientWidth, h = stage.clientHeight;
+  chBadges.forEach((dv, id) => {
+    const o = chs.get(id);
+    if (!o || !dv.firstChild.textContent || isHidden(id)) { dv.style.visibility = 'hidden'; return; }
+    let best = o.parts[0];
+    o.parts.forEach(pt => { if (pt.cum && pt.cum[pt.cum.length - 1] > (best.cum ? best.cum[best.cum.length - 1] : 0)) best = pt; });
+    const pts = best.world; if (!pts) return;
+    projV.copy(pts[Math.floor(pts.length / 2)]).applyMatrix4(world.matrixWorld).project(camera);
+    if (projV.z > 1) { dv.style.visibility = 'hidden'; return; }
+    dv.style.visibility = '';
+    dv.style.transform = 'translate(' + ((projV.x * 0.5 + 0.5) * w).toFixed(1) + 'px,' + ((-projV.y * 0.5 + 0.5) * h).toFixed(1) + 'px) translate(-50%,-50%)';
+  });
   const tanHalf = Math.tan(camera.fov * Math.PI / 360);
   camera.getWorldDirection(camDir);
   labelNodes.forEach(n => {
@@ -2642,8 +2820,8 @@ function applyControlMode() {
   $('#app').classList.toggle('mode3d', is3d);
   const narrow = matchMedia('(pointer: coarse)').matches;
   $('#hint').innerHTML = is3d
-    ? (narrow ? 'Drag to rotate · two fingers to pan and zoom · tap to select' : '<kbd>Drag</kbd> rotate · <kbd>Right-drag</kbd> pan · <kbd>Scroll</kbd> zoom · <kbd>Double-click</kbd> a system to step inside')
-    : (narrow ? 'Drag to pan · pinch to zoom · tap to select' : '<kbd>Drag</kbd> pan · <kbd>Scroll</kbd> zoom · <kbd>Click</kbd> to select · <kbd>Double-click</kbd> a system to step inside');
+    ? (narrow ? 'Drag to rotate · two fingers to pan and zoom · tap to select · long-press for the menu' : '<kbd>Drag</kbd> rotate · <kbd>Right-drag</kbd> pan · <kbd>Scroll</kbd> zoom · <kbd>Right-click</kbd> menu · <kbd>Double-click</kbd> an operation to step inside')
+    : (narrow ? 'Drag to pan · pinch to zoom · tap to select' : '<kbd>Drag</kbd> pan · <kbd>Scroll</kbd> zoom · <kbd>Click</kbd> select · <kbd>Right-click</kbd> menu · <kbd>Double-click</kbd> an operation to step inside');
 }
 
 async function setView(mode) {
@@ -2813,11 +2991,104 @@ function describe(id) {
   return html;
 }
 
+/* ---------- right-click menu ---------- */
+const ctx = $('#ctx');
+let ctxAt = null;
+function worldPointAt(cx, cy) {
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0).applyMatrix4(world.matrixWorld);
+  return ray.ray.intersectPlane(plane, new THREE.Vector3());
+}
+function centreOn(p) {
+  if (!p || busy) return;
+  const s = camState();
+  camTween({ target: p, dist: s.dist, az: s.az, el: s.el }, 500);
+}
+function closeCtx() { ctx.hidden = true; ctxAt = null; }
+function openCtx(cx, cy, id) {
+  tip.hidden = true;
+  const lv = level(), items = [];
+  const it = (ic, text, fn, extra) => items.push(Object.assign({ ic, text, fn }, extra || {}));
+  const sep = () => items.push({ sep: true });
+  const point = worldPointAt(cx, cy);
+  let head = '';
+  if (id) {
+    const kb = KB[typeOfId(L, id)] || {};
+    head = '<div class="ch"><span class="k">' + esc(kb.kind || '') + (codeOf(lv, id) ? ' · ' + esc(codeOf(lv, id)) : '') + '</span><b>' + esc(labelOf(lv, id)) + '</b></div>';
+    it('ⓘ', 'Show details', () => { inspDismissed = false; select(id, { reveal: true }); });
+    it('◎', 'Focus on this', () => { if (!selSet.has(id) || selSet.size !== 1) select(id); enterFocus(); }, { kbd: 'F' });
+    if (selSet.size && !(selSet.size === 1 && selSet.has(id))) it('＋', selSet.has(id) ? 'Remove from selection' : 'Add to selection', () => select(id, { add: true }), { kbd: '⇧ click' });
+    it('✥', 'Centre here', () => centreOn(L.byId[id] ? els.get(id).group.getWorldPosition(new THREE.Vector3()) : point));
+    it('✎', 'Rename', () => { inspDismissed = false; select(id); setTimeout(() => { const n = $('#iName'); if (n) { n.focus(); n.select(); } }, 60); });
+    if (isSystemType(typeOfId(L, id))) {
+      const key = recursionKey(id), cid = lv.children[key], child = cid && db.levels[cid];
+      sep();
+      it('↘', child ? 'Open its level' : 'Create its level', () => dive(id), { kbd: 'dbl-click' });
+      if (child) {
+        const n = countSubtree(child);
+        it('✕', 'Delete its level' + (n > 1 ? ' (' + n + ' levels)' : ''), null, { warn: true, confirm: n > 1 ? 'Click again to delete ' + n + ' levels' : 'Click again to delete', fn2: () => deleteLevel(child.id) });
+      }
+    }
+    sep();
+    items.push({ sub: 'Diagnosis' });
+    const d = diagOf(lv, id), isCh = !!L.chanById[id];
+    it('✓', 'Not flagged', () => setDiag(id, null), { checked: !d });
+    Object.keys(DIAG).filter(k => diagAllowed(k, id)).forEach(k => it(DIAG[k].glyph, diagName(k, isCh), () => setDiag(id, k), { checked: !!d && d.s === k, color: DIAG[k].color }));
+  } else {
+    it('✥', 'Centre here', () => centreOn(point));
+    it('⌖', 'Recentre the model', recentre, { kbd: 'C' });
+    if (focusMode) it('◎', 'Show all', exitFocus, { kbd: 'Esc' });
+    if (selSet.size) it('✕', 'Clear selection', () => select(null));
+    sep();
+    it('▣', prefs.view === '3d' ? 'Switch to 2D' : 'Switch to 3D', () => setView(prefs.view === '3d' ? '2d' : '3d'), { kbd: prefs.view === '3d' ? '2' : '3' });
+    it('⊙', prefs.nested ? 'Hide nested systems' : 'Show nested systems', () => $('#btnNested').click());
+    if (lv.parent) it('↑', 'Up to ' + levelName(db.levels[lv.parent.level]), exitToParent);
+  }
+  ctx.innerHTML = head + items.map((x, i) => x.sep ? '<hr>' : x.sub ? '<div class="sub">' + esc(x.sub) + '</div>' :
+    '<button type="button" role="' + (x.checked != null ? 'menuitemradio' : 'menuitem') + '"' + (x.checked != null ? ' aria-checked="' + x.checked + '"' : '') + ' data-i="' + i + '"' + (x.warn ? ' class="warn"' : '') + '><span class="ic"' + (x.color ? ' style="color:' + x.color + '"' : '') + '>' + x.ic + '</span><span>' + esc(x.text) + '</span>' + (x.kbd ? '<kbd>' + esc(x.kbd) + '</kbd>' : '<span></span>') + '</button>').join('');
+  ctx.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    const x = items[+b.dataset.i];
+    if (x.confirm) {
+      if (!b.dataset.armed) { b.dataset.armed = '1'; b.children[1].textContent = x.confirm; return; }
+      closeCtx(); x.fn2(); return;
+    }
+    closeCtx(); x.fn();
+  }));
+  ctx.hidden = false;
+  const W = innerWidth, H = innerHeight, mw = ctx.offsetWidth, mh = ctx.offsetHeight;
+  ctx.style.left = Math.min(cx, W - mw - 8) + 'px';
+  ctx.style.top = Math.max(8, Math.min(cy, H - mh - 8)) + 'px';
+  ctxAt = { id };
+  const first = ctx.querySelector('button'); if (first) first.focus({ preventScroll: true });
+}
+ctx.addEventListener('keydown', e => {
+  const btns = Array.from(ctx.querySelectorAll('button')), i = btns.indexOf(document.activeElement);
+  if (e.key === 'ArrowDown') { e.preventDefault(); btns[(i + 1) % btns.length].focus(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); btns[(i - 1 + btns.length) % btns.length].focus(); }
+  else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeCtx(); canvas.focus(); }
+  else if (e.key === 'Tab') closeCtx();
+});
+document.addEventListener('pointerdown', e => { if (!ctx.hidden && !ctx.contains(e.target)) closeCtx(); }, true);
+canvas.addEventListener('wheel', () => { if (!ctx.hidden) closeCtx(); }, { passive: true });
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+// long-press on touch screens opens the same menu
+let pressTimer = 0;
+canvas.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'touch') return;
+  clearTimeout(pressTimer);
+  const x = e.clientX, y = e.clientY;
+  pressTimer = setTimeout(() => { if (down && Math.hypot((lastMove ? lastMove.clientX : x) - x, (lastMove ? lastMove.clientY : y) - y) < 8) { down = null; openCtx(x, y, pickAt(x, y)); } }, 600);
+});
+canvas.addEventListener('pointerup', () => clearTimeout(pressTimer));
+
 let down = null, lastTap = null;
 canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now(), b: e.button }; });
 canvas.addEventListener('pointerup', e => {
   if (!down || busy) return;
   const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
+  if (moved < 6 && down.b === 2) { const id = pickAt(e.clientX, e.clientY); down = null; openCtx(e.clientX, e.clientY, id); return; }
   if (moved < 6 && down.b === 0) {
     const now = performance.now();
     // the second click of a double-click keeps the first click's selection (the inspector may have shifted the view)
@@ -2868,6 +3139,33 @@ controls.addEventListener('start', () => { tip.hidden = true; });
 /* =====================================================================
    Recursion: stepping into and out of systems
    ===================================================================== */
+function countSubtree(lv) { return 1 + Object.values(lv.children || {}).reduce((a, cid) => a + (db.levels[cid] ? countSubtree(db.levels[cid]) : 0), 0); }
+/* Delete a level and everything below it; if the view is inside it, rise to its parent first */
+async function deleteLevel(id) {
+  const lv = db.levels[id];
+  if (!lv || !lv.parent || busy) return;
+  const parent = db.levels[lv.parent.level];
+  const inside = ancestry(level()).some(l => l.id === id);
+  delete parent.children[lv.parent.el];
+  deleteSubtree(lv);
+  delete db.levels[id];
+  save();
+  if (inside) { db.currentId = parent.id; selected = null; focusSet = null; buildScene(); setCam(fitState()); }
+  else if (parent.id === db.currentId) { const cam = camState(); buildScene(); setCam(cam); }
+  renderAllPanels();
+  showToast('Deleted the level inside ' + labelOf(parent, lv.parent.el) + '.');
+}
+let toastTimer = 0;
+function showToast(msg, actionLabel, action) {
+  const t = $('#toast');
+  clearTimeout(toastTimer);
+  t.innerHTML = '<span>' + esc(msg) + '</span>' + (actionLabel ? '<button type="button" class="go">' + esc(actionLabel) + '</button><button type="button">Dismiss</button>' : '');
+  t.hidden = false;
+  const btns = t.querySelectorAll('button');
+  if (btns[0]) btns[0].onclick = () => { t.hidden = true; action(); };
+  if (btns[1]) btns[1].onclick = () => { t.hidden = true; };
+  toastTimer = setTimeout(() => { t.hidden = true; }, actionLabel ? 9000 : 3500);
+}
 function ensureChild(lv, elId) {
   const key = recursionKey(elId);
   if (lv.children[key] && db.levels[lv.children[key]]) return db.levels[lv.children[key]];
@@ -2992,7 +3290,15 @@ function checkRecursionZoom(now) {
       const dd = Math.hypot(o.group.position.x - s.target.x, o.group.position.y - s.target.y);
       if (dd < bd) { bd = dd; best = o; }
     });
-    if (best && bd < 12) enterOp(best.el.idx);
+    if (best && bd < 12) {
+      const k = best.el.idx, lv = level();
+      if (lv.children['o' + k] && db.levels[lv.children['o' + k]]) enterOp(k);
+      else if (prefs.autoLevels) enterOp(k);
+      else if (now - (window.__askedAt || 0) > 4000) {
+        window.__askedAt = now;
+        showToast(labelOf(lv, 'o' + k) + ' has no level yet.', 'Create and enter', () => enterOp(k));
+      }
+    }
   } else if (level().parent && s.dist > fitDistCache * 2.4) exitToParent();
 }
 /* Scroll zooms toward the pointer, so you can steer into an operation */
@@ -3125,7 +3431,9 @@ function renderTree() {
   const cur = db.currentId;
   const node = lv => {
     const isCur = lv.id === cur;
-    let html = '<li class="tnode"><button class="tbtn level' + (isCur ? ' current' : '') + '" data-level="' + lv.id + '" type="button"><span class="lv">L' + lv.depth + '</span><span class="tn">' + esc(levelName(lv)) + '</span>' + (isCur ? '<span class="here">HERE</span>' : '') + '</button>';
+    const flags = levelFlags(lv);
+    let html = '<li class="tnode"><div class="trow"><button class="tbtn level' + (isCur ? ' current' : '') + '" data-level="' + lv.id + '" type="button"><span class="lv">L' + lv.depth + '</span><span class="tn">' + esc(levelName(lv)) + '</span>' + (flags ? '<span class="tflag" title="' + flags + ' flagged in the diagnosis">⚑' + flags + '</span>' : '') + (isCur ? '<span class="here">HERE</span>' : '') + '</button>' +
+      (lv.parent ? '<button class="tdel" type="button" data-del="' + lv.id + '" aria-label="Delete the level ' + esc(levelName(lv)) + '" title="Delete this level and everything below it">Delete</button>' : '') + '</div>';
     const rows = [];
     for (let i = 0; i < lv.opCount; i++) {
       const key = 'o' + i, childId = lv.children[key];
@@ -3138,6 +3446,15 @@ function renderTree() {
   const tree = $('#tree');
   tree.innerHTML = node(root);
   tree.querySelectorAll('.tbtn.level').forEach(b => b.addEventListener('click', () => goToLevel(b.dataset.level)));
+  tree.querySelectorAll('.tdel').forEach(b => b.addEventListener('click', () => {
+    if (!b.classList.contains('armed')) {
+      const n = countSubtree(db.levels[b.dataset.del]);
+      b.classList.add('armed'); b.textContent = n > 1 ? 'Delete ' + n + ' levels?' : 'Delete?';
+      setTimeout(() => { if (b.isConnected) { b.classList.remove('armed'); b.textContent = 'Delete'; } }, 3500);
+      return;
+    }
+    deleteLevel(b.dataset.del);
+  }));
   tree.querySelectorAll('.tbtn.unexplored').forEach(b => b.addEventListener('click', async () => {
     const from = db.levels[b.dataset.from];
     if (from.id === db.currentId) { dive(b.dataset.el); return; }
@@ -3173,6 +3490,7 @@ function renderInspector() {
   const notes = $('#iNotes');
   if (document.activeElement !== notes) notes.value = lv.notes[id] || '';
   const isCh = !!L.chanById[id];
+  renderDiagEditor();
   $('#iFlowSec').hidden = !isCh;
   if (isCh) renderFlowEditor($('#iFlows'), id);
   if (isCh) $('#iIOSec').hidden = true; else renderIO();
@@ -3180,6 +3498,39 @@ function renderInspector() {
   renderRecursion();
   if (wasHidden) $('.insp-body').scrollTop = 0;
 }
+function setDiag(id, key, note) {
+  const lv = level();
+  lv.diag = lv.diag || {};
+  if (!key) delete lv.diag[id];
+  else lv.diag[id] = { s: key, note: note != null ? note : ((lv.diag[id] && lv.diag[id].note) || '') };
+  save();
+  refreshVisuals(); updateDiagBadges(); renderDiagList(); renderTree();
+  if (selected === id) renderDiagEditor();
+}
+function renderDiagEditor() {
+  const box = $('#iDiag'), lv = level(), id = selected;
+  if (!id) { box.innerHTML = ''; return; }
+  const isCh = !!L.chanById[id], d = diagOf(lv, id);
+  const keys = Object.keys(DIAG).filter(k => diagAllowed(k, id));
+  box.innerHTML = '<div class="dgrid" role="group" aria-label="Diagnosis">' +
+    '<button type="button" class="dchip" data-k="" aria-pressed="' + !d + '"><span class="dg" style="background:var(--ink-2)">✓</span>Not flagged</button>' +
+    keys.map(k => '<button type="button" class="dchip" data-k="' + k + '" aria-pressed="' + (!!d && d.s === k) + '" title="' + esc(DIAG[k].text) + '"><span class="dg" style="background:' + DIAG[k].color + '">' + DIAG[k].glyph + '</span>' + esc(diagName(k, isCh)) + '</button>').join('') +
+    '</div>' + (d ? '<p class="dnote">' + esc(DIAG[d.s].text) + '</p><label class="fld" style="margin-top:8px"><span>Evidence</span><textarea id="iDiagNote" placeholder="What did you observe?">' + esc(d.note || '') + '</textarea></label>' : '');
+  box.querySelectorAll('.dchip').forEach(b => b.addEventListener('click', () => setDiag(id, b.dataset.k || null)));
+  const nt = $('#iDiagNote');
+  if (nt) nt.addEventListener('input', e => { lv.diag[id].note = e.target.value; save(); updateDiagBadges(); renderDiagList(); });
+}
+function renderDiagList() {
+  const lv = level(), ul = $('#diagList');
+  const ids = Object.keys(lv.diag || {}).filter(id => (L.byId[id] || L.chanById[id]) && DIAG[lv.diag[id].s]);
+  ul.innerHTML = ids.length ? ids.map(id => {
+    const d = lv.diag[id], k = DIAG[d.s];
+    return '<li><button type="button" data-id="' + id + '"><span class="dg" style="background:' + k.color + '">' + k.glyph + '</span><span>' + esc(shownName(id)) + '<small>' + esc(diagName(d.s, !!L.chanById[id])) + (d.note ? ' · ' + esc(d.note) : '') + '</small></span></button></li>';
+  }).join('') : '<li class="src" style="padding:2px 0">Nothing flagged. Right-click any element, or use Diagnosis in its details, to mark it missing, weak, malfunctioning and so on.</li>';
+  ul.querySelectorAll('button').forEach(b => b.addEventListener('click', () => select(b.dataset.id)));
+}
+const levelFlags = lv => Object.keys(lv.diag || {}).length;
+
 /* What reaches and leaves an element, read from the flows on its channels */
 function renderIO() {
   const lv = level(), id = selected, rows = [];
@@ -3239,10 +3590,16 @@ function renderRecursion() {
     : 'Every operational element is a viable system in its own right. Its local management becomes the metasystem one level down, and its environment the environment.';
   box.innerHTML = '<div class="recur"><div class="t">Viable system inside ' + esc(name) + '</div>' +
     '<div class="prev">' + previewSVG(child, lv) + '</div><p>' + esc(note) + (child ? ' Explored: ' + child.opCount + ' operations.' : '') + '</p>' +
-    '<div class="btn-row"><button class="btn primary" type="button" id="iDive">Open level ' + (lv.depth + 1) + ' · ' + esc(name) + '</button>' +
+    '<div class="btn-row"><button class="btn primary" type="button" id="iDive">' + (child ? 'Open' : 'Create') + ' level ' + (lv.depth + 1) + ' · ' + esc(name) + '</button>' +
+    (child ? '<button class="btn warn" type="button" id="iDelLvl">Delete level</button>' : '') +
     (sampleFn ? '<button class="btn" type="button" id="iMap"' + (aiBusy ? ' disabled' : '') + '>Map it with Claude</button>' : '') + '</div>' +
     (sampleFn ? '<p id="iAiStatus" aria-live="polite">' + esc(aiInspectorNote) + '</p>' : '') + '</div>';
   $('#iDive').addEventListener('click', () => { if (matchMedia('(max-width: 860px)').matches) select(null); dive(id); });
+  const del = $('#iDelLvl');
+  if (del) del.addEventListener('click', () => {
+    if (!del.dataset.armed) { const n = countSubtree(child); del.dataset.armed = '1'; del.textContent = n > 1 ? 'Delete ' + n + ' levels?' : 'Click again to delete'; return; }
+    deleteLevel(child.id);
+  });
   const mapBtn = $('#iMap');
   if (mapBtn) mapBtn.addEventListener('click', () => {
     const child = ensureChild(lv, key);
@@ -3283,6 +3640,9 @@ function previewSVG(child, parent) {
 function renderAllPanels() {
   renderCrumbs();
   renderModelPane();
+  renderDiagList();
+  $('#diagShow').checked = prefs.diagShow !== false;
+  $('#autoLevels').checked = !!prefs.autoLevels;
   renderFlowsPane();
   renderTree();
   renderInspector();
@@ -3681,6 +4041,8 @@ $('#s2Inside').addEventListener('click', () => { if (prefs.s2mode !== 'inside') 
 $('#s2Bridge').addEventListener('click', () => { if (prefs.s2mode !== 'bridge') { prefs.s2mode = 'bridge'; save(); relayout(); } });
 $('#extS4cmd').addEventListener('change', e => { prefs.extS4cmd = e.target.checked; save(); relayout(); });
 $('#extS14').addEventListener('change', e => { prefs.extS14 = e.target.checked; save(); relayout(); });
+$('#diagShow').addEventListener('change', e => { prefs.diagShow = e.target.checked; save(); refreshVisuals(); updateDiagBadges(); });
+$('#autoLevels').addEventListener('change', e => { prefs.autoLevels = e.target.checked; save(); });
 $('#localS2').addEventListener('change', e => { prefs.localS2 = e.target.checked; save(); relayout(); });
 
 // data flows
@@ -3763,6 +4125,11 @@ window.addEventListener('keydown', e => {
   if (e.key === '2') setView('2d');
   else if (e.key === '3') setView('3d');
   else if (e.key === 'c' || e.key === 'C') recentre();
+  else if (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)) {
+    e.preventDefault();
+    const n = selected && labelNodes.get(selected), r = n ? n.div.getBoundingClientRect() : stage.getBoundingClientRect();
+    openCtx(r.left + r.width / 2, r.top + r.height / 2, selected);
+  }
   else if (e.key === 'f' || e.key === 'F') { if (focusMode) exitFocus(); else enterFocus(); }
   else if (e.key === 'Escape') { if (app.classList.contains('drawer-open')) { app.classList.remove('drawer-open'); syncSide(); } else if (focusMode) exitFocus(); else select(null); }
 });

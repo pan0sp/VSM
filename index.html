@@ -911,6 +911,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
           </div>
         </div>
         <label class="chk"><input type="checkbox" id="extS4cmd"><span>System Four into the Resource Bargain<small>Extension: reads the command axis as anticipatory</small></span></label>
+        <label class="chk"><input type="checkbox" id="localS2"><span>Local regulatory centres<small>System Two's centre beside each local management; some diagrams omit them</small></span></label>
         <label class="chk"><input type="checkbox" id="extS14"><span>System One ↔ System Four<small>Extension: operations and System Four exchange signals directly</small></span></label>
       </div>
 
@@ -1144,7 +1145,7 @@ const KB = {
     watch: ['Local management bypassed by direct commands from above', 'Managers acting as messengers rather than regulators']
   },
   s2: {
-    kind: 'System Two', role: 'Anti-oscillation',
+    kind: 'System Two', role: 'Local regulatory centre',
     summary: 'System Two is an anti-oscillatory device: "the highly specific function of damping oscillations, and nothing else" (Beer, The Heart of Enterprise). Each unit sits beside one operation\'s local management. It is a service to System One, not part of the command axis: "Its function is not to command."',
     practice: ['Timetables and schedules (Beer\'s example is the school timetable)', 'Shared standards, protocols and booking systems'],
     questions: ['Where do the operations oscillate against each other over shared resources, customers or schedules?', 'Is the damping automatic, or do managers step in each time?'],
@@ -1421,6 +1422,7 @@ function buildLayout(n, opts) {
   // next recursion's metasystem seen on the diagonal). 'diamond': the metasystem is a rhombus and
   // local managements are upright squares.
   const S2L = bridge ? LAYER.mid : LAYER.meta;
+  const localS2 = opts.localS2 !== false; // some diagrams omit System Two's local regulatory centres
   // The System Two regulatory centre stands directly above its units, and Three-Star mirrors it on the
   // other side, so both stay the same distance from System Three (x = 9)
   const S2X = S2UX, S3SX = 9 - (S2UX - 9);
@@ -1445,7 +1447,7 @@ function buildLayout(n, opts) {
     add({ id: 'm' + i, type: 'mgmt', group: 'ops', idx: i, layer: LAYER.ops, z2: 0,
       shape: sq ? { kind: 'diamond', cx: 9, cy: y + 7, hw: 7, hh: 7 } : { kind: 'square', cx: 9, cy: y + 7, s: 10 },
       label: { dx: 0, dy: 0, w: 21, nestDy: 10 } });
-    add({ id: 'a' + i, type: 's2', group: 'meta', idx: i, layer: S2L, z2: 0,
+    if (localS2) add({ id: 'a' + i, type: 's2', group: 'meta', idx: i, layer: S2L, z2: 0,
       shape: { kind: 'tri', cx: S2UX, cy: y + 7, w: 9, h: 8, dir: 'up' }, label: { dx: 6, dy: 0, w: 15, align: 'l', codeIn: true } });
   });
   add({ id: 'sys1', type: 'sys1', group: 'ops', container: true, layer: LAYER.ops, z2: -0.5, zs: 0.55,
@@ -1483,7 +1485,8 @@ function buildLayout(n, opts) {
   ops.forEach(i => {
     chan('eo' + i, 'eo', ['e' + i, 'o' + i], [['e' + i], ['o' + i]], [{ pts: [P(at('e' + i, 1, 0), E), P(at('o' + i, -1, 0), O)], arrows: 'both' }], { idx: i });
     chan('om' + i, 'om', ['o' + i, 'm' + i], [['o' + i], ['m' + i]], [{ pts: [P(at('o' + i, ...deg(45)), O), P(at('m' + i, -1, -1), O)], arrows: 'both' }], { idx: i });
-    chan('ms' + i, 'ms2', ['m' + i, 'a' + i], [['m' + i], ['a' + i]], [{ pts: [P(at('m' + i, 1, 0), O), P(at('a' + i, -1, 0), S2L)], arrows: 'both' }], { idx: i });
+    if (localS2) chan('ms' + i, 'ms2', ['m' + i, 'a' + i], [['m' + i], ['a' + i]], [{ pts: [P(at('m' + i, 1, 0), O), P(at('a' + i, -1, 0), S2L)], arrows: 'both' }], { idx: i });
+    else chan('ms' + i, 'ms2', ['m' + i, 's2'], [['m' + i], ['s2']], [{ pts: [P([S2UX, yOp(i) + 7], S2L), P(at('m' + i, 1, 0), O)], arrows: 'end', sgn: -1 }], { idx: i });
     if (i < n - 1) {
       chan('ee' + i, 'ee', ['e' + i, 'e' + (i + 1)], [['e' + i], ['e' + (i + 1)]], [{ pts: [P(at('e' + i, 0, -1), E), P(at('e' + (i + 1), 0, 1), E)], mode: 'wave', amp: 1.8, arrows: 'both' }], { idx: i });
       chan('oo' + i, 'oo', ['o' + i, 'o' + (i + 1)], [['o' + i], ['o' + (i + 1)]], [{ pts: [P(at('o' + i, 0, -1), O), P(at('o' + (i + 1), 0, 1), O)], mode: 'wave', amp: 1.8, arrows: 'both' }], { idx: i });
@@ -1491,9 +1494,14 @@ function buildLayout(n, opts) {
   });
 
   // System Two: anti-oscillation channel and its link to System Three
-  const s2paths = [{ pts: [P(at('s2', 0, -1), S2L), P(at('a0', 0, 1), S2L)], arrows: 'both' }];
-  for (let i = 0; i < n - 1; i++) s2paths.push({ pts: [P(at('a' + i, 0, -1), S2L), P(at('a' + (i + 1), 0, 1), S2L)], arrows: 'both' });
-  chan('c2', 's2ch', ['s2'].concat(allA), [['s2'], allA], s2paths);
+  if (localS2) {
+    const s2paths = [{ pts: [P(at('s2', 0, -1), S2L), P(at('a0', 0, 1), S2L)], arrows: 'both' }];
+    for (let i = 0; i < n - 1; i++) s2paths.push({ pts: [P(at('a' + i, 0, -1), S2L), P(at('a' + (i + 1), 0, 1), S2L)], arrows: 'both' });
+    chan('c2', 's2ch', ['s2'].concat(allA), [['s2'], allA], s2paths);
+  } else {
+    // without local centres the System Two channel runs straight down from the regulatory centre to every local management
+    chan('c2', 's2ch', ['s2'].concat(allM), [['s2'], allM], [{ pts: [P(at('s2', 0, -1), S2L), P([S2UX, yLast + 7], S2L)], arrows: 'none' }]);
+  }
   chan('c23', 's2s3', ['s3', 's2'], [['s3'], ['s2']], [bridge
     ? { pts: [P(at('s3', 1, -0.6), M), P([17.5, 33.7], M), P(at('s2', -1, 0), S2L)], corner: 2, arrows: 'both' }
     : { pts: [P(at('s3', 1, 0), M), P(at('s2', -1, 0), M)], arrows: 'both' }]);
@@ -1613,7 +1621,7 @@ const STORE_KEY = 'vsm-explorer:v1';
 
 let db = null; // { seq, rootId, currentId, levels: {} }
 let prefs = { view: '3d', flows: !reduceMotion, nested: false, spread: 1, side: true, s2mode: 'inside', extS4cmd: true, extS14: true, style: 'square', theme: 'auto' };
-function layoutOpts() { return { s2: prefs.s2mode === 'bridge' ? 'bridge' : 'inside', s4cmd: prefs.extS4cmd !== false, s14: prefs.extS14 !== false, style: prefs.style === 'diamond' ? 'diamond' : 'square' }; }
+function layoutOpts() { return { s2: prefs.s2mode === 'bridge' ? 'bridge' : 'inside', s4cmd: prefs.extS4cmd !== false, s14: prefs.extS14 !== false, style: prefs.style === 'diamond' ? 'diamond' : 'square', localS2: prefs.localS2 !== false }; }
 
 function newLevel(parent, elId) {
   db.seq += 1;
@@ -1662,7 +1670,7 @@ function defaultLabel(lv, id) {
   const t = i => opTag(lv, i);
   if ((m = /^o(\d+)$/.exec(id))) return 'Operation ' + t(+m[1]);
   if ((m = /^m(\d+)$/.exec(id))) return 'Local management ' + t(+m[1]);
-  if ((m = /^a(\d+)$/.exec(id))) return 'Anti-oscillation ' + t(+m[1]);
+  if ((m = /^a(\d+)$/.exec(id))) return 'Local regulatory centre ' + t(+m[1]);
   if ((m = /^e(\d+)$/.exec(id))) return 'Environment ' + t(+m[1]);
   if ((m = /^eo(\d+)$/.exec(id))) return 'Environment–operation ' + t(+m[1]);
   if ((m = /^om(\d+)$/.exec(id))) return 'Local management loop ' + t(+m[1]);
@@ -1772,7 +1780,7 @@ function poleName(lv, pole) {
   return POLE_GROUPS[pole[0].charAt(0)] || pole.map(id => labelOf(lv, id)).join(', ');
 }
 const flowsOf = (lv, chId) => (lv.flows && lv.flows[chId]) || [];
-const FULL_OPTS = { s2: 'inside', s4cmd: true, s14: true, style: 'square' };
+const FULL_OPTS = { s2: 'inside', s4cmd: true, s14: true, style: 'square', localS2: true };
 
 /* A neutral starting point for any level: what typically travels on each kind of channel */
 function standardFlows(lv, ch) {
@@ -2238,7 +2246,7 @@ function refreshVisuals() {
     o.group.visible = !isHidden(id) || !!el.container;
     if (isHidden(id) && el.container) setOpacity(o.fill.material, op * 0.35);
   });
-  minis.forEach(m => { if (m.holder.visible && isHidden(m.op)) m.holder.visible = false; else if (!isHidden(m.op)) m.holder.visible = minisShown; });
+  minis.forEach(m => { const v = !isHidden(m.op) && minisShown; m.holder.visible = v; if (m.opsHolder) m.opsHolder.visible = v; });
   chs.forEach((o, id) => {
     const base = new THREE.Color(colorOf(lv, id, L));
     const related = !focusSet || focusSet.has(id);
@@ -2341,50 +2349,59 @@ function updateParticles(time) {
 // circle and the inner metasystem on the tilted square, so the whole lower-level viable system reads as one unit
 let MINI_K = 0.075, THETA = -Math.PI / 4;
 let minisShown = false, fitDistCache = 300;
+// The lower recursion is drawn in two fitted parts, both turned 45 degrees as in Beer's recursion figure:
+// its metasystem inside the local management, and its System One (operations with their local managements)
+// inside the operation circle. Only the spine of each part is drawn, so the nested view stays readable.
+const MINI_META_CH = ['s34', 's45'];
+const MINI_OPS_CH = ['om', 'oo'];
 function buildMinis() {
   const lv = level();
+  const sq = layoutOpts().style !== 'diamond';
   for (let i = 0; i < lv.opCount; i++) {
     const childId = lv.children['o' + i];
     const child = childId ? db.levels[childId] : null;
-    const ML = buildLayout(child ? child.opCount : 3);
-    const holder = new THREE.Group();
-    const inner = new THREE.Group();
-    // map the inner operations' centre onto the operation and the inner metasystem's centre onto the local management
-    const innerOps = ML.els.filter(e => e.type === 'op'), innerMeta = ML.byId.meta.shape;
-    const oc = innerOps.reduce((a, e) => [a[0] + e.shape.cx / innerOps.length, a[1] + e.shape.cy / innerOps.length], [0, 0]);
-    const po = L.byId['o' + i].shape, pm = L.byId['m' + i].shape;
-    const pd = [pm.cx - po.cx, pm.cy - po.cy], cd = [innerMeta.cx - oc[0], innerMeta.cy - oc[1]];
-    MINI_K = Math.hypot(pd[0], pd[1]) / Math.hypot(cd[0], cd[1]);
-    THETA = Math.atan2(pd[1], pd[0]) - Math.atan2(cd[1], cd[0]);
-    inner.position.set(-oc[0], -oc[1], 0);
-    holder.add(inner);
-    holder.scale.setScalar(MINI_K);
-    holder.rotation.z = THETA;
+    const ML = buildLayout(child ? child.opCount : 3, Object.assign({}, layoutOpts(), { localS2: false, s4cmd: false, s14: false }));
+    const holder = new THREE.Group();          // follows the local management
+    const opsHolder = new THREE.Group();       // follows the operation
+    const metaIn = new THREE.Group(), opsIn = new THREE.Group();
+    const meta = ML.byId.meta.shape, s1 = ML.byId.sys1.shape;
+    const pm = L.byId['m' + i].shape, po = L.byId['o' + i].shape;
+    const kMeta = sq ? (pm.hw * Math.SQRT2 * 0.92) / (2 * Math.max(meta.hw, meta.hh)) : (pm.s / 2 * 0.92) / Math.max(meta.hw, meta.hh);
+    const kOps = (po.r * 0.9) / s1.r;
+    const theta = sq ? -Math.PI / 4 : 0;
+    metaIn.position.set(-meta.cx, -meta.cy, 0);
+    opsIn.position.set(-s1.cx, -s1.cy, 0);
+    holder.add(metaIn); opsHolder.add(opsIn);
+    holder.scale.setScalar(kMeta); opsHolder.scale.setScalar(kOps);
+    holder.rotation.z = theta; opsHolder.rotation.z = theta;
     const parts = [];
-    const isEnv = id => ML.byId[id] && ML.byId[id].group === 'env';
     ML.els.forEach(el => {
-      if (el.group === 'env') return; // the parent already draws this operation's environment
+      if (el.group === 'env' || el.type === 'sys1' || el.type === 's3s') return;
+      const target = el.group === 'ops' ? opsIn : metaIn;
       const fg = fillGeometry(el, 0.5);
       const m = new THREE.Mesh(fg.g, new THREE.MeshStandardMaterial({ roughness: 0.6, transparent: !!el.container, opacity: el.container ? 0.3 : 1, depthWrite: !el.container, side: el.container ? THREE.DoubleSide : THREE.FrontSide }));
       m.position.set(el.shape.cx, el.shape.cy, 0);
-      inner.add(m);
+      target.add(m);
       parts.push({ kind: 'el', el, mesh: m });
     });
-    ML.chans.filter(ch => !ch.ends.some(isEnv)).forEach(ch => ch.paths.forEach(p => {
+    ML.chans.filter(ch => MINI_META_CH.includes(ch.type) || MINI_OPS_CH.includes(ch.type)).forEach(ch => ch.paths.forEach(p => {
       const g = new THREE.BufferGeometry().setFromPoints(p.samples.map(s => new THREE.Vector3(s.x, s.y, 0)));
       const line = new THREE.Line(g, new THREE.LineBasicMaterial({ transparent: true, opacity: 0.9 }));
-      inner.add(line);
+      (MINI_OPS_CH.includes(ch.type) ? opsIn : metaIn).add(line);
       parts.push({ kind: 'ch', ch, p, line });
     }));
-    holder.visible = minisShown;
-    world.add(holder);
-    minis.push({ holder, inner, parts, child, ML, op: 'o' + i, idx: i });
+    holder.visible = opsHolder.visible = minisShown;
+    world.add(holder); world.add(opsHolder);
+    MINI_K = kMeta; THETA = theta;
+    // `inner` maps the child level onto the parent for the zoom-through transition
+    minis.push({ holder, opsHolder, inner: opsIn, parts, child, ML, op: 'o' + i, anchor: 'm' + i, idx: i });
   }
 }
 function updateMini(m) {
-  const d = anim.d, o = els.get(m.op);
-  if (!o) return;
+  const d = anim.d, o = els.get(m.anchor || m.op), op = els.get(m.op);
+  if (!o || !op) return;
   m.holder.position.set(o.el.shape.cx, o.el.shape.cy, elZ(o.el, d) + (1 - d) * (o.half * SZ(d) + 0.12));
+  if (m.opsHolder) m.opsHolder.position.set(op.el.shape.cx, op.el.shape.cy, elZ(op.el, d) + (1 - d) * (op.half * SZ(d) + 0.12));
   m.parts.forEach(pt => {
     if (pt.kind === 'el') {
       pt.mesh.position.z = d * (pt.el.layer * prefs.spread + (pt.el.zoff || 0)) + (1 - d) * (pt.el.z2 * 4);
@@ -2402,7 +2419,7 @@ function updateMinisShown(force) {
   const show = prefs.nested || dist < fitDistCache * 0.45;
   if (show === minisShown && !force) return;
   minisShown = show;
-  minis.forEach(m => { m.holder.visible = show; });
+  minis.forEach(m => { m.holder.visible = show; if (m.opsHolder) m.opsHolder.visible = show; });
   refreshVisuals();
   dirty = true;
 }
@@ -2887,7 +2904,7 @@ async function enterOp(k) {
   const lv = level(), m = minis.find(x => x.idx === k);
   if (busy || !m) return;
   busy = true; controls.enabled = false; tip.hidden = true;
-  m.holder.visible = true;
+  m.holder.visible = true; if (m.opsHolder) m.opsHolder.visible = true;
   world.updateMatrixWorld(true);
   const T = m.inner.matrixWorld.clone();
   const s0 = camState();
@@ -2918,7 +2935,7 @@ async function exitToParent() {
   world.updateMatrixWorld(true);
   const T = m.inner.matrixWorld.clone(), Tinv = T.clone().invert();
   applyWorld(Tinv);
-  m.holder.visible = true;
+  m.holder.visible = true; if (m.opsHolder) m.opsHolder.visible = true;
   setCam(s0);
   updateMinisShown(true);
   renderAllPanels();
@@ -2932,11 +2949,12 @@ function checkRecursionZoom(now) {
   if (s.dist < D_IN) {
     let best = null, bd = Infinity;
     els.forEach(o => {
-      if (o.el.type !== 'op') return;
+      // the lower recursion spans the operation and its local management, so zooming toward either enters it
+      if (o.el.type !== 'op' && o.el.type !== 'mgmt') return;
       const dd = Math.hypot(o.group.position.x - s.target.x, o.group.position.y - s.target.y);
       if (dd < bd) { bd = dd; best = o; }
     });
-    if (best && bd < best.el.shape.r * 1.4) enterOp(best.el.idx);
+    if (best && bd < 12) enterOp(best.el.idx);
   } else if (level().parent && s.dist > fitDistCache * 2.4) exitToParent();
 }
 /* Scroll zooms toward the pointer, so you can steer into an operation */
@@ -3582,6 +3600,7 @@ function syncDiagramControls() {
   $('#s2Bridge').setAttribute('aria-pressed', String(bridge));
   $('#extS4cmd').checked = prefs.extS4cmd !== false;
   $('#extS14').checked = prefs.extS14 !== false;
+  $('#localS2').checked = prefs.localS2 !== false;
 }
 function relayout() {
   const cam = camState();
@@ -3614,6 +3633,7 @@ $('#s2Inside').addEventListener('click', () => { if (prefs.s2mode !== 'inside') 
 $('#s2Bridge').addEventListener('click', () => { if (prefs.s2mode !== 'bridge') { prefs.s2mode = 'bridge'; save(); relayout(); } });
 $('#extS4cmd').addEventListener('change', e => { prefs.extS4cmd = e.target.checked; save(); relayout(); });
 $('#extS14').addEventListener('change', e => { prefs.extS14 = e.target.checked; save(); relayout(); });
+$('#localS2').addEventListener('change', e => { prefs.localS2 = e.target.checked; save(); relayout(); });
 
 // data flows
 function armTwoStep(btn, idle, armed, action) {

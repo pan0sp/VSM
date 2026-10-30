@@ -975,7 +975,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
         <div class="eyebrow" id="focusEyebrow">System in focus · Level 0</div>
         <input class="focus-name" id="levelName" type="text" aria-label="Name of the system in focus">
         <div class="row">
-          <span>System One operations</span>
+          <span>System One operations<small style="display:block;font-size:11.5px">− removes the last; right-click an operation to remove it</small></span>
           <div class="stepper">
             <button id="opMinus" type="button" aria-label="Remove an operation">−</button>
             <output id="opCount" aria-live="polite">3</output>
@@ -3025,6 +3025,7 @@ function openCtx(cx, cy, id) {
     if (isSystemType(typeOfId(L, id))) {
       const key = recursionKey(id), cid = lv.children[key], child = cid && db.levels[cid];
       sep();
+      if (lv.opCount > MIN_OPS) it('−', 'Remove operation ' + codeOf(lv, key), null, { warn: true, confirm: 'Click again to remove ' + labelOf(lv, key), fn2: () => removeOpUI(lv.id, +key.slice(1)) });
       it('↘', child ? 'Open its level' : 'Create its level', () => dive(id), { kbd: 'dbl-click' });
       if (child) {
         const n = countSubtree(child);
@@ -3139,6 +3140,57 @@ controls.addEventListener('start', () => { tip.hidden = true; });
 /* =====================================================================
    Recursion: stepping into and out of systems
    ===================================================================== */
+/* Remove operation k from a level: drops its environment, local management, System Two unit, channels and
+   its own recursion, and moves every later operation up one place so their labels and data follow them */
+function removeOperation(lv, k) {
+  if (!lv || lv.opCount <= MIN_OPS) return false;
+  const single = /^(o|m|a|e|eo|om|ms)(\d+)$/, pair = /^(ee|oo)(\d+)$/;
+  const remap = id => {
+    let m = single.exec(id);
+    if (m) { const i = +m[2]; return i === k ? null : (i > k ? m[1] + (i - 1) : id); }
+    m = pair.exec(id);
+    if (m) { const i = +m[2]; return (i === k || i === k - 1) ? null : (i > k ? m[1] + (i - 1) : id); }
+    return id;
+  };
+  ['labels', 'colors', 'notes', 'diag', 'flows'].forEach(f => {
+    const src = lv[f] || {}, out = {};
+    Object.keys(src).forEach(id => { const n = remap(id); if (n) out[n] = src[id]; });
+    lv[f] = out;
+  });
+  const kids = {};
+  Object.keys(lv.children || {}).forEach(id => {
+    const n = remap(id), cid = lv.children[id], c = db.levels[cid];
+    if (!c) return;
+    if (n) { kids[n] = cid; c.parent.el = n; }
+    else { deleteSubtree(c); delete db.levels[cid]; }
+  });
+  lv.children = kids;
+  lv.opCount -= 1;
+  // sub-levels keep default names that follow their operation's new position
+  const retag = p => Object.values(p.children).forEach(cid => { const c = db.levels[cid]; if (c) { c.tag = childTag(p, c.parent.el); retag(c); } });
+  retag(lv);
+  return true;
+}
+let lastRemoved = null;
+function removeOpUI(lvId, k) {
+  const lv = db.levels[lvId];
+  if (!lv || busy) return;
+  if (lv.opCount <= MIN_OPS) { showToast('A level needs at least one operation.'); return; }
+  const name = labelOf(lv, 'o' + k);
+  lastRemoved = JSON.stringify(db);
+  if (!removeOperation(lv, k)) return;
+  if (!db.levels[db.currentId]) db.currentId = lv.id;
+  save();
+  selected = null; selSet = new Set(); focusSet = null; focusMode = false;
+  const cam = camState(); buildScene(); setCam(cam);
+  renderAllPanels();
+  camTween(fitState(), 600);
+  showToast('Removed ' + name + '.', 'Undo', () => {
+    if (!lastRemoved) return;
+    db = JSON.parse(lastRemoved); lastRemoved = null; save();
+    const c = camState(); buildScene(); setCam(c); renderAllPanels(); camTween(fitState(), 600);
+  });
+}
 function countSubtree(lv) { return 1 + Object.values(lv.children || {}).reduce((a, cid) => a + (db.levels[cid] ? countSubtree(db.levels[cid]) : 0), 0); }
 /* Delete a level and everything below it; if the view is inside it, rise to its parent first */
 async function deleteLevel(id) {
@@ -3429,16 +3481,17 @@ function recolorElement(id, value, source) {
 function renderTree() {
   const root = db.levels[db.rootId];
   const cur = db.currentId;
-  const node = lv => {
+  const node = (lv, rmBtn) => {
     const isCur = lv.id === cur;
     const flags = levelFlags(lv);
     let html = '<li class="tnode"><div class="trow"><button class="tbtn level' + (isCur ? ' current' : '') + '" data-level="' + lv.id + '" type="button"><span class="lv">L' + lv.depth + '</span><span class="tn">' + esc(levelName(lv)) + '</span>' + (flags ? '<span class="tflag" title="' + flags + ' flagged in the diagnosis">⚑' + flags + '</span>' : '') + (isCur ? '<span class="here">HERE</span>' : '') + '</button>' +
-      (lv.parent ? '<button class="tdel" type="button" data-del="' + lv.id + '" aria-label="Delete the level ' + esc(levelName(lv)) + '" title="Delete this level and everything below it">Delete</button>' : '') + '</div>';
+      (lv.parent ? '<button class="tdel" type="button" data-del="' + lv.id + '" aria-label="Delete the level inside ' + esc(levelName(lv)) + '" title="Delete the level inside this operation (and everything below it); the operation stays">Delete level</button>' : '') + (rmBtn || '') + '</div>';
     const rows = [];
     for (let i = 0; i < lv.opCount; i++) {
       const key = 'o' + i, childId = lv.children[key];
-      if (childId && db.levels[childId]) rows.push(node(db.levels[childId]));
-      else rows.push('<li class="tnode"><button class="tbtn unexplored" type="button" data-from="' + lv.id + '" data-el="' + key + '"><span class="cd">' + esc(codeOf(lv, key)) + '</span><span class="tn">' + esc(labelOf(lv, key)) + '</span></button></li>');
+      const rm = lv.opCount > MIN_OPS ? '<button class="tdel" type="button" data-rmop="' + lv.id + ':' + i + '" title="Remove this operation from ' + esc(levelName(lv)) + '" aria-label="Remove operation ' + esc(labelOf(lv, key)) + '">Remove</button>' : '';
+      if (childId && db.levels[childId]) rows.push(node(db.levels[childId], rm));
+      else rows.push('<li class="tnode"><div class="trow"><button class="tbtn unexplored" type="button" data-from="' + lv.id + '" data-el="' + key + '"><span class="cd">' + esc(codeOf(lv, key)) + '</span><span class="tn">' + esc(labelOf(lv, key)) + '</span></button>' + rm + '</div></li>');
     }
     if (rows.length) html += '<ul>' + rows.join('') + '</ul>';
     return html + '</li>';
@@ -3447,13 +3500,16 @@ function renderTree() {
   tree.innerHTML = node(root);
   tree.querySelectorAll('.tbtn.level').forEach(b => b.addEventListener('click', () => goToLevel(b.dataset.level)));
   tree.querySelectorAll('.tdel').forEach(b => b.addEventListener('click', () => {
+    const idle = b.textContent;
     if (!b.classList.contains('armed')) {
-      const n = countSubtree(db.levels[b.dataset.del]);
-      b.classList.add('armed'); b.textContent = n > 1 ? 'Delete ' + n + ' levels?' : 'Delete?';
-      setTimeout(() => { if (b.isConnected) { b.classList.remove('armed'); b.textContent = 'Delete'; } }, 3500);
+      if (b.dataset.del) { const n = countSubtree(db.levels[b.dataset.del]); b.textContent = n > 1 ? 'Delete ' + n + ' levels?' : 'Delete level?'; }
+      else b.textContent = 'Remove it?';
+      b.classList.add('armed');
+      setTimeout(() => { if (b.isConnected) { b.classList.remove('armed'); b.textContent = idle; } }, 3500);
       return;
     }
-    deleteLevel(b.dataset.del);
+    if (b.dataset.del) deleteLevel(b.dataset.del);
+    else { const [lid, k] = b.dataset.rmop.split(':'); removeOpUI(lid, +k); }
   }));
   tree.querySelectorAll('.tbtn.unexplored').forEach(b => b.addEventListener('click', async () => {
     const from = db.levels[b.dataset.from];
@@ -3592,9 +3648,15 @@ function renderRecursion() {
     '<div class="prev">' + previewSVG(child, lv) + '</div><p>' + esc(note) + (child ? ' Explored: ' + child.opCount + ' operations.' : '') + '</p>' +
     '<div class="btn-row"><button class="btn primary" type="button" id="iDive">' + (child ? 'Open' : 'Create') + ' level ' + (lv.depth + 1) + ' · ' + esc(name) + '</button>' +
     (child ? '<button class="btn warn" type="button" id="iDelLvl">Delete level</button>' : '') +
+    (lv.opCount > MIN_OPS ? '<button class="btn warn" type="button" id="iRmOp">Remove operation</button>' : '') +
     (sampleFn ? '<button class="btn" type="button" id="iMap"' + (aiBusy ? ' disabled' : '') + '>Map it with Claude</button>' : '') + '</div>' +
     (sampleFn ? '<p id="iAiStatus" aria-live="polite">' + esc(aiInspectorNote) + '</p>' : '') + '</div>';
   $('#iDive').addEventListener('click', () => { if (matchMedia('(max-width: 860px)').matches) select(null); dive(id); });
+  const rmb = $('#iRmOp');
+  if (rmb) rmb.addEventListener('click', () => {
+    if (!rmb.dataset.armed) { rmb.dataset.armed = '1'; rmb.textContent = 'Click again to remove ' + name; return; }
+    removeOpUI(lv.id, +key.slice(1));
+  });
   const del = $('#iDelLvl');
   if (del) del.addEventListener('click', () => {
     if (!del.dataset.armed) { const n = countSubtree(child); del.dataset.armed = '1'; del.textContent = n > 1 ? 'Delete ' + n + ' levels?' : 'Click again to delete'; return; }

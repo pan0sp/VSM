@@ -18,6 +18,8 @@ Open `index.html` in a recent browser. Everything is in that one file; it loads 
 
 Labels, colours, notes, levels and view settings are saved in the browser's local storage.
 
+**Colour scheme** (Model panel) recolours every level at once: *Environment–Operation–Management* (environment green, operations and the System One circle red, local managements and the metasystem blue) or *One colour per system* (Systems One to Five each keep one colour across levels). Individual colours can still be changed afterwards.
+
 Use **Auto / Light / Dark** in the toolbar to override the system theme.
 
 ## Fidelity to the canonical diagram

@@ -917,6 +917,16 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 
       <div class="block">
         <div class="eyebrow">Group colours</div>
+        <div class="row">
+          <span>Colour scheme</span>
+          <select class="inp" id="scheme" aria-label="Apply a colour scheme to every level">
+            <option value="">Choose…</option>
+            <option value="eom">Environment–Operation–Management</option>
+            <option value="systems">One colour per system</option>
+            <option value="default">Default (by domain)</option>
+          </select>
+        </div>
+        <div class="src" id="schemeNote" style="margin-top:-4px">Applies to every level, including ones you open later. You can still recolour anything afterwards.</div>
         <div class="groups" id="groups"></div>
       </div>
 
@@ -1619,6 +1629,32 @@ const GROUP_INFO = {
 };
 const STORE_KEY = 'vsm-explorer:v1';
 
+/* Model-wide colour schemes. Element ids are the same at every level, so one scheme repeats across recursions. */
+const COLOR_SCHEMES = {
+  // Beer's E–O–M reading of every recursion: environment green, operations red, management blue.
+  // Local managements are management, so they are blue; the System One circle stays with the operations.
+  eom: { groups: { env: '#4f9a63', ops: '#cc4a3f', meta: '#2f6fbf', chan: '#6c7b86' }, el: id => /^m\d+$/.test(id) ? '#2f6fbf' : null },
+  // One colour per system, so System Three looks the same at every level
+  systems: {
+    groups: { env: '#4f9a63', ops: '#2f74c0', meta: '#9a8c74', chan: '#6c7b86' },
+    el: id => {
+      if (/^[om]\d+$/.test(id) || id === 'sys1') return '#2f74c0';   // System One
+      if (/^a\d+$/.test(id) || id === 's2') return '#8a5cc7';         // System Two
+      if (id === 's3' || id === 's3s') return '#d0861b';              // System Three and Three-Star
+      if (id === 's4') return '#1f9a8c';                              // System Four
+      if (id === 's5') return '#c4457a';                              // System Five
+      return null;
+    }
+  },
+  default: { groups: DEFAULT_GROUP_COLORS, el: () => null }
+};
+const SCHEME_IDS = ['sys1', 'meta', 's2', 's3', 's3s', 's4', 's5'].concat(...Array.from({ length: 6 }, (_, i) => ['o' + i, 'm' + i, 'a' + i]));
+function schemeColors(key) {
+  const sc = COLOR_SCHEMES[key], colors = {};
+  SCHEME_IDS.forEach(id => { const c = sc.el(id); if (c) colors[id] = c; });
+  return { groupColors: Object.assign({}, sc.groups), colors };
+}
+
 let db = null; // { seq, rootId, currentId, levels: {} }
 let prefs = { view: '3d', flows: !reduceMotion, nested: false, spread: 1, side: true, s2mode: 'inside', extS4cmd: true, extS14: true, style: 'square', theme: 'auto' };
 function layoutOpts() { return { s2: prefs.s2mode === 'bridge' ? 'bridge' : 'inside', s4cmd: prefs.extS4cmd !== false, s14: prefs.extS14 !== false, style: prefs.style === 'diamond' ? 'diamond' : 'square', localS2: prefs.localS2 !== false }; }
@@ -1635,6 +1671,8 @@ function newLevel(parent, elId) {
     groupColors: Object.assign({}, parent ? parent.groupColors : DEFAULT_GROUP_COLORS),
     children: {}
   };
+  // a colour scheme chosen for the whole model carries into new levels
+  if (db.scheme && COLOR_SCHEMES[db.scheme]) Object.assign(lv, schemeColors(db.scheme));
   db.levels[id] = lv;
   if (parent) parent.children[elId] = id;
   return lv;
@@ -2428,7 +2466,7 @@ function colorMini(m) {
   const parent = level();
   m.parts.forEach(pt => {
     const id = pt.kind === 'el' ? pt.el.id : pt.ch.id;
-    const lv = src || { colors: {}, groupColors: parent.groupColors };
+    const lv = src || (db.scheme && COLOR_SCHEMES[db.scheme] ? schemeColors(db.scheme) : { colors: {}, groupColors: parent.groupColors });
     const base = new THREE.Color(lv.colors[id] || SPECIAL_DEFAULTS[id] || lv.groupColors[pt.kind === 'el' ? pt.el.group : 'chan']);
     if (pt.kind === 'el') {
       const t = pt.el.container ? 0.6 : lerp(0.35, 0, anim.d);
@@ -3217,7 +3255,7 @@ function renderRecursion() {
 function previewSVG(child, parent) {
   const n = child ? child.opCount : 3;
   const PL = buildLayout(n);
-  const src = child || { colors: {}, groupColors: parent.groupColors, labels: {}, tag: childTag(parent, recursionKey(selected)) };
+  const src = child || Object.assign({ colors: {}, groupColors: parent.groupColors, labels: {}, tag: childTag(parent, recursionKey(selected)) }, db.scheme && COLOR_SCHEMES[db.scheme] ? schemeColors(db.scheme) : {});
   const b = PL.bbox, pad = 4;
   const vb = [b.x0 - pad, -(b.y1 + pad), (b.x1 - b.x0) + pad * 2, (b.y1 - b.y0) + pad * 2];
   const col = (id, g) => src.colors[id] || SPECIAL_DEFAULTS[id] || src.groupColors[g];
@@ -3548,6 +3586,16 @@ function changeOps(delta) {
 }
 $('#opMinus').addEventListener('click', () => changeOps(-1));
 $('#opPlus').addEventListener('click', () => changeOps(1));
+$('#scheme').addEventListener('change', e => {
+  const key = e.target.value;
+  e.target.value = '';
+  if (!COLOR_SCHEMES[key]) return;
+  db.scheme = key === 'default' ? null : key;
+  Object.values(db.levels).forEach(l => Object.assign(l, schemeColors(key)));
+  save();
+  refreshVisuals(); renderAllPanels();
+  $('#schemeNote').textContent = (key === 'default' ? 'Default colours' : key === 'eom' ? 'Environment–Operation–Management colours' : 'System colours') + ' applied to all ' + Object.keys(db.levels).length + (Object.keys(db.levels).length === 1 ? ' level' : ' levels') + '. Recolour anything to adjust.';
+});
 $('#preset').addEventListener('change', e => {
   if (e.target.value === 'example') { e.target.value = ''; loadExample(); return; }
   const p = PRESETS[e.target.value];

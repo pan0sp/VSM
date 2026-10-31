@@ -210,19 +210,15 @@ button { cursor: pointer; }
 }
 .depth input { width: 110px; accent-color: var(--accent); }
 .focusbar {
-  position: absolute;
-  top: 54px;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: var(--surface);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--accent);
   border-radius: 999px;
-  padding: 5px 6px 5px 14px;
+  padding: 3px 4px 3px 12px;
   box-shadow: var(--shadow);
-  z-index: 3;
+  min-width: 0;
   font-size: 12.5px;
   max-width: calc(100% - 24px);
 }
@@ -975,7 +971,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
         <div class="eyebrow" id="focusEyebrow">System in focus · Level 0</div>
         <input class="focus-name" id="levelName" type="text" aria-label="Name of the system in focus">
         <div class="row">
-          <span>System One operations<small style="display:block;font-size:11.5px">− removes the last; right-click an operation to remove it</small></span>
+          <span>System One operations<small style="display:block;font-size:11.5px">− removes the last; right-click any operation to remove it</small></span>
           <div class="stepper">
             <button id="opMinus" type="button" aria-label="Remove an operation">−</button>
             <output id="opCount" aria-live="polite">3</output>
@@ -1084,7 +1080,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
       <div class="block">
         <div class="eyebrow">Recursive structure</div>
         <p class="src" style="margin:0">Recursion runs only through System One: every operational element contains a whole viable system, and its metasystemic functions follow it down. Open any operation to step into it, or zoom into it in the model. The highlighted node is the System-in-Focus.</p>
-        <label class="chk"><input type="checkbox" id="autoLevels"><span>Create levels by zooming in<small>Off: zooming into an operation without a level asks first. Double-click or Open always creates one.</small></span></label>
+        <label class="chk"><input type="checkbox" id="autoLevels"><span>Create levels by zooming in<small>Off: zooming into an operation without lower levels asks first. Double-click always creates them.</small></span></label>
         <ul class="tree" id="tree"></ul>
       </div>
     </section>
@@ -1137,7 +1133,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
           <kbd>Scroll into</kbd><span>Zoom toward the pointer; keep going into an operation to enter its recursion</span>
           <kbd>2 / 3</kbd><span>Switch between 2D and 3D</span>
           <kbd>C</kbd><span>Recentre the model face-on</span>
-          <kbd>Right-click</kbd><span>Menu: details, focus, centre here, recursion, diagnosis</span>
+          <kbd>Right-click</kbd><span>Menu: details, focus, centre here, lower levels, remove, diagnosis</span>
           <kbd>Esc</kbd><span>Leave focus, then clear the selection</span>
         </div>
       </div>
@@ -1153,12 +1149,12 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
     <div class="labels" id="labels" aria-hidden="true"></div>
     <div class="overlay-tl">
       <div class="level-chip" id="levelChip"></div>
+      <div class="focusbar" id="focusBar" role="status" hidden></div>
       <button class="up-btn" id="upBtn" type="button" hidden>
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/></svg>
         <span id="upTx">Up one level</span>
       </button>
     </div>
-    <div class="focusbar" id="focusBar" role="toolbar" aria-label="Selection" hidden></div>
     <div class="tip" id="tip" hidden></div>
     <div class="toast" id="toast" role="status" hidden></div>
     <div class="hint" id="hint"></div>
@@ -2766,7 +2762,7 @@ function fitState(forD, bbox) {
   const aspect = w / h, tanHalf = Math.tan(camera.fov * Math.PI / 360);
   const bw = (b.x1 - b.x0) + 8, bh = (b.y1 - b.y0) + 8;
   let dist = Math.max(bh / 2 / tanHalf, bw / 2 / (tanHalf * aspect)) * 1.04;
-  const padTop = matchMedia('(max-width: 860px)').matches ? 0 : 100 / h; // keep clear of the level chip and selection bar
+  const padTop = matchMedia('(max-width: 860px)').matches ? 0 : 56 / h; // keep clear of the level chip
   dist *= 1 + padTop;
   const d = forD == null ? anim.d : forD;
   if (d > 0.5) dist *= 1.06;
@@ -2910,24 +2906,13 @@ function select(id, opts) {
 const isHidden = id => focusMode && focusSet && !focusSet.has(id);
 function shownName(id) { const lv = level(); const c = codeOf(lv, id); return (c ? c + ' ' : '') + labelOf(lv, id); }
 function renderFocusBar() {
+  // a small reminder only while focused; everything else lives in the right-click menu and keys
   const bar = $('#focusBar');
-  if (!selSet.size) { bar.hidden = true; bar.classList.remove('on'); return; }
-  const ids = Array.from(selSet), n = ids.length;
-  const linked = Math.max(0, (focusSet ? focusSet.size : 0) - n);
-  const who = n === 1 ? '<b>' + esc(shownName(ids[0])) + '</b>' : '<b>' + n + ' selected</b>';
+  if (!focusMode || !selSet.size) { bar.hidden = true; return; }
+  const ids = Array.from(selSet);
   bar.hidden = false;
-  bar.classList.toggle('on', focusMode);
-  bar.innerHTML = focusMode
-    ? '<span class="fx">Focused on ' + who + ' · ' + linked + ' directly connected</span>' +
-      (inspDismissed ? '<button type="button" id="fDetails">Details</button>' : '') + '<button type="button" id="fReframe">Reframe</button><button type="button" class="go" id="fExit">Show all</button>'
-    : '<span class="fx">' + who + ' · ' + linked + ' directly connected</span><span class="fk">Shift-click to add</span>' +
-      '<button type="button" class="go" id="fEnter" title="Show only the selection and what connects to it (key F)">Focus</button>' + (inspDismissed ? '<button type="button" id="fDetails">Details</button>' : '') + '<button type="button" id="fClear">Clear</button>';
-  const b = id => document.getElementById(id);
-  if (b('fEnter')) b('fEnter').onclick = enterFocus;
-  if (b('fClear')) b('fClear').onclick = () => select(null);
-  if (b('fExit')) b('fExit').onclick = exitFocus;
-  if (b('fReframe')) b('fReframe').onclick = frameFocus;
-  if (b('fDetails')) b('fDetails').onclick = () => { inspDismissed = false; renderInspector(); renderFocusBar(); };
+  bar.innerHTML = '<span class="fx">Focused on <b>' + esc(ids.length === 1 ? shownName(ids[0]) : ids.length + ' elements') + '</b></span><button type="button" class="go" id="fExit" title="Show everything again (Esc)">Show all</button>';
+  $('#fExit').onclick = exitFocus;
 }
 function focusBBox() {
   let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
@@ -3007,6 +2992,19 @@ function centreOn(p) {
   camTween({ target: p, dist: s.dist, az: s.az, el: s.el }, 500);
 }
 function closeCtx() { ctx.hidden = true; ctxAt = null; }
+function openRemoveMenu(x, y, lv, k, kid) {
+  const name = labelOf(lv, 'o' + k), opts = [];
+  if (kid) { const n = countSubtree(kid); opts.push(['Remove lower levels', 'Keeps ' + name + '; removes the ' + (n > 1 ? n + ' levels' : 'level') + ' inside it', () => deleteLevel(kid.id)]); }
+  if (lv.opCount > MIN_OPS) opts.push(['Remove operation', 'Removes ' + name + (kid ? ' and its lower levels' : '') + ' from ' + levelName(lv), () => removeOpUI(lv.id, k)]);
+  ctx.innerHTML = '<div class="ch"><span class="k">Remove</span><b>' + esc(name) + '</b></div>' + opts.map((o, i) =>
+    '<button type="button" role="menuitem" class="warn" data-i="' + i + '"><span class="ic">−</span><span>' + esc(o[0]) + '<small style="display:block;color:var(--ink-2);font-size:11.5px;font-weight:400">' + esc(o[1]) + '</small></span><span></span></button>').join('') +
+    '<hr><button type="button" role="menuitem" data-i="x"><span class="ic"></span><span>Cancel</span><span></span></button>';
+  ctx.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { closeCtx(); if (b.dataset.i !== 'x') opts[+b.dataset.i][2](); }));
+  ctx.hidden = false;
+  ctx.style.left = Math.min(x, innerWidth - ctx.offsetWidth - 8) + 'px';
+  ctx.style.top = Math.max(8, Math.min(y, innerHeight - ctx.offsetHeight - 8)) + 'px';
+  ctx.querySelector('button').focus({ preventScroll: true });
+}
 function openCtx(cx, cy, id) {
   tip.hidden = true;
   const lv = level(), items = [];
@@ -3025,12 +3023,9 @@ function openCtx(cx, cy, id) {
     if (isSystemType(typeOfId(L, id))) {
       const key = recursionKey(id), cid = lv.children[key], child = cid && db.levels[cid];
       sep();
-      if (lv.opCount > MIN_OPS) it('−', 'Remove operation ' + codeOf(lv, key), null, { warn: true, confirm: 'Click again to remove ' + labelOf(lv, key), fn2: () => removeOpUI(lv.id, +key.slice(1)) });
-      it('↘', child ? 'Open its level' : 'Create its level', () => dive(id), { kbd: 'dbl-click' });
-      if (child) {
-        const n = countSubtree(child);
-        it('✕', 'Delete its level' + (n > 1 ? ' (' + n + ' levels)' : ''), null, { warn: true, confirm: n > 1 ? 'Click again to delete ' + n + ' levels' : 'Click again to delete', fn2: () => deleteLevel(child.id) });
-      }
+      it('↘', child ? 'Open lower level' : 'Create lower level', () => dive(id), { kbd: 'dbl-click' });
+      if (child) it('−', 'Remove lower levels', () => deleteLevel(child.id), { warn: true });
+      if (lv.opCount > MIN_OPS) it('−', 'Remove operation', () => removeOpUI(lv.id, +key.slice(1)), { warn: true });
     }
     sep();
     items.push({ sub: 'Diagnosis' });
@@ -3040,7 +3035,7 @@ function openCtx(cx, cy, id) {
   } else {
     it('✥', 'Centre here', () => centreOn(point));
     it('⌖', 'Recentre the model', recentre, { kbd: 'C' });
-    if (focusMode) it('◎', 'Show all', exitFocus, { kbd: 'Esc' });
+    if (focusMode) { it('◎', 'Show all', exitFocus, { kbd: 'Esc' }); it('⤢', 'Reframe the focus', frameFocus); }
     if (selSet.size) it('✕', 'Clear selection', () => select(null));
     sep();
     it('▣', prefs.view === '3d' ? 'Switch to 2D' : 'Switch to 3D', () => setView(prefs.view === '3d' ? '2d' : '3d'), { kbd: prefs.view === '3d' ? '2' : '3' });
@@ -3172,6 +3167,13 @@ function removeOperation(lv, k) {
   return true;
 }
 let lastRemoved = null;
+function offerUndo(msg) {
+  showToast(msg, 'Undo', () => {
+    if (!lastRemoved) return;
+    db = JSON.parse(lastRemoved); lastRemoved = null; save();
+    const c = camState(); buildScene(); setCam(c); renderAllPanels(); camTween(fitState(), 600);
+  });
+}
 function removeOpUI(lvId, k) {
   const lv = db.levels[lvId];
   if (!lv || busy) return;
@@ -3185,17 +3187,14 @@ function removeOpUI(lvId, k) {
   const cam = camState(); buildScene(); setCam(cam);
   renderAllPanels();
   camTween(fitState(), 600);
-  showToast('Removed ' + name + '.', 'Undo', () => {
-    if (!lastRemoved) return;
-    db = JSON.parse(lastRemoved); lastRemoved = null; save();
-    const c = camState(); buildScene(); setCam(c); renderAllPanels(); camTween(fitState(), 600);
-  });
+  offerUndo('Removed ' + name + ' and its lower levels.');
 }
 function countSubtree(lv) { return 1 + Object.values(lv.children || {}).reduce((a, cid) => a + (db.levels[cid] ? countSubtree(db.levels[cid]) : 0), 0); }
-/* Delete a level and everything below it; if the view is inside it, rise to its parent first */
+/* Remove the lower levels of an operation (the operation stays); if the view is inside them, rise first */
 async function deleteLevel(id) {
   const lv = db.levels[id];
   if (!lv || !lv.parent || busy) return;
+  lastRemoved = JSON.stringify(db);
   const parent = db.levels[lv.parent.level];
   const inside = ancestry(level()).some(l => l.id === id);
   delete parent.children[lv.parent.el];
@@ -3205,7 +3204,7 @@ async function deleteLevel(id) {
   if (inside) { db.currentId = parent.id; selected = null; focusSet = null; buildScene(); setCam(fitState()); }
   else if (parent.id === db.currentId) { const cam = camState(); buildScene(); setCam(cam); }
   renderAllPanels();
-  showToast('Deleted the level inside ' + labelOf(parent, lv.parent.el) + '.');
+  offerUndo('Removed the lower levels of ' + labelOf(parent, lv.parent.el) + '.');
 }
 let toastTimer = 0;
 function showToast(msg, actionLabel, action) {
@@ -3348,7 +3347,7 @@ function checkRecursionZoom(now) {
       else if (prefs.autoLevels) enterOp(k);
       else if (now - (window.__askedAt || 0) > 4000) {
         window.__askedAt = now;
-        showToast(labelOf(lv, 'o' + k) + ' has no level yet.', 'Create and enter', () => enterOp(k));
+        showToast(labelOf(lv, 'o' + k) + ' has no lower level yet.', 'Create and enter', () => enterOp(k));
       }
     }
   } else if (level().parent && s.dist > fitDistCache * 2.4) exitToParent();
@@ -3485,11 +3484,12 @@ function renderTree() {
     const isCur = lv.id === cur;
     const flags = levelFlags(lv);
     let html = '<li class="tnode"><div class="trow"><button class="tbtn level' + (isCur ? ' current' : '') + '" data-level="' + lv.id + '" type="button"><span class="lv">L' + lv.depth + '</span><span class="tn">' + esc(levelName(lv)) + '</span>' + (flags ? '<span class="tflag" title="' + flags + ' flagged in the diagnosis">⚑' + flags + '</span>' : '') + (isCur ? '<span class="here">HERE</span>' : '') + '</button>' +
-      (lv.parent ? '<button class="tdel" type="button" data-del="' + lv.id + '" aria-label="Delete the level inside ' + esc(levelName(lv)) + '" title="Delete the level inside this operation (and everything below it); the operation stays">Delete level</button>' : '') + (rmBtn || '') + '</div>';
+      (rmBtn || '') + '</div>';
     const rows = [];
     for (let i = 0; i < lv.opCount; i++) {
       const key = 'o' + i, childId = lv.children[key];
-      const rm = lv.opCount > MIN_OPS ? '<button class="tdel" type="button" data-rmop="' + lv.id + ':' + i + '" title="Remove this operation from ' + esc(levelName(lv)) + '" aria-label="Remove operation ' + esc(labelOf(lv, key)) + '">Remove</button>' : '';
+      const hasKid = !!(childId && db.levels[childId]);
+      const rm = (lv.opCount > MIN_OPS || hasKid) ? '<button class="tdel" type="button" data-lv="' + lv.id + '" data-k="' + i + '" aria-haspopup="true" aria-label="Remove options for ' + esc(labelOf(lv, key)) + '">Remove</button>' : '';
       if (childId && db.levels[childId]) rows.push(node(db.levels[childId], rm));
       else rows.push('<li class="tnode"><div class="trow"><button class="tbtn unexplored" type="button" data-from="' + lv.id + '" data-el="' + key + '"><span class="cd">' + esc(codeOf(lv, key)) + '</span><span class="tn">' + esc(labelOf(lv, key)) + '</span></button>' + rm + '</div></li>');
     }
@@ -3500,16 +3500,9 @@ function renderTree() {
   tree.innerHTML = node(root);
   tree.querySelectorAll('.tbtn.level').forEach(b => b.addEventListener('click', () => goToLevel(b.dataset.level)));
   tree.querySelectorAll('.tdel').forEach(b => b.addEventListener('click', () => {
-    const idle = b.textContent;
-    if (!b.classList.contains('armed')) {
-      if (b.dataset.del) { const n = countSubtree(db.levels[b.dataset.del]); b.textContent = n > 1 ? 'Delete ' + n + ' levels?' : 'Delete level?'; }
-      else b.textContent = 'Remove it?';
-      b.classList.add('armed');
-      setTimeout(() => { if (b.isConnected) { b.classList.remove('armed'); b.textContent = idle; } }, 3500);
-      return;
-    }
-    if (b.dataset.del) deleteLevel(b.dataset.del);
-    else { const [lid, k] = b.dataset.rmop.split(':'); removeOpUI(lid, +k); }
+    const lv = db.levels[b.dataset.lv], k = +b.dataset.k, cid = lv.children['o' + k], kid = cid && db.levels[cid];
+    const r = b.getBoundingClientRect();
+    openRemoveMenu(r.left, r.bottom + 4, lv, k, kid);
   }));
   tree.querySelectorAll('.tbtn.unexplored').forEach(b => b.addEventListener('click', async () => {
     const from = db.levels[b.dataset.from];
@@ -3646,22 +3639,16 @@ function renderRecursion() {
     : 'Every operational element is a viable system in its own right. Its local management becomes the metasystem one level down, and its environment the environment.';
   box.innerHTML = '<div class="recur"><div class="t">Viable system inside ' + esc(name) + '</div>' +
     '<div class="prev">' + previewSVG(child, lv) + '</div><p>' + esc(note) + (child ? ' Explored: ' + child.opCount + ' operations.' : '') + '</p>' +
-    '<div class="btn-row"><button class="btn primary" type="button" id="iDive">' + (child ? 'Open' : 'Create') + ' level ' + (lv.depth + 1) + ' · ' + esc(name) + '</button>' +
-    (child ? '<button class="btn warn" type="button" id="iDelLvl">Delete level</button>' : '') +
+    '<div class="btn-row"><button class="btn primary" type="button" id="iDive">' + (child ? 'Open' : 'Create') + ' lower level · ' + esc(name) + '</button>' +
+    (child ? '<button class="btn warn" type="button" id="iDelLvl">Remove lower levels</button>' : '') +
     (lv.opCount > MIN_OPS ? '<button class="btn warn" type="button" id="iRmOp">Remove operation</button>' : '') +
     (sampleFn ? '<button class="btn" type="button" id="iMap"' + (aiBusy ? ' disabled' : '') + '>Map it with Claude</button>' : '') + '</div>' +
     (sampleFn ? '<p id="iAiStatus" aria-live="polite">' + esc(aiInspectorNote) + '</p>' : '') + '</div>';
   $('#iDive').addEventListener('click', () => { if (matchMedia('(max-width: 860px)').matches) select(null); dive(id); });
   const rmb = $('#iRmOp');
-  if (rmb) rmb.addEventListener('click', () => {
-    if (!rmb.dataset.armed) { rmb.dataset.armed = '1'; rmb.textContent = 'Click again to remove ' + name; return; }
-    removeOpUI(lv.id, +key.slice(1));
-  });
+  if (rmb) rmb.addEventListener('click', () => removeOpUI(lv.id, +key.slice(1)));
   const del = $('#iDelLvl');
-  if (del) del.addEventListener('click', () => {
-    if (!del.dataset.armed) { const n = countSubtree(child); del.dataset.armed = '1'; del.textContent = n > 1 ? 'Delete ' + n + ' levels?' : 'Click again to delete'; return; }
-    deleteLevel(child.id);
-  });
+  if (del) del.addEventListener('click', () => deleteLevel(child.id));
   const mapBtn = $('#iMap');
   if (mapBtn) mapBtn.addEventListener('click', () => {
     const child = ensureChild(lv, key);

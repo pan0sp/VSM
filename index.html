@@ -1785,7 +1785,7 @@ function schemeColors(key) {
 }
 
 let db = null; // { seq, rootId, currentId, levels: {} }
-let prefs = { view: '3d', flows: !reduceMotion, nested: false, spread: 1, side: true, diagShow: true, autoLevels: false, s2mode: 'inside', extS4cmd: true, extS14: true, style: 'square', theme: 'auto' };
+let prefs = { view: '3d', flows: !reduceMotion, nested: false, spread: 1, side: true, diagShow: true, autoLevels: false, lpHint: false, s2mode: 'inside', extS4cmd: true, extS14: true, style: 'square', theme: 'auto' };
 function layoutOpts() { return { s2: prefs.s2mode === 'bridge' ? 'bridge' : 'inside', s4cmd: prefs.extS4cmd !== false, s14: prefs.extS14 !== false, style: prefs.style === 'diamond' ? 'diamond' : 'square', localS2: prefs.localS2 !== false }; }
 
 function newLevel(parent, elId) {
@@ -2817,7 +2817,7 @@ function applyControlMode() {
   const narrow = matchMedia('(pointer: coarse)').matches;
   $('#hint').innerHTML = is3d
     ? (narrow ? 'Drag to rotate · two fingers to pan and zoom · tap to select · long-press for the menu' : '<kbd>Drag</kbd> rotate · <kbd>Right-drag</kbd> pan · <kbd>Scroll</kbd> zoom · <kbd>Right-click</kbd> menu · <kbd>Double-click</kbd> an operation to step inside')
-    : (narrow ? 'Drag to pan · pinch to zoom · tap to select' : '<kbd>Drag</kbd> pan · <kbd>Scroll</kbd> zoom · <kbd>Click</kbd> select · <kbd>Right-click</kbd> menu · <kbd>Double-click</kbd> an operation to step inside');
+    : (narrow ? 'Drag to pan · pinch to zoom · tap to select · long-press for the menu' : '<kbd>Drag</kbd> pan · <kbd>Scroll</kbd> zoom · <kbd>Click</kbd> select · <kbd>Right-click</kbd> menu · <kbd>Double-click</kbd> an operation to step inside');
 }
 
 async function setView(mode) {
@@ -3067,9 +3067,14 @@ ctx.addEventListener('keydown', e => {
   else if (e.key === 'Tab') closeCtx();
 });
 document.addEventListener('pointerdown', e => { if (!ctx.hidden && !ctx.contains(e.target)) closeCtx(); }, true);
-canvas.addEventListener('wheel', () => { if (!ctx.hidden) closeCtx(); }, { passive: true });
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 // long-press on touch screens opens the same menu
+// the on-screen hint is hidden on phones, so the first touch gets a one-time tip instead
+canvas.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'touch' || prefs.lpHint) return;
+  prefs.lpHint = true; save();
+  setTimeout(() => showToast('Tip: long-press anything, or empty space, for the menu: focus, centre here, rename, remove and more.', null, null, 7000), 900);
+});
 let pressTimer = 0;
 canvas.addEventListener('pointerdown', e => {
   if (e.pointerType !== 'touch') return;
@@ -3207,7 +3212,7 @@ async function deleteLevel(id) {
   offerUndo('Removed the lower levels of ' + labelOf(parent, lv.parent.el) + '.');
 }
 let toastTimer = 0;
-function showToast(msg, actionLabel, action) {
+function showToast(msg, actionLabel, action, ms) {
   const t = $('#toast');
   clearTimeout(toastTimer);
   t.innerHTML = '<span>' + esc(msg) + '</span>' + (actionLabel ? '<button type="button" class="go">' + esc(actionLabel) + '</button><button type="button">Dismiss</button>' : '');
@@ -3215,7 +3220,7 @@ function showToast(msg, actionLabel, action) {
   const btns = t.querySelectorAll('button');
   if (btns[0]) btns[0].onclick = () => { t.hidden = true; action(); };
   if (btns[1]) btns[1].onclick = () => { t.hidden = true; };
-  toastTimer = setTimeout(() => { t.hidden = true; }, actionLabel ? 9000 : 3500);
+  toastTimer = setTimeout(() => { t.hidden = true; }, ms || (actionLabel ? 9000 : 3500));
 }
 function ensureChild(lv, elId) {
   const key = recursionKey(elId);
@@ -3352,19 +3357,37 @@ function checkRecursionZoom(now) {
     }
   } else if (level().parent && s.dist > fitDistCache * 2.4) exitToParent();
 }
-/* Scroll zooms toward the pointer, so you can steer into an operation */
-canvas.addEventListener('wheel', e => {
-  if (busy || e.deltaY >= 0) return;
+/* Scroll zooms about the point under the pointer, so that point stays put and you can steer into an operation.
+   OrbitControls zooms toward the orbit centre by a fixed step per event; it never sees wheel events (they stop at
+   the stage below), which keeps trackpads and mice consistent. Pinch and middle-drag still go through OrbitControls. */
+canvas.parentElement.addEventListener('wheel', e => {
+  if (e.target !== canvas) return;
+  e.preventDefault(); e.stopPropagation();
+  if (!ctx.hidden) closeCtx();
+  if (busy || !controls.enabled) return;
+  let dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1);
+  dy = clamp(dy, -120, 120) * (e.ctrlKey ? 0.01 : 0.0018); // ctrlKey marks a trackpad pinch, whose deltas are small
+  const dist = camera.position.distanceTo(controls.target);
+  const nd = clamp(dist * Math.exp(dy), controls.minDistance, controls.maxDistance);
+  const f = nd / dist;
+  if (Math.abs(f - 1) < 1e-4) { camMoved = true; return; } // still scrolling at the limit: let the recursion check run again
   const r = canvas.getBoundingClientRect();
   ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(ndc, camera);
-  const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0).applyMatrix4(world.matrixWorld);
-  const hit = ray.ray.intersectPlane(plane, new THREE.Vector3());
-  if (!hit) return;
-  const delta = hit.sub(controls.target).multiplyScalar(0.16);
-  controls.target.add(delta); camera.position.add(delta);
-  dirty = true;
-}, { passive: true });
+  // anchor on the element under the pointer; otherwise on the model's plane at the orbit centre's depth,
+  // or, seen edge-on, on the plane through the orbit centre facing the camera
+  const hit = ray.intersectObjects(pickables, false).find(h => { const k = h.object.userData.pick; return k && k.kind === 'el' && !k.container && h.object.visible && !isHidden(k.id); });
+  let p = hit ? hit.point.clone() : null;
+  if (!p) {
+    const n = new THREE.Vector3(0, 0, 1).transformDirection(world.matrixWorld);
+    p = ray.ray.intersectPlane(new THREE.Plane().setFromNormalAndCoplanarPoint(n, controls.target), new THREE.Vector3());
+  }
+  if (!p || p.distanceTo(camera.position) > dist * 4) p = ray.ray.intersectPlane(new THREE.Plane().setFromNormalAndCoplanarPoint(controls.target.clone().sub(camera.position).normalize(), controls.target), new THREE.Vector3());
+  if (!p) return;
+  camera.position.sub(p).multiplyScalar(f).add(p);
+  controls.target.sub(p).multiplyScalar(f).add(p);
+  dirty = true; camMoved = true;
+}, { passive: false, capture: true });
 
 
 /* =====================================================================

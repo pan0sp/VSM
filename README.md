@@ -11,14 +11,14 @@ Open `index.html` in a recent browser. Everything is in that one file; it loads 
 | Toggle 2D and 3D | The **2D / 3D** switch (or keys `2` and `3`) morphs one scene between the flat canonical diagram and the 3D model, with the camera swinging from face-on to an angled view. |
 | 3D navigation | Drag to rotate, right-drag or Shift-drag to pan, scroll or pinch to zoom. Scrolling zooms about the point under the pointer, which stays put. **Recentre** (bottom-right of the model, the toolbar, or `C`) brings the model back to dead centre, face-on as in 2D; in 3D the depth stays so you can rotate into it again. Click an element to select it, Shift-click to add more, then **Focus** (or `F`) to show only the selection and what connects directly to it; **Show all** or `Esc` brings everything back. Focusing folds the details pane away; closing the pane keeps the selection and focus, and **Show details** in the right-click menu reopens it. While focused, a small chip beside the level chip reads *Focused on …* with **Show all**; there is no other floating bar. In 2D, dragging pans. |
 | Element interaction | Every system, environment and channel is clickable. Hovering shows a tooltip; clicking opens the inspector with Beer's definition, examples, diagnostic questions, common pathologies and the element's connections, and dims everything not connected to it. |
-| Custom labels | Rename anything in the inspector or in the **Model** panel's element list. Each element also takes free-text notes. Presets fill in a canonical set of labels or one of two worked examples. |
-| Recursion | Recursion runs only through System One. Each operation holds its own viable system, drawn inside the circle and turned 45 degrees. Scroll toward an operation to zoom into it; past a threshold it becomes the System-in-Focus, and zooming far out rises to the containing level. Double-click or **Open level n** does the same in one step. The breadcrumb trail, the level chip and the **Recursion** tab always show which level is in focus. **Nested** keeps the inner systems visible at every zoom. |
-| Colours | Change any element's colour in the inspector or element list, and the four group colours (Environment, Operations, Metasystem, Channels) in the Model panel. Child levels inherit their parent's group colours. |
+| Custom labels | Rename anything in the inspector or in the **Settings** tab's element list. Each element also takes free-text notes. Presets fill in a canonical set of labels or one of two worked examples. |
+| Recursion | Recursion runs only through System One. Each operation holds its own viable system, drawn inside the circle and turned 45 degrees. Scroll toward an operation to zoom into it; past a threshold it becomes the System-in-Focus, and zooming far out rises to the containing level. Double-click or **Open level n** does the same in one step. The breadcrumb trail, the level chip and the **Recursion** view always show which level is in focus. **Nested** keeps the inner systems visible at every zoom. |
+| Colours | Change any element's colour in the inspector or element list, and the four group colours (Environment, Operations, Metasystem, Channels) in the Settings tab. Child levels inherit their parent's group colours. |
 | Data flows | The **Flows** tab names what travels on each channel and in which direction; the moving dots follow those directions, and a coverage bar shows which channels carry nothing. Load the model company, fill gaps with standard flows, or (in the Claude artifact) describe any organization and let Claude map it. |
 
 Labels, colours, notes, levels and view settings are saved in the browser's local storage.
 
-**Colour scheme** (Model panel) recolours every level at once: *Environment–Operation–Management* (environment green, operations and the System One circle red, local managements and the metasystem blue) or *One colour per system* (Systems One to Five each keep one colour across levels). Individual colours can still be changed afterwards.
+**Colour scheme** (Settings tab) recolours every level at once: *Environment–Operation–Management* (environment green, operations and the System One circle red, local managements and the metasystem blue) or *One colour per system* (Systems One to Five each keep one colour across levels). Individual colours can still be changed afterwards.
 
 Use **Auto / Light / Dark** in the toolbar to override the system theme.
 
@@ -29,7 +29,7 @@ The layout follows Beer's diagram from *Brain of the Firm* and *Diagnosing the S
 - Environments are amoebas on the left: the total environment, the future environment beside System 4, and one operational environment per operation.
 - The operational elements of System One are circles in a column, each with its local management up and to the right.
 - A large circle (a translucent sphere in 3D) encloses all of System One: every operation and its local management. It is sized from the column, so the rows drop below the metasystem and the System Two units and environment move outward as operations are added.
-- **Drawing convention** (Model panel): *Square* draws the metasystem as a square box holding Systems Three, Three-Star, Four, Five and the System Two regulatory centre, with each local management as a square tilted 45 degrees (the next recursion's metasystem seen on the diagonal). *Diamond* draws the metasystem as a rhombus with upright local managements, the form Jon Walker prefers.
+- **Drawing convention** (Settings tab): *Square* draws the metasystem as a square box holding Systems Three, Three-Star, Four, Five and the System Two regulatory centre, with each local management as a square tilted 45 degrees (the next recursion's metasystem seen on the diagonal). *Diamond* draws the metasystem as a rhombus with upright local managements, the form Jon Walker prefers.
 - The central command axis is two of Beer's six vertical channels from *Diagnosing the System*: Corporate Intervention (down) and the Resource Bargain with accountability (both ways), from System Three to each local management. The other four are the operational linkages, the environmental intersects, System Two and the audit.
 - System Two's anti-oscillation triangles sit beside each local management, linked to the regulatory centre inside the metasystem.
 - The Three-Star audit channel reaches the operations directly from the environment side, past local management.
@@ -38,7 +38,7 @@ The layout follows Beer's diagram from *Brain of the Firm* and *Diagnosing the S
 
 Terminology follows Beer's books as collected in the [Pure VSM](https://wiki.cybernetic-futures.org/pure-vsm/) source set: inside-and-now (System Three), outside-and-then (System Four), closure and identity (System Five), anti-oscillation and regulatory centre (System Two), System-in-Focus, local management.
 
-### Options in the Model panel
+### Options in the Settings tab
 
 - **System 2 centre: Inside / Bridge.** Bridge draws the centre on the metasystem boundary and, in 3D, puts all of System 2 on its own plane between operations and metasystem. It is an interpretive option, prompted by a Stanford Medicine study (*Nature Neuroscience*, September 2026) reporting that the forebrain and midbrain arise from one progenitor lineage and the hindbrain from another.
 - **S4 to command channel** (extension, on by default): System 4 feeds the command channel, reading the resource bargain as anticipatory.
@@ -47,6 +47,10 @@ Terminology follows Beer's books as collected in the [Pure VSM](https://wiki.cyb
 Neither extension is part of the commonly reproduced diagram; switch both off for the canonical form.
 
 The 3D model keeps every x and y position and adds one dimension. The environment sits at the back, the operations in the middle and the metasystem in front, so channels that cross between domains show up as slopes. Each solid is chosen so that seen face-on it is exactly Beer's symbol: spheres for circles, cubes for squares, prisms for triangles, an octahedron for the rhombus and pillowed extrusions for the amoebas. The **Layer depth** slider changes the separation.
+
+## Three views
+
+The toolbar switches between three views of one model: **VSM** (Beer's diagram in 2D or 3D), **Value network** (key `N`) and **Recursion** (key `R`), a top-down hierarchy of viable systems with the System-in-Focus marked. Click a level in the Recursion view to make it the System-in-Focus; dashed operations have no lower level yet, and each node's **⋯** or right-click menu opens it in the VSM or the value network, creates a lower level, or removes it. The left panel holds the settings and data: **Settings** (the level, labels, conventions, colours, diagnosis), **Flows** and **Guide**.
 
 ## Value network
 
@@ -67,7 +71,7 @@ The **Value network** view (toolbar, or key `N`) maps System One before the VSM 
    - Flows with actors travel on the environment–operation channels.
    - These flows appear, read-only, in the Flows tab and in the moving dots.
 
-Squiggly lines are value flows; the straight lines of the VSM are its cybernetic channels. Drag to move things, use **Connect** or the right-click menu to draw a flow, and press Delete to remove the selection (with Undo). The **Labels preset** menu has a café example, with its value network and a lower level for the brewing station.
+Squiggly lines are value flows; the straight lines of the VSM are its cybernetic channels. Drag to move things. To draw a flow, drag the **+** handle on an element to another one, Shift-drag the element, press `L`, or use **Connect** or the right-click menu; dropping into empty space adds a customer (outputs side) or supplier (inputs side) there, already connected. Press Delete to remove the selection (with Undo). The **Labels preset** menu has a café example, with its value network and a lower level for the brewing station.
 
 ## Data flows and the model company
 
@@ -94,6 +98,6 @@ The **Map** buttons call Claude through the claude.ai artifact runtime (`window.
 ## Right-click menu, recursion control and diagnosis
 
 - **Right-click** (long-press on touch, or the Menu key) opens a menu. On a touch screen the first tap shows a one-time tip about the long-press. On an element: show details, focus, add to the selection, centre here, rename, open or create its lower level, remove its lower levels, remove the operation, and set its diagnosis. On empty space: centre here, recentre, show all, reframe the focus, switch 2D/3D, nested systems on or off, and up one level.
-- **Recursion levels are created on purpose.** Double-click, **Create level** in the details pane, or the menu creates one. Zooming into an operation that has no level yet asks first, unless *Create levels by zooming in* is ticked in the Recursion tab.
-- **One verb: Remove.** *Remove operation* takes an operation (and everything inside it) out of its level; *Remove lower levels* keeps the operation and clears the levels inside it. Both act at once and show an **Undo** toast. The Recursion tab has one **Remove** button per operation that asks which of the two you mean; the operations stepper's **−** removes the last operation.
-- **Diagnosis** marks any element or channel with one of Beer's diagnostic states: *Missing*, *Nominal only* (on paper but not "effectively there"), *Lacks requisite variety* (*Insufficient capacity* for channels), *Malfunctioning*, *Collapsed into another system* (for example System Five diving into System Three) and *Pathologically autopoietic* (serving its own continuation). A coloured badge appears beside the element; missing elements are greyed and struck through. Each mark takes a note of the evidence, the Model panel lists every flag on the level, and the Recursion tab counts flags per level.
+- **Recursion levels are created on purpose.** Double-click, **Create level** in the details pane, or the menu creates one. Zooming into an operation that has no level yet asks first, unless *Create levels by zooming in* is ticked in the Settings tab.
+- **One verb: Remove.** *Remove operation* takes an operation (and everything inside it) out of its level; *Remove lower levels* keeps the operation and clears the levels inside it. Both act at once and show an **Undo** toast. In the Recursion view, every node has a **⋯** menu (or right-click) with the same actions; the operations stepper's **−** removes the last operation.
+- **Diagnosis** marks any element or channel with one of Beer's diagnostic states: *Missing*, *Nominal only* (on paper but not "effectively there"), *Lacks requisite variety* (*Insufficient capacity* for channels), *Malfunctioning*, *Collapsed into another system* (for example System Five diving into System Three) and *Pathologically autopoietic* (serving its own continuation). A coloured badge appears beside the element; missing elements are greyed and struck through. Each mark takes a note of the evidence, the Settings tab lists every flag on the level, and the Recursion view counts flags per level.

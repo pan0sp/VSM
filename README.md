@@ -48,6 +48,27 @@ Neither extension is part of the commonly reproduced diagram; switch both off fo
 
 The 3D model keeps every x and y position and adds one dimension. The environment sits at the back, the operations in the middle and the metasystem in front, so channels that cross between domains show up as slopes. Each solid is chosen so that seen face-on it is exactly Beer's symbol: spheres for circles, cubes for squares, prisms for triangles, an octahedron for the rhombus and pillowed extrusions for the amoebas. The **Layer depth** slider changes the separation.
 
+## Value network
+
+The **Value network** view (toolbar, or key `N`) maps System One before the VSM is drawn, following a four-step method:
+
+1. **Purpose.** One sentence, in verbs. The purpose of a system is what it does (POSIWID).
+2. **Identify and map the S1s.**
+   - Each primary activity is a circle inside the System-in-Focus (the *white box*). These are activities, processes or functions, not (yet) roles or departments, and only those the organization performs itself.
+   - The customers, suppliers and other actors each activity deals with sit outside as amoebas.
+   - Squiggly lines carry what they exchange, money included.
+   - The *black box* shows the system as one box in its business context, with only the flows that cross its boundary.
+3. **Recursion.** Double-click an activity to map its own value network one level down.
+4. **Transfer to the VSM.** There is nothing to copy across, because both views share one model:
+   - Each activity is an operation of System One. Adding, renaming or removing one changes the VSM as well.
+   - The actors an operation exchanges flows with name its local environment in the VSM.
+   - An actor shared by several operations marks an environmental intersect.
+   - Flows between activities travel on the operational linkages. The VSM column only joins neighbours, so a flow between distant operations runs along each linkage in between.
+   - Flows with actors travel on the environment–operation channels.
+   - These flows appear, read-only, in the Flows tab and in the moving dots.
+
+Squiggly lines are value flows; the straight lines of the VSM are its cybernetic channels. Drag to move things, use **Connect** or the right-click menu to draw a flow, and press Delete to remove the selection (with Undo). The **Labels preset** menu has a café example, with its value network and a lower level for the brewing station.
+
 ## Data flows and the model company
 
 Each channel has two sides, A and B, and every flow runs A to B, B to A, or both ways. The element inspector lists what reaches and leaves an element through its channels.
@@ -62,7 +83,7 @@ Beer's recursion runs only through System One: every operational element contain
 
 ## Map it with Claude, and hosting elsewhere
 
-The **Map** buttons call Claude through the claude.ai artifact runtime (`window.claude.use('sample')`). Each call runs on the viewer's own Claude account after they consent, and the page never holds an API key. A copy served anywhere else (GitHub Pages, a file on disk) has no `window.claude`, so the buttons hide themselves and the model company and standard flows remain. Making mapping work on a public site needs a small server-side proxy that holds an Anthropic API key and forwards the same prompt. The explorer also lets you open Systems 2 to 5 as viable systems, for cases where a department carrying out one of those functions is worth modelling on its own; the inspector says so when you do.
+The **Map** buttons call Claude through the claude.ai artifact runtime (`window.claude.use('sample')`). Each call runs on the viewer's own Claude account after they consent, and the page never holds an API key. A copy served anywhere else (GitHub Pages, a file on disk) has no `window.claude`, so the buttons hide themselves and the model company and standard flows remain. Making mapping work on a public site needs a small server-side proxy that holds an Anthropic API key and forwards the same prompt.
 
 ## Sources
 

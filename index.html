@@ -92,6 +92,54 @@ button { cursor: pointer; }
 .app.insp-open { --right: 368px; }
 .app.side-closed { --left: 0px; }
 
+/* ---------- Value network ---------- */
+.app.netmode .vsm-only, .app.netmode #labels, .app.netmode #gl, .app.netmode .hint, .app.netmode .recentre, .app.netmode .depth, .app.netmode #focusBar { display: none !important; }
+.net { position: absolute; inset: 0; background: var(--stage); }
+.net svg { width: 100%; height: 100%; display: block; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.net.connecting svg, .net.connecting .nn { cursor: crosshair; }
+.net .bg { fill: transparent; }
+.net .wbox rect { fill: var(--stage-hi); fill-opacity: .55; stroke-width: 1.6; }
+.net .wbox .bl { font: 650 15px var(--f-display); fill: var(--ink); }
+.net .wbox .bk, .net .nk { font: 500 10px var(--f-mono); fill: var(--ink-2); letter-spacing: .06em; text-transform: uppercase; }
+.net .np { font: italic 12px var(--f-body); fill: var(--ink-2); }
+.net .nn { cursor: pointer; }
+.net .nn circle, .net .nn path, .net .nn rect { fill-opacity: .2; stroke-width: 1.8; }
+.net .nn.sif rect { fill: var(--ink); fill-opacity: .82; }
+.net .nn.sif .nl, .net .nn.sif .nk, .net .nn.sif .np { fill: var(--stage); }
+.net .nn .kid { fill: none; stroke: currentColor; stroke-opacity: .35; stroke-dasharray: 3 3; stroke-width: 1; }
+.net .nn.sel circle, .net .nn.sel path, .net .nn.sel rect { stroke: var(--accent) !important; stroke-width: 3; }
+.net .nn.src circle, .net .nn.src path { stroke-dasharray: 5 3; stroke-width: 3; }
+.net .nn text { text-anchor: middle; pointer-events: none; }
+.net .nl { font: 600 12.5px var(--f-body); fill: var(--ink); }
+.net .nl.big { font-size: 16px; }
+.net .nc { font: 600 11px var(--f-mono); fill: var(--ink-2); }
+.net .fl { cursor: pointer; color: var(--ink-2); }
+.net .fl .hit { fill: none; stroke: transparent; stroke-width: 16; }
+.net .fl .w { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; }
+.net .fl polygon { fill: currentColor; }
+.net .fl:hover, .net .fl.sel { color: var(--accent); }
+.net .fl.sel .w { stroke-width: 2.4; }
+.net .ft { font: 500 11px var(--f-body); fill: var(--ink); text-anchor: middle; paint-order: stroke; stroke: var(--stage); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
+.net .ft.un { fill: var(--ink-2); font-style: italic; }
+.net .rubber { fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-dasharray: 5 4; pointer-events: none; }
+.net-bar { position: absolute; top: 12px; right: 12px; left: 300px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; pointer-events: none; }
+.net-bar > * { pointer-events: auto; }
+.net-bar .btn { padding: 5px 10px; font-size: 12.5px; }
+.net-bar .btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.net-bar .btn:disabled { opacity: .45; cursor: default; }
+.net-card { position: absolute; right: 12px; top: 58px; width: 284px; max-height: calc(100% - 72px); overflow: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); box-shadow: var(--shadow); padding: 12px 14px; }
+.net-card .nhead { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.net-card .code-chip { flex: none; }
+.net-card .isec { margin-top: 10px; }
+.net-card h4 { margin: 0 0 4px; font-size: 12px; }
+.net-card .src { margin: 4px 0; }
+.net-card .btn-row { margin-top: 10px; }
+.net-card .btn.warn { color: var(--accent); }
+@media (max-width: 700px) {
+  .net-bar { left: 12px; top: 52px; justify-content: flex-start; }
+  .net-card { left: 12px; right: 12px; width: auto; top: auto; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); max-height: 40%; }
+}
+
 /* ---------- Top bar ---------- */
 .topbar {
   grid-area: top;
@@ -481,6 +529,9 @@ input[type="color"].sw.custom::-moz-color-swatch { box-shadow: inset 0 0 0 2px v
 .frow input:focus, .fadd input:focus { border-color: var(--accent); outline: none; }
 .frow .x { border: 0; background: none; color: var(--ink-2); font-size: 16px; line-height: 1; padding: 0; height: 26px; }
 .frow .x:hover { color: var(--accent); }
+.frow.net .fdir { display: grid; place-items: center; height: 26px; color: var(--ink-2); font-family: var(--f-mono); }
+.frow.net .fnet { font-size: 12.5px; padding: 3px 0; grid-column: 2 / 4; }
+.frow.net .fnet small { display: block; color: var(--ink-2); font: 10px var(--f-mono); letter-spacing: .04em; text-transform: uppercase; }
 .fadd { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px; }
 .fadd button { border: 1px solid var(--rule); background: var(--surface); border-radius: 6px; font-size: 12.5px; font-weight: 600; padding: 4px 10px; }
 .fempty { font-size: 12.5px; color: var(--ink-2); }
@@ -867,8 +918,10 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
   .topbar { gap: 8px 10px; padding-inline: 12px; }
   .brand-sub { display: none; }
   .crumbs { order: 5; flex-basis: 100%; border-left: 0; padding-left: 0; }
-  .tools { gap: 6px; }
+  .tools { gap: 6px; flex: 1 1 auto; min-width: 0; justify-content: flex-end; }
   .tool .t { display: none; }
+  .dlong { display: none; }
+  .dshort { display: inline !important; }
   .tool { padding: 6px 8px; }
   .depth input { width: 90px; }
   .side {
@@ -905,7 +958,9 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 }
 @media (max-width: 520px) {
   .brand-text { display: none; }
+  .tools .seg button { padding-inline: 8px; }
 }
+.dshort { display: none; }
 @media (min-width: 861px) { .only-narrow { display: none !important; } }
 @media (prefers-reduced-motion: reduce) {
   * { transition-duration: 0s !important; }
@@ -932,15 +987,19 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
     </div>
     <nav class="crumbs" id="crumbs" aria-label="Recursion trail"></nav>
     <div class="tools">
-      <div class="seg" role="group" aria-label="View mode">
+      <div class="seg" role="group" aria-label="Diagram">
+        <button id="dVsm" type="button" aria-pressed="true" title="Viable System Model (key N switches)">VSM</button>
+        <button id="dNet" type="button" aria-pressed="false" title="Value network of System One: activities, actors and flows (key N switches)"><span class="dlong">Value network</span><span class="dshort">Network</span></button>
+      </div>
+      <div class="seg vsm-only" role="group" aria-label="View mode">
         <button id="v2d" type="button" aria-pressed="false" title="Classic 2D diagram (key 2)">2D</button>
         <button id="v3d" type="button" aria-pressed="true" title="3D model (key 3)">3D</button>
       </div>
-      <button class="tool" id="btnFlows" type="button" aria-pressed="true" title="Animate information flow along channels">
+      <button class="tool vsm-only" id="btnFlows" type="button" aria-pressed="true" title="Animate information flow along channels">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 8h9"/><path d="M8 4.5L11.5 8 8 11.5"/><circle cx="14" cy="8" r="1.2" fill="currentColor" stroke="none"/></svg>
         <span class="t">Flows</span>
       </button>
-      <button class="tool" id="btnNested" type="button" aria-pressed="false" title="Show the viable system nested inside each operation">
+      <button class="tool vsm-only" id="btnNested" type="button" aria-pressed="false" title="Show the viable system nested inside each operation">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.3"/><circle cx="8" cy="9.2" r="2.2"/><path d="M8 3.6l1.6 1.8L8 7.2 6.4 5.4z"/></svg>
         <span class="t">Nested</span>
       </button>
@@ -948,7 +1007,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.6"/><path d="M8 2.4v11.2A5.6 5.6 0 0 0 8 2.4z" fill="currentColor" stroke="none"/></svg>
         <span class="t" id="themeTx">Auto</span>
       </button>
-      <button class="tool" id="btnFrame" type="button" title="Recentre the model face-on, as in 2D (key C)">
+      <button class="tool vsm-only" id="btnFrame" type="button" title="Recentre the model face-on, as in 2D (key C)">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5.5V2h3.5M10.5 2H14v3.5M14 10.5V14h-3.5M5.5 14H2v-3.5"/><circle cx="8" cy="8" r="1.6" fill="currentColor" stroke="none"/></svg>
         <span class="t">Recentre</span>
       </button>
@@ -986,6 +1045,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
             <option value="example">Model company with data flows</option>
             <option value="hospital">Example: regional hospital</option>
             <option value="software">Example: software company</option>
+            <option value="cafe">Example: café, with its value network</option>
           </select>
         </div>
       </div>
@@ -1089,7 +1149,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
       <div class="block">
         <h3>What the model describes</h3>
         <p>Stafford Beer developed the Viable System Model in <i>Brain of the Firm</i> (1972), <i>The Heart of Enterprise</i> (1979) and <i>Diagnosing the System for Organizations</i> (1985). It sets out the functions any system needs to remain viable: to keep a separate existence in an environment that keeps changing.</p>
-        <p>The operational elements of System One produce the system. The metasystem (Systems Two to Five, with Three-Star) exists to serve them: System Two damps oscillation, System Three manages the inside-and-now, System Four the outside-and-then, and System Five supplies closure and identity. Each operational element is itself a viable system, so the same structure repeats at every level of recursion, and only through System One.</p>
+        <p>The operational elements of System One produce the system. The metasystem (Systems Three to Five with Three-Star; Beer's books differ on whether System Two belongs to it) exists to serve them: System Two damps oscillation, System Three manages the inside-and-now, System Four the outside-and-then, and System Five supplies closure and identity. Each operational element is itself a viable system, so the same structure repeats at every level of recursion, and only through System One.</p>
         <p class="src">Terms follow Beer's books as collected in <a href="https://wiki.cybernetic-futures.org/pure-vsm/" target="_blank" rel="noopener">Pure VSM</a> (cybernetic-futures wiki).</p>
       </div>
       <div class="block">
@@ -1117,6 +1177,11 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
         <p>When you open an operation, its environment becomes the environment one level down and its local management becomes the metasystem, following Beer's recursion. Scroll toward any operation to zoom into it: the next recursion sits inside each circle, turned 45 degrees, and becomes the System-in-Focus as you arrive. Zoom far out to rise a level.</p>
       </div>
       <div class="block">
+        <h3>Value network</h3>
+        <p>The Value network view (key N) maps System One before the VSM is drawn. Step 1 states the purpose in verbs: the purpose of a system is what it does. Step 2 identifies the primary activities and maps them. Each activity is a circle inside the System-in-Focus (the white box); the customers, suppliers and other actors it deals with sit outside as amoebas; squiggly lines carry what they exchange. The black box shows the same system as one box in its business context, with only the flows that cross its boundary. Double-click an activity to map its own network one level down.</p>
+        <p>The two views share one model. Each activity is an operation of System One, so adding, renaming or removing one changes the VSM as well. The actors an operation exchanges flows with name its local environment, and an actor shared by several operations marks an environmental intersect. Flows between activities travel on the operational linkages; the VSM column only joins neighbours, so a flow between distant operations runs along each linkage in between. Flows with actors travel on the environment–operation channels. Squiggly lines are value flows; the straight lines of the VSM are its cybernetic channels.</p>
+      </div>
+      <div class="block">
         <h3>How the 3D view uses depth</h3>
         <p>The 3D model keeps the canonical layout and adds one dimension: the environment sits at the back, the operations in the middle, the metasystem in front. Channels that cross between domains become visible as slopes. Each solid is chosen so that seen face-on it is exactly Beer's symbol: spheres for circles, cubes for squares, prisms for triangles, an octahedron for the rhombus. The Depth slider controls the separation.</p>
       </div>
@@ -1131,6 +1196,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
           <kbd>F</kbd><span>Focus: show only the selection and what connects directly to it</span>
           <kbd>Double-click</kbd><span>Step into an operation's own viable system</span>
           <kbd>Scroll into</kbd><span>Zoom toward the pointer; keep going into an operation to enter its recursion</span>
+          <kbd>N</kbd><span>Switch between the VSM and the value network</span>
           <kbd>2 / 3</kbd><span>Switch between 2D and 3D</span>
           <kbd>C</kbd><span>Recentre the model face-on</span>
           <kbd>Right-click</kbd><span>Menu: details, focus, centre here, lower levels, remove, diagnosis</span>
@@ -1147,6 +1213,23 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
   <main class="stage" id="stage">
     <canvas id="gl" tabindex="0" aria-label="Viable System Model view. Use the Model panel's element list for keyboard access."></canvas>
     <div class="labels" id="labels" aria-hidden="true"></div>
+    <div class="net" id="net" hidden>
+      <svg id="netSvg" role="img" aria-label="Value network of System One: activities, the actors around them and the flows between them"></svg>
+      <div class="net-bar" role="toolbar" aria-label="Value network tools">
+        <div class="seg small" role="group" aria-label="White box or black box">
+          <button id="nbWhite" type="button" aria-pressed="true" title="The activities inside the system and the flows between them">White box</button>
+          <button id="nbBlack" type="button" aria-pressed="false" title="The system as one box in its business context">Black box</button>
+        </div>
+        <button class="btn" id="nbAct" type="button" title="Add a primary activity: an operation of System One">+ Activity</button>
+        <button class="btn" id="nbCust" type="button">+ Customer</button>
+        <button class="btn" id="nbSupp" type="button">+ Supplier</button>
+        <button class="btn" id="nbOther" type="button" title="Another actor in the environment: a partner, regulator, community…">+ Other</button>
+        <button class="btn" id="nbConnect" type="button" aria-pressed="false" title="Draw a flow: click where it starts, then where it goes">Connect</button>
+        <button class="btn" id="nbTidy" type="button" title="Arrange the activities along the value chain">Tidy</button>
+        <button class="btn" id="nbFit" type="button" title="Fit the network to the view">Fit</button>
+      </div>
+      <div class="net-card" id="netCard" aria-live="polite"></div>
+    </div>
     <div class="overlay-tl">
       <div class="level-chip" id="levelChip"></div>
       <div class="focusbar" id="focusBar" role="status" hidden></div>
@@ -1251,8 +1334,8 @@ const KB = {
     kind: 'System One', role: 'Operational element',
     summary: 'The operational elements of System One produce the system: they do what it exists to do. Each is an elemental viable system in its own right, with its own local management and its own environment; together they are the embedded viable systems of the next lower recursion. Recursion runs only through System One: open an operation to see the viable system inside it.',
     practice: ['Business units, product lines or regional branches', 'Clinical departments in a hospital', 'Teams that deliver a service from end to end'],
-    questions: ['Which activities produce the system\'s purpose? Could each maintain a separate existence?', 'Does each operation have the autonomy and resources to absorb the variety of its environment?', 'Beer suggests seven or eight elements at most: does a long list mean a level of recursion has been missed?'],
-    watch: ['Operations defined by internal function rather than by what they produce', 'Autonomy so constrained that every decision escalates upward']
+    questions: ['Which activities produce the system\'s purpose? Could each maintain a separate existence?', 'Is this a primary activity the organization performs itself, rather than a supporting or outsourced one?', 'Does each operation have the eigen-variety (resources, skills, time) to absorb the variety of its environment, or does residual variety escalate to System Three?', 'How does information from the environment cross into the operation, and do those transducers strip out what matters?', 'Beer suggests seven or eight elements at most: does a long list mean a level of recursion has been missed?'],
+    watch: ['Operations defined by roles or departments rather than by the activities that produce the purpose', 'Autonomy so constrained that every decision escalates upward']
   },
   mgmt: {
     kind: 'System One', role: 'Local management',
@@ -1264,7 +1347,7 @@ const KB = {
   s2: {
     kind: 'System Two', role: 'Local regulatory centre',
     summary: 'System Two is an anti-oscillatory device: "the highly specific function of damping oscillations, and nothing else" (Beer, The Heart of Enterprise). Each unit sits beside one operation\'s local management. It is a service to System One, not part of the command axis: "Its function is not to command."',
-    practice: ['Timetables and schedules (Beer\'s example is the school timetable)', 'Shared standards, protocols and booking systems'],
+    practice: ['Timetables and schedules (Beer\'s example is the school timetable)', 'Shared standards, protocols and booking systems', 'Hidden in other roles: executives\' secretaries and, Beer estimates, about 80% of management accounting'],
     questions: ['Where do the operations oscillate against each other over shared resources, customers or schedules?', 'Is the damping automatic, or do managers step in each time?'],
     watch: ['System Two used as a channel of command', 'No damping, so every clash escalates to System Three']
   },
@@ -1284,21 +1367,21 @@ const KB = {
   },
   s3s: {
     kind: 'System Three-Star', role: 'Audit',
-    summary: 'The audit channel works sporadically: System Three looks directly into the operations to see what the routine reports cannot show. In Diagnosing the System audit is "a typical 3* function". It reaches the operations from the outside, past their local management.',
+    summary: 'The audit channel works sporadically: System Three looks directly into the operations to see what the routine reports cannot show. In Diagnosing the System audit is "a typical 3* function", carried out "by agreement with System One management". It reaches the operations from the outside, past their local management, and closes the variety gap the routine channels leave.',
     practice: ['Internal audits, quality inspections, safety walks', 'Site visits and spot checks'],
     questions: ['How does System Three validate what reaches it on the command axis?', 'Is audit sporadic and agreed, or constant surveillance?'],
     watch: ['Audit so heavy that it erodes trust and autonomy', 'No independent view, so System Three hears only what it wants to hear']
   },
   s4: {
     kind: 'System Four', role: 'Outside-and-then',
-    summary: 'System Four manages the outside-and-then: the total environment and the future. Beer called it the development directorate, and wanted it housed in a management centre or operations room where a model of the system and its environment can be explored. It works in constant exchange with System Three across the Three–Four homeostat.',
-    practice: ['Development, research, market studies, planning', 'An operations room where models of the system and its environment are explored'],
+    summary: 'System Four manages the outside-and-then: the total environment and the future. It must contain a model of the system itself, which gives the System-in-Focus its self-awareness, and it generates variety as well as absorbing it: "how will it invent the future?" Beer called it the development directorate, and wanted it housed in a management centre or operations room where that model can be explored. It is "in no sense senior to System Three": the two are accountable to each other across the Three–Four homeostat.',
+    practice: ['Development, research, market studies, planning and management development', 'An operations room where models of the system and its environment are explored'],
     questions: ['Who looks beyond current customers and the present year?', 'Does System Four hold a working model of the system itself?', 'How are its proposals tested against what System Three knows of current capability?'],
-    watch: ['System Four missing or reduced to forecasting', 'Development disconnected from what the operations can do']
+    watch: ['System Four missing or reduced to forecasting', 'System Four disseminated across departments that never meet (Beer finds this the usual case)', 'Development disconnected from what the operations can do']
   },
   s5: {
     kind: 'System Five', role: 'Closure and identity',
-    summary: 'System Five supplies logical closure: the viable system "turns in on itself to become an identity". It sets the ethos within which the other systems act and monitors the Three–Four homeostat, which Beer called "the organ of adaptation". It does not run System Three directly.',
+    summary: 'System Five supplies logical closure: the viable system "turns in on itself to become an identity". It shapes behaviour through an ethos rather than instructions and monitors the Three–Four homeostat, which Beer called "the organ of adaptation". It is usually many people, not one boss, and it does not run System Three directly. Algedonic alerts reach it past the normal filters.',
     practice: ['Board, owners, members or founders', 'Purpose, ethos and the rules that follow from them'],
     questions: ['What is the identity of this system, as it is actually practised?', 'How does System Five hear the Three–Four debate?', 'Does it reach into the operations, collapsing into System Three?'],
     watch: ['System Five collapsing into System Three', 'An identity that is declared but never acted on']
@@ -1311,8 +1394,8 @@ const KB = {
     watch: ['Treating System One as a collection of departments rather than viable systems']
   },
   meta: {
-    kind: 'Metasystem', role: 'Systems Two to Five',
-    summary: 'The metasystem is the management of the whole: Systems Two, Three, Three-Star, Four and Five. It exists to serve System One, providing the cohesion and adaptation the operations cannot provide for themselves. "Meta" means a higher logical order, not higher status.',
+    kind: 'Metasystem', role: 'Management of the whole',
+    summary: 'The metasystem is the management of the whole: Systems Three, Four and Five, with Three-Star (Diagnosing the System). Beer\'s books differ on System Two: Brain of the Firm calls it part of the metasystem, The Heart of Enterprise a service to System One and part of System Three. This model draws it inside the box, with the Bridge option as the alternative. The metasystem exists to serve System One, providing the cohesion and adaptation the operations cannot provide for themselves. "Meta" means a higher logical order, not higher status.',
     practice: ['The leadership and support functions taken together'],
     questions: ['Does the metasystem add value the operations recognize?', 'Has it requisite variety to manage the operations without smothering them?'],
     watch: ['A metasystem that serves itself rather than System One']
@@ -1838,6 +1921,7 @@ function defaultLabel(lv, id) {
   if ((m = /^o(\d+)$/.exec(id))) return 'Operation ' + t(+m[1]);
   if ((m = /^m(\d+)$/.exec(id))) return 'Local management ' + t(+m[1]);
   if ((m = /^a(\d+)$/.exec(id))) return 'Local regulatory centre ' + t(+m[1]);
+  if ((m = /^e(\d+)$/.exec(id)) && lv.net) { const xs = actorsOfOp(lv, +m[1]); if (xs.length) return xs.map(x => netName(lv, x)).join(', '); }
   if ((m = /^e(\d+)$/.exec(id))) return 'Environment ' + t(+m[1]);
   if ((m = /^eo(\d+)$/.exec(id))) return 'Environment–operation ' + t(+m[1]);
   if ((m = /^om(\d+)$/.exec(id))) return 'Local management loop ' + t(+m[1]);
@@ -1928,7 +2012,7 @@ const PRESETS = {
     ops: 3, name: 'Software company (example)',
     labels: {
       env: 'Software market', fut: 'AI tooling, regulation, new competitors', meta: 'Leadership team',
-      s2: 'Engineering coordination', s3: 'Head of delivery', s3s: 'Security and quality audits', s4: 'Product strategy and research', s5: 'Founders and board',
+      s2: 'Engineering programme office', s3: 'Head of delivery', s3s: 'Security and quality audits', s4: 'Product strategy and research', s5: 'Founders and board',
       o0: 'Mobile app', o1: 'Web platform', o2: 'Enterprise integrations',
       m0: 'App team lead', m1: 'Platform lead', m2: 'Integrations lead',
       a0: 'Release calendar', a1: 'Shared design system', a2: 'API standards',
@@ -2456,7 +2540,7 @@ function updateRing(o, on) {
 }
 
 /* ---------- flow particles along channels ---------- */
-function levelHasFlows(lv) { return !!lv.flows && Object.keys(lv.flows).some(k => (lv.flows[k] || []).length); }
+function levelHasFlows(lv) { return (!!lv.flows && Object.keys(lv.flows).some(k => (lv.flows[k] || []).length)) || (!!lv.net && netFlows(lv).length > 0); }
 /* Which ways a flow moves along one path: +1 runs with the path, -1 against it */
 function flowDirsOnPath(dir, p) {
   const sg = p.sgn || 1;
@@ -2479,7 +2563,7 @@ function buildParticles() {
       return;
     }
     // data mode: one stream of particles per mapped flow, in that flow's direction
-    const flows = lv.flows[ch.id] || [];
+    const flows = allFlowsOf(lv, ch.id);
     const count = Math.max(1, Math.round(len / 22));
     flows.forEach((f, fi) => flowDirsOnPath(f.dir, p).forEach(dir => {
       for (let j = 0; j < count; j++) particleSpecs.push({ id: ch.id, part: k, dir, behind: !!ch.behind, phase: (j + (fi + 0.5) / (flows.length + 1)) / count });
@@ -2970,7 +3054,7 @@ function describe(id) {
   const code = codeOf(lv, id);
   let html = '<span class="k">' + esc(kb.kind || '') + (code ? ' · ' + esc(code) : '') + '</span><b>' + esc(labelOf(lv, id)) + '</b>' + (kb.role && kb.role !== labelOf(lv, id) ? '<br><span style="color:var(--ink-2)">' + esc(kb.role) + '</span>' : '');
   if (L.chanById[id]) {
-    const fl = flowsOf(lv, id);
+    const fl = allFlowsOf(lv, id);
     html += '<span class="tf">' + (fl.length ? fl.length + (fl.length === 1 ? ' flow: ' : ' flows: ') + esc(fl.slice(0, 3).map(f => f.name).join('; ')) + (fl.length > 3 ? '…' : '') : 'No flows mapped') + '</span>';
   }
   return html;
@@ -3042,6 +3126,9 @@ function openCtx(cx, cy, id) {
     it('⊙', prefs.nested ? 'Hide nested systems' : 'Show nested systems', () => $('#btnNested').click());
     if (lv.parent) it('↑', 'Up to ' + levelName(db.levels[lv.parent.level]), exitToParent);
   }
+  showCtxMenu(cx, cy, head, items, id);
+}
+function showCtxMenu(cx, cy, head, items, id) {
   ctx.innerHTML = head + items.map((x, i) => x.sep ? '<hr>' : x.sub ? '<div class="sub">' + esc(x.sub) + '</div>' :
     '<button type="button" role="' + (x.checked != null ? 'menuitemradio' : 'menuitem') + '"' + (x.checked != null ? ' aria-checked="' + x.checked + '"' : '') + ' data-i="' + i + '"' + (x.warn ? ' class="warn"' : '') + '><span class="ic"' + (x.color ? ' style="color:' + x.color + '"' : '') + '>' + x.ic + '</span><span>' + esc(x.text) + '</span>' + (x.kbd ? '<kbd>' + esc(x.kbd) + '</kbd>' : '<span></span>') + '</button>').join('');
   ctx.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
@@ -3165,6 +3252,13 @@ function removeOperation(lv, k) {
     else { deleteSubtree(c); delete db.levels[cid]; }
   });
   lv.children = kids;
+  if (lv.net) {
+    const rn = id => { const i = opIdx(id); return i < 0 ? id : i === k ? null : i > k ? 'o' + (i - 1) : id; };
+    lv.net.flows = lv.net.flows.filter(f => rn(f.from) && rn(f.to)).map(f => Object.assign(f, { from: rn(f.from), to: rn(f.to) }));
+    const pos = {};
+    Object.keys(lv.net.pos).forEach(id => { const n = rn(id); if (n) pos[n] = lv.net.pos[id]; });
+    lv.net.pos = pos;
+  }
   lv.opCount -= 1;
   // sub-levels keep default names that follow their operation's new position
   const retag = p => Object.values(p.children).forEach(cid => { const c = db.levels[cid]; if (c) { c.tag = childTag(p, c.parent.el); retag(c); } });
@@ -3610,7 +3704,7 @@ function renderIO() {
     const inA = ch.poles[0].includes(id), inB = ch.poles[1].includes(id);
     if (!inA && !inB) return;
     const other = poleName(lv, inA ? ch.poles[1] : ch.poles[0]);
-    flowsOf(lv, ch.id).forEach(f => {
+    allFlowsOf(lv, ch.id).forEach(f => {
       const k = f.dir === 'both' ? 'both' : ((f.dir === 'ab') === inA ? 'out' : 'in');
       rows.push({ k, name: f.name, via: (k === 'out' ? 'to ' : k === 'in' ? 'from ' : 'with ') + other + ' · ' + labelOf(lv, ch.id) });
     });
@@ -3719,12 +3813,13 @@ function renderAllPanels() {
   renderTree();
   renderInspector();
   renderFocusBar();
+  renderNet();
 }
 
 /* ---------- data flows: list, editor, coverage ---------- */
 function coverage(lv) {
   let mapped = 0, flows = 0;
-  L.chans.forEach(ch => { const n = flowsOf(lv, ch.id).length; if (n) mapped++; flows += n; });
+  L.chans.forEach(ch => { const n = allFlowsOf(lv, ch.id).length; if (n) mapped++; flows += n; });
   return { mapped, total: L.chans.length, flows };
 }
 function renderCoverage() {
@@ -3743,7 +3838,7 @@ function renderFlowsPane() {
   const open = {};
   list.querySelectorAll('details').forEach(d => { open[d.dataset.ch] = d.open; });
   list.innerHTML = L.chans.map(ch => {
-    const n = flowsOf(lv, ch.id).length;
+    const n = allFlowsOf(lv, ch.id).length;
     return '<details class="fch' + (selected === ch.id ? ' sel' : '') + '" data-ch="' + ch.id + '"' + (open[ch.id] || selected === ch.id ? ' open' : '') + '>' +
       '<summary><span class="dot" style="background:' + colorOf(lv, ch.id, L) + '"></span><span class="nm">' + esc(labelOf(lv, ch.id)) +
       '<small>' + esc(poleName(lv, ch.poles[0])) + ' ↔ ' + esc(poleName(lv, ch.poles[1])) + '</small></span>' +
@@ -3763,10 +3858,11 @@ function renderFlowEditor(box, chId) {
     (flows.length ? flows.map((f, i) =>
     '<div class="frow" data-i="' + i + '"><button class="fdir" type="button" title="' + esc(dirText(f.dir)) + '. Click to change." aria-label="Direction: ' + esc(dirText(f.dir)) + '. Click to change.">' + glyph(f.dir) + '</button>' +
     '<input type="text" value="' + esc(f.name) + '" aria-label="Flow name"><button class="x" type="button" aria-label="Remove ' + esc(f.name) + '">×</button></div>').join('')
-    : '<div class="fempty">No flows mapped to this channel yet.</div>') +
+    : (netFlowsOn(lv, chId).length ? '' : '<div class="fempty">No flows mapped to this channel yet.</div>')) +
+    netFlowsOn(lv, chId).map(f => '<div class="frow net" title="From the value network: edit it there"><span class="fdir">' + glyph(f.dir) + '</span><span class="fnet">' + esc(f.name) + '<small>value network</small></span></div>').join('') +
     '<form class="fadd"><input type="text" placeholder="Add a flow, e.g. Monthly KPIs" aria-label="New flow on ' + esc(labelOf(lv, chId)) + '"><button type="submit">Add</button></form>';
   const inInsp = !!box.closest('#insp');
-  box.querySelectorAll('.frow').forEach(r => {
+  box.querySelectorAll('.frow:not(.net)').forEach(r => {
     const i = +r.dataset.i;
     r.querySelector('.fdir').addEventListener('click', e => {
       const f = lv.flows[chId][i];
@@ -3804,7 +3900,7 @@ function flowsChanged(chId, structural, fromInsp, refocusAdd) {
     if (structural && paneBox) renderFlowEditor(paneBox, chId);
   }
   const det = paneBox && paneBox.closest('details');
-  if (det) { const n = flowsOf(level(), chId).length, c = det.querySelector('.cnt'); c.textContent = n || 'none'; c.classList.toggle('zero', !n); }
+  if (det) { const n = allFlowsOf(level(), chId).length, c = det.querySelector('.cnt'); c.textContent = n || 'none'; c.classList.toggle('zero', !n); }
   renderCoverage();
   if (selected && L.byId[selected]) renderIO();
   if (refocusAdd) { const box = fromInsp ? $('#iFlows') : paneBox; const inp = box && box.querySelector('.fadd input'); if (inp) inp.focus(); }
@@ -3847,7 +3943,7 @@ function mappingPrompt(lv, brief) {
         const has = pole => pole.includes('o' + k) || pole.includes('m' + k);
         const side = has(ch.poles[0]) ? 0 : has(ch.poles[1]) ? 1 : -1;
         if (side < 0) return;
-        flowsOf(p, ch.id).forEach(f => lines.push('- ' + f.name + ' (' + labelOf(p, ch.id) + ', ' + (f.dir === 'both' ? 'both ways' : (f.dir === 'ab') === (side === 0) ? 'outgoing' : 'incoming') + ')'));
+        allFlowsOf(p, ch.id).forEach(f => lines.push('- ' + f.name + ' (' + labelOf(p, ch.id) + ', ' + (f.dir === 'both' ? 'both ways' : (f.dir === 'ab') === (side === 0) ? 'outgoing' : 'incoming') + ')'));
       });
       if (lines.length) ctx += '\nFlows that reach or leave it in the parent model:\n' + lines.slice(0, 30).join('\n');
     } else ctx += ' In the parent model it is the unit performing ' + ((KB[typeOfIdFor(p, lv.parent.el)] || {}).kind || 'a management function') + '.';
@@ -4006,7 +4102,7 @@ function changeOps(delta) {
   const lv = level();
   const n = clamp(lv.opCount + delta, MIN_OPS, MAX_OPS);
   if (n === lv.opCount || busy) return;
-  lv.opCount = n; save();
+  lv.opCount = n; pruneNet(lv); save();
   if (selected && !L.byId[selected] && !L.chanById[selected]) selected = null;
   const cam = camState();
   buildScene();
@@ -4030,6 +4126,16 @@ $('#scheme').addEventListener('change', e => {
 });
 $('#preset').addEventListener('change', e => {
   if (e.target.value === 'example') { e.target.value = ''; loadExample(); return; }
+  if (e.target.value === 'cafe') {
+    e.target.value = '';
+    lastRemoved = JSON.stringify(db);
+    applyCafe(level()); save();
+    selected = null; focusSet = null; netSel = null; netView = null;
+    const cam = camState(); buildScene(); setCam(cam); renderAllPanels(); camTween(fitState(), 600);
+    if (prefs.diagram !== 'net') showToast('Café loaded, with its value network and a lower level for the brewing station.', 'Open the value network', () => setDiagram('net'));
+    else offerUndo('Café loaded.');
+    return;
+  }
   const p = PRESETS[e.target.value];
   e.target.value = '';
   if (!p) return;
@@ -4038,6 +4144,7 @@ $('#preset').addEventListener('change', e => {
   if (lv.parent) { if (p.name) setLevelName(lv, p.name.replace(' (example)', '')); }
   else lv.name = p.name || 'Organization';
   lv.opCount = p.ops;
+  pruneNet(lv);
   save();
   const cam = camState();
   selected = null; focusSet = null;
@@ -4047,7 +4154,7 @@ $('#preset').addEventListener('change', e => {
 });
 $('#resetLevel').addEventListener('click', () => {
   const lv = level();
-  lv.labels = {}; lv.colors = {}; lv.notes = {}; lv.flows = {}; lv.opCount = 3;
+  lv.labels = {}; lv.colors = {}; lv.notes = {}; lv.flows = {}; lv.opCount = 3; delete lv.net; delete lv.purpose;
   lv.groupColors = Object.assign({}, lv.parent ? db.levels[lv.parent.level].groupColors : DEFAULT_GROUP_COLORS);
   if (!lv.parent) lv.name = 'Organization';
   save();
@@ -4194,6 +4301,17 @@ if (narrowQ.addEventListener) narrowQ.addEventListener('change', syncSide);
 window.addEventListener('keydown', e => {
   const tag = (e.target && e.target.tagName) || '';
   if (/INPUT|TEXTAREA|SELECT/.test(tag)) { if (e.key === 'Escape') e.target.blur(); return; }
+  if (e.key === 'n' || e.key === 'N') { setDiagram(prefs.diagram === 'net' ? 'vsm' : 'net'); return; }
+  if (prefs.diagram === 'net') {
+    if (e.key === 'Escape') { if (!ctx.hidden) closeCtx(); else if (netConnect) netEndConnect(); else if (netSel) netSelect(null); }
+    else if ((e.key === 'Delete' || e.key === 'Backspace') && netSel) {
+      e.preventDefault();
+      if (netSel.t === 'flow') netRemoveFlow(netSel.id);
+      else if (opIdx(netSel.id) >= 0) removeOpUI(level().id, opIdx(netSel.id));
+      else netRemoveActor(netSel.id);
+    }
+    return;
+  }
   if (e.key === '2') setView('2d');
   else if (e.key === '3') setView('3d');
   else if (e.key === 'c' || e.key === 'C') recentre();
@@ -4224,6 +4342,723 @@ function resize() {
 new ResizeObserver(resize).observe(stage);
 
 /* =====================================================================
+   Value network: the internal value network of System One (white box)
+   and the System-in-Focus in its business context (black box). Its
+   activities are the operations of the VSM, the actors they exchange
+   flows with make up their local environments, and its flows travel on
+   the operational linkages and the environment–operation channels.
+   ===================================================================== */
+const NET_KINDS = { customer: 'Customer', supplier: 'Supplier', other: 'Other actor' };
+const NET_DEFAULT_NAMES = { customer: 'Customers', supplier: 'Suppliers', other: 'Partner' };
+const EMPTY_NET = { actors: [], flows: [], pos: {} };
+const netOf = lv => lv.net || EMPTY_NET;
+function ensureNet(lv) {
+  if (!lv.net) lv.net = { seq: 0, actors: [], flows: [], pos: {} };
+  return lv.net;
+}
+const opIdx = id => { const m = /^o(\d+)$/.exec(id); return m ? +m[1] : -1; };
+const actorById = (lv, id) => netOf(lv).actors.find(a => a.id === id);
+function netNodeOk(lv, id) { const k = opIdx(id); return k >= 0 ? k < lv.opCount : !!actorById(lv, id); }
+function netFlows(lv) { return netOf(lv).flows.filter(f => f.from !== f.to && netNodeOk(lv, f.from) && netNodeOk(lv, f.to)); }
+function netName(lv, id) { const a = actorById(lv, id); return a ? (a.name || NET_DEFAULT_NAMES[a.kind] || 'Actor') : labelOf(lv, id); }
+const flowName = f => f.name || 'Unnamed flow';
+// the actors an operation exchanges flows with: its local environment in the VSM
+function actorsOfOp(lv, k) {
+  const o = 'o' + k, out = [];
+  netFlows(lv).forEach(f => {
+    const other = f.from === o ? f.to : f.to === o ? f.from : null;
+    if (other && opIdx(other) < 0 && !out.includes(other)) out.push(other);
+  });
+  return out;
+}
+function opsOfActor(lv, aid) {
+  const ks = new Set();
+  netFlows(lv).forEach(f => {
+    if (f.from === aid && opIdx(f.to) >= 0) ks.add(opIdx(f.to));
+    if (f.to === aid && opIdx(f.from) >= 0) ks.add(opIdx(f.from));
+  });
+  return Array.from(ks).sort((a, b) => a - b);
+}
+/* What the value network puts on a VSM channel, shown read-only beside the flows named there.
+   The VSM column can only draw linkages between neighbours, so a flow between distant operations
+   runs along every linkage in between. */
+function netFlowsOn(lv, chId) {
+  if (!lv.net) return [];
+  let m;
+  const out = [];
+  if ((m = /^eo(\d+)$/.exec(chId))) {
+    const k = +m[1], o = 'o' + k, many = actorsOfOp(lv, k).length > 1;
+    netFlows(lv).forEach(f => {
+      if (f.to === o && opIdx(f.from) < 0) out.push({ name: flowName(f) + (many ? ' (' + netName(lv, f.from) + ')' : ''), dir: 'ab', net: true });
+      else if (f.from === o && opIdx(f.to) < 0) out.push({ name: flowName(f) + (many ? ' (' + netName(lv, f.to) + ')' : ''), dir: 'ba', net: true });
+    });
+  } else if ((m = /^oo(\d+)$/.exec(chId))) {
+    const i = +m[1];
+    netFlows(lv).forEach(f => {
+      const a = opIdx(f.from), b = opIdx(f.to);
+      if (a < 0 || b < 0 || Math.min(a, b) > i || Math.max(a, b) <= i) return;
+      const far = Math.abs(a - b) > 1;
+      out.push({ name: flowName(f) + (far ? ' (' + codeOf(lv, f.from) + ' → ' + codeOf(lv, f.to) + ')' : ''), dir: a < b ? 'ab' : 'ba', net: true });
+    });
+  } else if ((m = /^ee(\d+)$/.exec(chId))) {
+    const i = +m[1];
+    netOf(lv).actors.forEach(a => {
+      const ks = opsOfActor(lv, a.id);
+      if (ks.length > 1 && ks[0] <= i && ks[ks.length - 1] > i) out.push({ name: 'Shared: ' + netName(lv, a.id), dir: 'both', net: true });
+    });
+  }
+  return out;
+}
+const allFlowsOf = (lv, chId) => flowsOf(lv, chId).concat(netFlowsOn(lv, chId));
+// operations that leave the level take their flows and positions with them
+function pruneNet(lv) {
+  if (!lv.net) return;
+  lv.net.flows = lv.net.flows.filter(f => netNodeOk(lv, f.from) && netNodeOk(lv, f.to));
+  Object.keys(lv.net.pos).forEach(id => { if (!netNodeOk(lv, id)) delete lv.net.pos[id]; });
+}
+
+const netEl = $('#net'), netSvg = $('#netSvg'), netCard = $('#netCard');
+let netSel = null;       // { t: 'node' | 'flow', id }
+let netView = null;      // { cx, cy, s }: centre in model units, pixels per unit
+let netConnect = null;   // { from } while drawing a flow
+let netDrag = null, netLastClick = null;
+const NET_R = 46, NET_RX = 66, NET_RY = 38, SIF_W = 128, SIF_H = 70;
+const netBlack = () => prefs.netBox === 'black';
+
+function netAutoLayout(lv, all) {
+  const net = ensureNet(lv), fl = netFlows(lv), n = lv.opCount;
+  // columns follow the value chain: an activity sits one column after the activities that feed it
+  const rank = new Array(n).fill(0);
+  for (let pass = 0; pass < n; pass++) fl.forEach(f => {
+    const a = opIdx(f.from), b = opIdx(f.to);
+    if (a >= 0 && b >= 0 && rank[b] < rank[a] + 1 && rank[a] + 1 < n) rank[b] = rank[a] + 1;
+  });
+  const cols = {};
+  for (let k = 0; k < n; k++) (cols[rank[k]] = cols[rank[k]] || []).push(k);
+  const maxR = Math.max(0, ...rank), DX = 210, DY = 130;
+  const tallest = Math.max(1, ...Object.values(cols).map(c => c.length));
+  Object.keys(cols).forEach(r => cols[r].forEach((k, j) => {
+    const id = 'o' + k;
+    if (all || !net.pos[id]) net.pos[id] = [r * DX, (j - (cols[r].length - 1) / 2) * DY];
+  }));
+  const top = -tallest * DY / 2 - 150, bottom = tallest * DY / 2 + 150, slots = {};
+  net.actors.forEach(a => {
+    if (!all && net.pos[a.id]) return;
+    const ks = opsOfActor(lv, a.id), rs = ks.map(k => rank[k]), ys = ks.map(k => net.pos['o' + k][1]);
+    const meanY = ys.length ? ys.reduce((x, y) => x + y, 0) / ys.length : 0;
+    let p;
+    if (ks.length && Math.min(...rs) === Math.max(...rs) && rs[0] === 0 && a.kind !== 'customer') p = [-DX - 70, meanY];
+    else if (ks.length && Math.min(...rs) === Math.max(...rs) && rs[0] === maxR && a.kind !== 'supplier') p = [maxR * DX + DX + 70, meanY];
+    else if (a.kind === 'supplier' && !ks.length) p = [-DX - 70, 0];
+    else if (a.kind === 'customer' && !ks.length) p = [maxR * DX + DX + 70, 0];
+    else {
+      const xs = ks.map(k => net.pos['o' + k][0]), mx = xs.length ? xs.reduce((x, y) => x + y, 0) / xs.length : maxR * DX / 2;
+      p = [mx, a.kind === 'customer' ? top : bottom];
+    }
+    const key = Math.round(p[0]) + ',' + Math.round(p[1]);
+    slots[key] = (slots[key] || 0) + 1;
+    if (slots[key] > 1) p = [p[0] + (slots[key] - 1) * 170, p[1]];
+    net.pos[a.id] = p;
+  });
+}
+
+/* ---------- geometry ---------- */
+function netRadius(id, dx, dy) {
+  const l = Math.hypot(dx, dy) || 1, c = dx / l, s = dy / l;
+  if (id === 'sif') return Math.min(SIF_W / Math.max(Math.abs(c), 1e-6), SIF_H / Math.max(Math.abs(s), 1e-6));
+  if (opIdx(id) >= 0) return NET_R;
+  return 1 / Math.sqrt((c / NET_RX) ** 2 + (s / NET_RY) ** 2);
+}
+function quad(p0, c, p1, t) { const u = 1 - t; return [u * u * p0[0] + 2 * u * t * c[0] + t * t * p1[0], u * u * p0[1] + 2 * u * t * c[1] + t * t * p1[1]]; }
+// Beer's squiggly line: a value flow, as distinct from the straight cybernetic channels
+function wavyD(p0, c, p1) {
+  const N = Math.max(24, Math.ceil((Math.hypot(c[0] - p0[0], c[1] - p0[1]) + Math.hypot(p1[0] - c[0], p1[1] - c[1])) / 2.5));
+  const S = [];
+  let len = 0;
+  for (let i = 0; i <= N; i++) {
+    const p = quad(p0, c, p1, i / N);
+    if (i) len += Math.hypot(p[0] - S[i - 1][0], p[1] - S[i - 1][1]);
+    S.push([p[0], p[1], len]);
+  }
+  const pts = S.map((p, i) => {
+    const a = S[Math.max(0, i - 1)], b = S[Math.min(N, i + 1)];
+    let tx = b[0] - a[0], ty = b[1] - a[1];
+    const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
+    const w = 3.4 * Math.sin(p[2] / 14 * Math.PI * 2) * Math.max(0, Math.min(1, p[2] / 12, (len - p[2]) / 18));
+    return (p[0] - ty * w).toFixed(1) + ' ' + (p[1] + tx * w).toFixed(1);
+  });
+  return 'M' + pts.join('L');
+}
+function blobD(seed) {
+  const pts = [];
+  for (let i = 0; i < 14; i++) {
+    const t = i / 14 * Math.PI * 2, r = 1 + 0.06 * Math.sin(3 * t + seed) + 0.04 * Math.sin(5 * t + seed * 2.3);
+    pts.push([Math.cos(t) * NET_RX * r, Math.sin(t) * NET_RY * r]);
+  }
+  const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+  let d = 'M' + mid(pts[13], pts[0]).map(v => v.toFixed(1)).join(' ');
+  pts.forEach((p, i) => { const m = mid(p, pts[(i + 1) % 14]); d += 'Q' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + ' ' + m[0].toFixed(1) + ' ' + m[1].toFixed(1); });
+  return d + 'Z';
+}
+function wrapText(str, max, lines) {
+  const words = String(str).split(/\s+/).filter(Boolean), out = [];
+  let cur = '';
+  words.forEach(w => { if (!cur) cur = w; else if ((cur + ' ' + w).length <= max) cur += ' ' + w; else { out.push(cur); cur = w; } });
+  if (cur) out.push(cur);
+  if (out.length > lines) { out.length = lines; out[lines - 1] = out[lines - 1].replace(/.{0,2}$/, '') + '…'; }
+  return out;
+}
+const tspans = (lines, lh, x) => lines.map((l, i) => '<tspan x="' + (x || 0) + '" dy="' + (i ? lh : -(lines.length - 1) * lh / 2) + '">' + esc(l) + '</tspan>').join('');
+
+/* Lay out a set of flows: parallel flows between the same pair bow apart, and reverse flows bow the other way */
+function layFlows(list, posOf) {
+  const groups = {};
+  list.forEach(f => { const k = [f.from, f.to].sort().join('|'); (groups[k] = groups[k] || []).push(f); });
+  Object.values(groups).forEach(g => g.forEach((f, i) => {
+    const [ca, cb] = [f.from, f.to].sort(), A = posOf(ca), B = posOf(cb);
+    let nx = -(B[1] - A[1]), ny = B[0] - A[0];
+    const nl = Math.hypot(nx, ny) || 1; nx /= nl; ny /= nl;
+    const off = g.length === 1 ? 0 : (i - (g.length - 1) / 2) * 36;
+    const P = posOf(f.from), Q = posOf(f.to);
+    const c = [(P[0] + Q[0]) / 2 + nx * off * 2, (P[1] + Q[1]) / 2 + ny * off * 2];
+    const d0 = Math.hypot(c[0] - P[0], c[1] - P[1]) || 1, d1 = Math.hypot(c[0] - Q[0], c[1] - Q[1]) || 1;
+    const r0 = netRadius(f.from, c[0] - P[0], c[1] - P[1]), r1 = netRadius(f.to, c[0] - Q[0], c[1] - Q[1]) + 3;
+    f.p0 = [P[0] + (c[0] - P[0]) / d0 * r0, P[1] + (c[1] - P[1]) / d0 * r0];
+    f.p1 = [Q[0] + (c[0] - Q[0]) / d1 * r1, Q[1] + (c[1] - Q[1]) / d1 * r1];
+    f.c = c;
+    f.mid = quad(f.p0, c, f.p1, 0.5);
+    let ax = f.p1[0] - c[0], ay = f.p1[1] - c[1];
+    const al = Math.hypot(ax, ay) || 1; ax /= al; ay /= al;
+    const b = [f.p1[0] - ax * 10, f.p1[1] - ay * 10];
+    f.arrow = [f.p1, [b[0] - ay * 5, b[1] + ax * 5], [b[0] + ay * 5, b[1] - ax * 5]].map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  }));
+}
+
+/* ---------- rendering ---------- */
+function netFit() {
+  const lv = level(), net = ensureNet(lv), r = netEl.getBoundingClientRect();
+  const ids = netBlack() ? netOf(lv).actors.map(a => a.id).concat(['sif']) : netNodesOf(lv);
+  const pts = ids.map(id => id === 'sif' ? sifPos(lv) : net.pos[id]).filter(Boolean);
+  if (!pts.length || !r.width) { netView = { cx: 0, cy: 0, s: 1 }; return; }
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const x0 = Math.min(...xs) - 120, x1 = Math.max(...xs) + 120, y0 = Math.min(...ys) - 110, y1 = Math.max(...ys) + 120;
+  // fit into the space the tool bar and the card leave free
+  const bar = netEl.querySelector('.net-bar').getBoundingClientRect(), card = netCard.getBoundingClientRect(), narrow = r.width < 700;
+  const top = bar.bottom - r.top + 8, bottom = narrow ? Math.max(12, r.bottom - card.top + 8) : 12, right = narrow ? 12 : Math.max(12, r.right - card.left + 12), left = 12;
+  const aw = Math.max(80, r.width - left - right), ah = Math.max(80, r.height - top - bottom);
+  const s = clamp(Math.min(aw / (x1 - x0), ah / (y1 - y0)), 0.25, 1.5);
+  netView = { cx: (x0 + x1) / 2 + (r.width / 2 - (left + aw / 2)) / s, cy: (y0 + y1) / 2 + (r.height / 2 - (top + ah / 2)) / s, s };
+}
+const netNodesOf = lv => Array.from({ length: lv.opCount }, (_, k) => 'o' + k).concat(netOf(lv).actors.map(a => a.id));
+function sifPos(lv) {
+  const net = netOf(lv), ps = Array.from({ length: lv.opCount }, (_, k) => net.pos['o' + k]).filter(Boolean);
+  if (!ps.length) return [0, 0];
+  return [ps.reduce((a, p) => a + p[0], 0) / ps.length, ps.reduce((a, p) => a + p[1], 0) / ps.length];
+}
+function netPt(e) {
+  const r = netSvg.getBoundingClientRect();
+  return [netView.cx + (e.clientX - r.left - r.width / 2) / netView.s, netView.cy + (e.clientY - r.top - r.height / 2) / netView.s];
+}
+function renderNet() {
+  if (prefs.diagram !== 'net') return;
+  const lv = level(), net = ensureNet(lv);
+  if (netNodesOf(lv).some(id => !net.pos[id])) netAutoLayout(lv, false);
+  if (netSel && (netSel.t === 'node' ? !netNodeOk(lv, netSel.id) : !net.flows.some(f => f.id === netSel.id))) netSel = null;
+  renderNetCard();
+  syncNetBar();
+  if (!netView) netFit();
+  renderNetSvg();
+}
+function renderNetSvg() {
+  const lv = level(), net = ensureNet(lv), r = netSvg.getBoundingClientRect();
+  if (!r.width) return;
+  const vw = r.width / netView.s, vh = r.height / netView.s, vx = netView.cx - vw / 2, vy = netView.cy - vh / 2;
+  netSvg.setAttribute('viewBox', [vx, vy, vw, vh].map(v => v.toFixed(1)).join(' '));
+  const black = netBlack(), out = [];
+  const envCol = lv.groupColors.env || DEFAULT_GROUP_COLORS.env, opsCol = lv.groupColors.ops || DEFAULT_GROUP_COLORS.ops;
+  const isSel = (t, id) => netSel && netSel.t === t && netSel.id === id;
+  const posOf = id => id === 'sif' ? sifPos(lv) : net.pos[id];
+  out.push('<rect class="bg" x="' + vx + '" y="' + vy + '" width="' + vw + '" height="' + vh + '"/>');
+  // the System-in-Focus: a white box holding its activities, or a black box
+  const name = levelName(lv);
+  if (black) {
+    const c = sifPos(lv);
+    out.push('<g class="nn sif' + (isSel('node', 'sif') ? ' sel' : '') + '" data-id="sif" transform="translate(' + c[0].toFixed(1) + ' ' + c[1].toFixed(1) + ')">' +
+      '<rect x="' + -SIF_W + '" y="' + -SIF_H + '" width="' + SIF_W * 2 + '" height="' + SIF_H * 2 + '" rx="10" style="stroke:' + opsCol + '"/>' +
+      '<text class="nk" y="-' + (SIF_H - 20) + '">System-in-Focus · black box</text><text class="nl big">' + tspans(wrapText(name, 22, 2), 17) + '</text>' +
+      (lv.purpose ? '<text class="np" y="' + (SIF_H - 30) + '">' + tspans(wrapText(lv.purpose, 40, 2), 13) + '</text>' : '') + '</g>');
+  } else {
+    const ps = Array.from({ length: lv.opCount }, (_, k) => net.pos['o' + k]);
+    const x0 = Math.min(...ps.map(p => p[0])) - NET_R - 34, x1 = Math.max(...ps.map(p => p[0])) + NET_R + 34;
+    const pl = lv.purpose ? wrapText(lv.purpose, Math.max(30, Math.floor((x1 - x0 - 28) / 5.9)), 3) : [];
+    const y0 = Math.min(...ps.map(p => p[1])) - NET_R - 56, y1 = Math.max(...ps.map(p => p[1])) + NET_R + 30 + pl.length * 15;
+    out.push('<g class="wbox"><rect x="' + x0 + '" y="' + y0 + '" width="' + (x1 - x0) + '" height="' + (y1 - y0) + '" rx="14" style="stroke:' + opsCol + '"/>' +
+      '<text class="bl" x="' + (x0 + 14) + '" y="' + (y0 + 22) + '">' + esc(name) + '</text><text class="bk" x="' + (x0 + 14) + '" y="' + (y0 + 37) + '">System-in-Focus · white box</text>' +
+      pl.map((l, i) => '<text class="np" x="' + (x0 + 14) + '" y="' + (y1 - 12 - (pl.length - 1 - i) * 15) + '">' + esc(l) + '</text>').join('') + '</g>');
+  }
+  // flows: in the black box only what crosses the boundary, merged per actor and direction
+  let list;
+  if (black) {
+    const agg = {};
+    netFlows(lv).forEach(f => {
+      const fa = opIdx(f.from) < 0, ta = opIdx(f.to) < 0;
+      if (fa === ta) return;
+      const key = fa ? f.from + '>sif' : 'sif>' + f.to;
+      (agg[key] = agg[key] || { id: f.id, from: fa ? f.from : 'sif', to: fa ? 'sif' : f.to, names: [] }).names.push(flowName(f));
+    });
+    list = Object.values(agg).map(a => ({ id: a.id, from: a.from, to: a.to, name: Array.from(new Set(a.names)).join(', '), merged: true }));
+  } else list = netFlows(lv).map(f => ({ id: f.id, from: f.from, to: f.to, name: flowName(f), unnamed: !f.name }));
+  layFlows(list, posOf);
+  const placed = [];
+  list.forEach(f => {
+    const lines = wrapText(f.name, 26, 2), w = Math.max(...lines.map(l => l.length)) * 5.6 + 8, h = lines.length * 12 + 4;
+    const hit = (x, y) => placed.some(b => Math.abs(b[0] - x) < (b[2] + w) / 2 && Math.abs(b[1] - y) < (b[3] + h) / 2);
+    let at = f.mid;
+    for (const t of [0.5, 0.36, 0.64, 0.28, 0.72]) { const q = quad(f.p0, f.c, f.p1, t); if (!hit(q[0], q[1] - 7)) { at = q; break; } }
+    placed.push([at[0], at[1] - 7, w, h]);
+    f.lines = lines; f.at = at;
+  });
+  list.forEach(f => {
+    const sel = !f.merged && isSel('flow', f.id);
+    out.push('<g class="fl' + (sel ? ' sel' : '') + '"' + (f.merged ? '' : ' data-flow="' + f.id + '"') + '>' +
+      '<path class="hit" d="M' + f.p0.join(' ') + 'Q' + f.c.join(' ') + ' ' + f.p1.join(' ') + '"/>' +
+      '<path class="w" d="' + wavyD(f.p0, f.c, f.p1) + '"/><polygon points="' + f.arrow + '"/>' +
+      '<text class="ft' + (f.unnamed ? ' un' : '') + '" x="' + f.at[0].toFixed(1) + '" y="' + (f.at[1] - 7).toFixed(1) + '">' + tspans(f.lines, 12, f.at[0].toFixed(1)) + '</text></g>');
+  });
+  // nodes
+  if (!black) for (let k = 0; k < lv.opCount; k++) {
+    const id = 'o' + k, p = net.pos[id], col = colorOf(lv, id, L);
+    const cls = 'nn act' + (isSel('node', id) ? ' sel' : '') + (netConnect && netConnect.from === id ? ' src' : '');
+    out.push('<g class="' + cls + '" data-id="' + id + '" transform="translate(' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + ')">' +
+      '<circle r="' + NET_R + '" style="fill:' + col + ';stroke:' + col + '"/>' +
+      '<text class="nc" y="-27">' + esc(codeOf(lv, id)) + '</text><text class="nl" y="5">' + tspans(wrapText(labelOf(lv, id), 12, 3), 13) + '</text>' +
+      (lv.children[id] ? '<circle class="kid" r="' + (NET_R - 5) + '"/>' : '') + '</g>');
+  }
+  net.actors.forEach((a, i) => {
+    const p = net.pos[a.id];
+    if (!p) return;
+    const cls = 'nn actor' + (isSel('node', a.id) ? ' sel' : '') + (netConnect && netConnect.from === a.id ? ' src' : '');
+    out.push('<g class="' + cls + '" data-id="' + a.id + '" transform="translate(' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + ')">' +
+      '<path d="' + blobD(i * 1.7 + 0.4) + '" style="fill:' + envCol + ';stroke:' + envCol + '"/>' +
+      '<text class="nk" y="-17">' + esc(NET_KINDS[a.kind] || 'Actor') + '</text><text class="nl" y="5">' + tspans(wrapText(netName(lv, a.id), 16, 2), 13) + '</text></g>');
+  });
+  out.push('<path id="netRubber" class="rubber" d=""/>');
+  netSvg.innerHTML = out.join('');
+}
+
+/* ---------- the side card: method, element and flow details ---------- */
+function netCardFlowRows(lv, id) {
+  const rows = netFlows(lv).filter(f => f.from === id || f.to === id).map(f => {
+    const out = f.from === id;
+    return '<li><button type="button" data-flow="' + f.id + '"><span class="ar">' + (out ? '→' : '←') + '</span><span>' + esc(flowName(f)) + '<span class="via">' + (out ? 'to ' : 'from ') + esc(netName(lv, out ? f.to : f.from)) + '</span></span></button></li>';
+  });
+  return rows.length ? '<ul class="io links">' + rows.join('') + '</ul>' : '<p class="src">No flows yet. Use Connect, or right-click, to draw one.</p>';
+}
+function renderNetCard() {
+  const lv = level(), net = ensureNet(lv);
+  let h = '';
+  if (!netSel) {
+    const nf = netFlows(lv).length;
+    h = '<div class="eyebrow">Value network · ' + esc(levelName(lv)) + '</div>' +
+      '<label class="fld"><span>Step 1 · Purpose: what the system does, in verbs</span><textarea id="nPurpose" rows="3" placeholder="The purpose of the café is to brew and serve coffee and food to…">' + esc(lv.purpose || '') + '</textarea></label>' +
+      '<p class="src">Remember POSIWID: the purpose of a system is what it does.</p>' +
+      '<div class="isec"><h4>Step 2 · Identify and map the S1s</h4><p class="src">Add the primary activities that fulfil the purpose: activities, processes or functions, not (yet) roles or departments, and only those the organization performs itself. Then add the customers, suppliers and other actors each one deals with, and connect them with the flows they exchange.</p></div>' +
+      '<div class="isec"><h4>Step 3 · Recursion</h4><p class="src">Double-click an activity to map its own value network one level down. The Recursion tab shows the hierarchy.</p></div>' +
+      '<div class="isec"><h4>Step 4 · The VSM</h4><p class="src">Nothing to transfer by hand: each activity is an operation of System One, the actors around it form its local environment, and the flows travel on the operational linkages and environment channels of the VSM.</p></div>' +
+      '<p class="src">' + lv.opCount + (lv.opCount === 1 ? ' activity, ' : ' activities, ') + net.actors.length + (net.actors.length === 1 ? ' actor, ' : ' actors, ') + nf + (nf === 1 ? ' flow.' : ' flows.') + '</p>';
+  } else if (netSel.t === 'node' && opIdx(netSel.id) >= 0) {
+    const id = netSel.id, k = opIdx(id), cid = lv.children[id], child = cid && db.levels[cid];
+    const env = actorsOfOp(lv, k);
+    h = '<div class="nhead"><span class="code-chip" style="background:' + colorOf(lv, id, L) + '">' + esc(codeOf(lv, id)) + '</span><span class="insp-kind"><span class="k">Primary activity</span><span class="r">Operation of System One</span></span></div>' +
+      '<label class="fld"><span>Name</span><input type="text" id="nName" value="' + esc(labelOf(lv, id)) + '"></label>' +
+      '<div class="isec"><h4>Flows</h4>' + netCardFlowRows(lv, id) + '</div>' +
+      '<div class="isec"><h4>In the VSM</h4><p class="src">' + (env.length ? 'Its local environment: ' + esc(env.map(x => netName(lv, x)).join(', ')) + '.' : 'No outside actor exchanges flows with it, so its environment is the other operations.') + '</p></div>' +
+      '<div class="btn-row"><button class="btn primary" type="button" id="nOpen">' + (child ? 'Open lower level' : 'Create lower level') + '</button><button class="btn" type="button" id="nShow">Show in the VSM</button></div>' +
+      (lv.opCount > MIN_OPS ? '<div class="btn-row"><button class="btn warn" type="button" id="nRemove">Remove operation</button></div>' : '');
+  } else if (netSel.t === 'node') {
+    const a = actorById(lv, netSel.id), ks = opsOfActor(lv, a.id);
+    h = '<div class="nhead"><span class="code-chip" style="background:' + (lv.groupColors.env || DEFAULT_GROUP_COLORS.env) + '">E</span><span class="insp-kind"><span class="k">Environment</span><span class="r">' + esc(NET_KINDS[a.kind] || 'Actor') + '</span></span></div>' +
+      '<label class="fld"><span>Name</span><input type="text" id="nName" value="' + esc(a.name || '') + '" placeholder="' + esc(NET_DEFAULT_NAMES[a.kind] || '') + '"></label>' +
+      '<label class="fld"><span>Kind</span><select class="inp" id="nKind">' + Object.keys(NET_KINDS).map(k => '<option value="' + k + '"' + (k === a.kind ? ' selected' : '') + '>' + NET_KINDS[k] + '</option>').join('') + '</select></label>' +
+      '<div class="isec"><h4>Flows</h4>' + netCardFlowRows(lv, a.id) + '</div>' +
+      '<div class="isec"><h4>In the VSM</h4><p class="src">' + (ks.length ? 'Part of the local environment of ' + esc(ks.map(k => codeOf(lv, 'o' + k) + ' ' + labelOf(lv, 'o' + k)).join(', ')) + '.' + (ks.length > 1 ? ' Shared between operations, it is an environmental intersect.' : '') : 'Not yet connected to any activity.') + '</p></div>' +
+      '<div class="btn-row"><button class="btn warn" type="button" id="nRemove">Remove actor</button></div>';
+  } else {
+    const f = net.flows.find(x => x.id === netSel.id);
+    const opts = cur => netNodesOf(lv).map(id => '<option value="' + id + '"' + (id === cur ? ' selected' : '') + '>' + esc((opIdx(id) >= 0 ? codeOf(lv, id) + ' ' : '') + netName(lv, id)) + '</option>').join('');
+    const a = opIdx(f.from), b = opIdx(f.to);
+    const where = a >= 0 && b >= 0 ? (Math.abs(a - b) === 1 ? 'the operational linkage between ' + codeOf(lv, f.from) + ' and ' + codeOf(lv, f.to) : 'the operational linkages from ' + codeOf(lv, f.from) + ' to ' + codeOf(lv, f.to) + ' (the VSM column only joins neighbours)')
+      : 'the channel between ' + codeOf(lv, a >= 0 ? f.from : f.to) + ' and its environment';
+    h = '<div class="nhead"><span class="code-chip">⇝</span><span class="insp-kind"><span class="k">Flow</span><span class="r">Value exchanged</span></span></div>' +
+      '<label class="fld"><span>What flows</span><input type="text" id="nName" value="' + esc(f.name || '') + '" placeholder="Coffee orders, $, ingredients…"></label>' +
+      '<label class="fld"><span>From</span><select class="inp" id="nFrom">' + opts(f.from) + '</select></label>' +
+      '<label class="fld"><span>To</span><select class="inp" id="nTo">' + opts(f.to) + '</select></label>' +
+      '<div class="isec"><h4>In the VSM</h4><p class="src">Travels on ' + esc(where) + '.</p></div>' +
+      '<div class="btn-row"><button class="btn" type="button" id="nRev">Reverse</button><button class="btn warn" type="button" id="nRemove">Remove flow</button></div>';
+  }
+  netCard.innerHTML = h;
+  wireNetCard(lv);
+}
+function wireNetCard(lv) {
+  const q = s => netCard.querySelector(s), net = ensureNet(lv);
+  const p = q('#nPurpose');
+  if (p) { p.addEventListener('input', () => { lv.purpose = p.value.slice(0, 400); save(); }); p.addEventListener('change', renderNetSvg); }
+  netCard.querySelectorAll('[data-flow]').forEach(b => b.addEventListener('click', () => netSelect({ t: 'flow', id: b.dataset.flow })));
+  if (!netSel) return;
+  const name = q('#nName');
+  if (netSel.t === 'node' && opIdx(netSel.id) >= 0) {
+    const id = netSel.id, k = opIdx(id);
+    name.addEventListener('input', () => { renameElement(id, name.value, 'net'); renderNetSvg(); });
+    q('#nOpen').addEventListener('click', () => netOpen(k));
+    q('#nShow').addEventListener('click', () => { setDiagram('vsm'); setTimeout(() => select(id, { reveal: true }), 60); });
+    const rm = q('#nRemove'); if (rm) rm.addEventListener('click', () => removeOpUI(lv.id, k));
+  } else if (netSel.t === 'node') {
+    const a = actorById(lv, netSel.id);
+    name.addEventListener('input', () => { a.name = name.value.slice(0, 60); save(); renderNetSvg(); });
+    q('#nKind').addEventListener('change', e => { a.kind = e.target.value; save(); renderNet(); });
+    q('#nRemove').addEventListener('click', () => netRemoveActor(a.id));
+  } else {
+    const f = net.flows.find(x => x.id === netSel.id);
+    name.addEventListener('input', () => { f.name = name.value.slice(0, 80); save(); renderNetSvg(); });
+    const ends = () => {
+      const from = q('#nFrom').value, to = q('#nTo').value;
+      if (from === to || (opIdx(from) < 0 && opIdx(to) < 0)) { showToast(from === to ? 'A flow needs two different ends.' : 'Flows between two outside actors lie outside this system.'); renderNetCard(); return; }
+      f.from = from; f.to = to; netFlowsChanged();
+    };
+    q('#nFrom').addEventListener('change', ends);
+    q('#nTo').addEventListener('change', ends);
+    q('#nRev').addEventListener('click', () => { const t = f.from; f.from = f.to; f.to = t; netFlowsChanged(); });
+    q('#nRemove').addEventListener('click', () => netRemoveFlow(f.id));
+  }
+}
+
+/* ---------- editing ---------- */
+function netFlowsChanged() { save(); renderNet(); }
+function netSelect(sel) {
+  netSel = sel;
+  renderNetSvg(); renderNetCard();
+}
+function freePos(lv, near) {
+  const net = ensureNet(lv), taken = netNodesOf(lv).map(id => net.pos[id]).filter(Boolean);
+  let [x, y] = near;
+  for (let i = 0; i < 40 && taken.some(p => Math.hypot(p[0] - x, p[1] - y) < 120); i++) y += 130;
+  return [x, y];
+}
+function netAddActivity() {
+  const lv = level();
+  if (lv.opCount >= MAX_OPS) { showToast('This explorer allows up to ' + MAX_OPS + ' operations per level. Group activities, or open one and map its lower level.'); return; }
+  const net = ensureNet(lv), ps = Array.from({ length: lv.opCount }, (_, k) => net.pos['o' + k]).filter(Boolean);
+  const near = ps.length ? [ps.reduce((a, p) => a + p[0], 0) / ps.length, Math.max(...ps.map(p => p[1])) + 130] : [0, 0];
+  const id = 'o' + lv.opCount;
+  lv.opCount += 1;
+  delete lv.labels[id];
+  net.pos[id] = freePos(lv, near);
+  save(); buildScene(); renderAllPanels();
+  netSelect({ t: 'node', id });
+  focusNetName();
+}
+function netAddActor(kind) {
+  const lv = level(), net = ensureNet(lv);
+  net.seq = (net.seq || 0) + 1;
+  const id = 'x' + net.seq, ps = Array.from({ length: lv.opCount }, (_, k) => net.pos['o' + k]).filter(Boolean);
+  const xs = ps.map(p => p[0]), ys = ps.map(p => p[1]);
+  const left = Math.min(0, ...xs) - 280, right = Math.max(0, ...xs) + 280, mid = ys.length ? (Math.min(...ys) + Math.max(...ys)) / 2 : 0;
+  net.actors.push({ id, kind, name: '' });
+  net.pos[id] = freePos(lv, kind === 'supplier' ? [left, mid] : kind === 'customer' ? [right, mid] : [(left + right) / 2, Math.max(0, ...ys) + 200]);
+  save();
+  netSelect({ t: 'node', id });
+  focusNetName();
+}
+function focusNetName() { setTimeout(() => { const n = netCard.querySelector('#nName'); if (n) { n.focus(); n.select(); } }, 30); }
+function netAddFlow(from, to) {
+  const lv = level(), net = ensureNet(lv);
+  if (from === to) return;
+  if (opIdx(from) < 0 && opIdx(to) < 0) { showToast('Flows between two outside actors lie outside this system.'); return; }
+  net.seq = (net.seq || 0) + 1;
+  const f = { id: 'f' + net.seq, from, to, name: '' };
+  net.flows.push(f);
+  save(); rebuildParticles();
+  netSelect({ t: 'flow', id: f.id });
+  focusNetName();
+}
+function netRemoveFlow(id) {
+  const lv = level(), net = ensureNet(lv), f = net.flows.find(x => x.id === id);
+  if (!f) return;
+  lastRemoved = JSON.stringify(db);
+  net.flows = net.flows.filter(x => x.id !== id);
+  netSel = null; save(); rebuildParticles(); renderNet();
+  offerUndo('Removed the flow ' + flowName(f) + '.');
+}
+function netRemoveActor(id) {
+  const lv = level(), net = ensureNet(lv), name = netName(lv, id);
+  lastRemoved = JSON.stringify(db);
+  net.actors = net.actors.filter(a => a.id !== id);
+  net.flows = net.flows.filter(f => f.from !== id && f.to !== id);
+  delete net.pos[id];
+  netSel = null; save(); rebuildParticles(); renderNet();
+  offerUndo('Removed ' + name + ' and its flows.');
+}
+function netStartConnect(from) {
+  if (netBlack()) { prefs.netBox = 'white'; save(); netView = null; }
+  netConnect = { from: from || null };
+  showToast(from ? 'Click where the flow goes.' : 'Click where the flow starts, then where it goes. Esc cancels.', null, null, 4000);
+  renderNet();
+}
+function netEndConnect() { netConnect = null; const r = $('#netRubber'); if (r) r.setAttribute('d', ''); renderNetSvg(); syncNetBar(); }
+function netOpen(k) {
+  const lv = level(), child = ensureChild(lv, 'o' + k);
+  save();
+  db.currentId = child.id;
+  selected = null; selSet = new Set(); focusSet = null; focusMode = false;
+  netSel = null; netConnect = null; netView = null;
+  buildScene(); setCam(fitState());
+  renderAllPanels();
+}
+function netTidy() { netAutoLayout(level(), true); save(); netView = null; renderNet(); }
+function syncNetBar() {
+  $('#nbWhite').setAttribute('aria-pressed', String(!netBlack()));
+  $('#nbBlack').setAttribute('aria-pressed', String(netBlack()));
+  $('#nbConnect').setAttribute('aria-pressed', String(!!netConnect));
+  ['nbAct', 'nbCust', 'nbSupp', 'nbOther', 'nbConnect', 'nbTidy'].forEach(id => { $('#' + id).disabled = netBlack(); });
+  netEl.classList.toggle('connecting', !!netConnect);
+}
+function setNetBox(mode) { prefs.netBox = mode; save(); netConnect = null; netView = null; renderNet(); }
+
+/* ---------- switching between the VSM and the value network ---------- */
+function syncDiagram() {
+  const on = prefs.diagram === 'net';
+  app.classList.toggle('netmode', on);
+  netEl.hidden = !on;
+  $('#dVsm').setAttribute('aria-pressed', String(!on));
+  $('#dNet').setAttribute('aria-pressed', String(on));
+}
+function setDiagram(mode) {
+  if (busy || prefs.diagram === mode) return;
+  prefs.diagram = mode; save();
+  closeCtx(); tip.hidden = true; $('#toast').hidden = true;
+  syncDiagram();
+  if (mode === 'net') { netSel = null; netConnect = null; netView = null; select(null); renderNet(); }
+  else { buildScene(); renderAllPanels(); setCam(fitState()); dirty = true; }
+}
+
+/* ---------- pointer, wheel and menu ---------- */
+// two fingers pinch and pan; the point between them stays put
+const netTouches = new Map();
+let netPinch = null;
+function netPinchState() {
+  const [a, b] = Array.from(netTouches.values()), r = netSvg.getBoundingClientRect();
+  return { d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, mx: (a[0] + b[0]) / 2 - r.left - r.width / 2, my: (a[1] + b[1]) / 2 - r.top - r.height / 2 };
+}
+netSvg.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'touch') {
+    netTouches.set(e.pointerId, [e.clientX, e.clientY]);
+    if (netTouches.size === 2) {
+      netDrag = null; clearTimeout(netPress);
+      const st = netPinchState();
+      netPinch = { d: st.d, s: netView.s, wx: netView.cx + st.mx / netView.s, wy: netView.cy + st.my / netView.s };
+      return;
+    }
+  }
+  if (e.button !== 0 || netPinch) return;
+  closeCtx();
+  const t = e.target.closest('[data-id],[data-flow]');
+  if (netConnect && t && t.dataset.id && t.dataset.id !== 'sif') {
+    if (!netConnect.from) { netConnect.from = t.dataset.id; renderNetSvg(); return; }
+    const from = netConnect.from;
+    netEndConnect();
+    netAddFlow(from, t.dataset.id);
+    return;
+  }
+  netSvg.setPointerCapture(e.pointerId);
+  const base = { x0: e.clientX, y0: e.clientY, moved: false };
+  if (t && t.dataset.id) {
+    const id = t.dataset.id, pt = netPt(e), p = id === 'sif' ? null : ensureNet(level()).pos[id];
+    netDrag = Object.assign(base, { kind: p ? 'node' : 'click', id, dx: p ? pt[0] - p[0] : 0, dy: p ? pt[1] - p[1] : 0 });
+  } else if (t && t.dataset.flow) netDrag = Object.assign(base, { kind: 'flow', id: t.dataset.flow });
+  else netDrag = Object.assign(base, { kind: 'pan', cx: netView.cx, cy: netView.cy });
+});
+netSvg.addEventListener('pointermove', e => {
+  if (netTouches.has(e.pointerId)) netTouches.set(e.pointerId, [e.clientX, e.clientY]);
+  if (netPinch && netTouches.size === 2) {
+    const st = netPinchState();
+    netView.s = clamp(netPinch.s * st.d / netPinch.d, 0.2, 3);
+    netView.cx = netPinch.wx - st.mx / netView.s; netView.cy = netPinch.wy - st.my / netView.s;
+    renderNetSvg();
+    return;
+  }
+  if (!netDrag) {
+    if (netConnect && netConnect.from) {
+      const lv = level(), a = netOf(lv).pos[netConnect.from], b = netPt(e), r = $('#netRubber');
+      if (a && r) r.setAttribute('d', 'M' + a[0] + ' ' + a[1] + 'L' + b[0] + ' ' + b[1]);
+    }
+    return;
+  }
+  if (!netDrag.moved && Math.hypot(e.clientX - netDrag.x0, e.clientY - netDrag.y0) < 4) return;
+  netDrag.moved = true;
+  if (netDrag.kind === 'node') {
+    const pt = netPt(e);
+    ensureNet(level()).pos[netDrag.id] = [pt[0] - netDrag.dx, pt[1] - netDrag.dy];
+    renderNetSvg();
+  } else if (netDrag.kind === 'pan') {
+    netView.cx = netDrag.cx - (e.clientX - netDrag.x0) / netView.s;
+    netView.cy = netDrag.cy - (e.clientY - netDrag.y0) / netView.s;
+    renderNetSvg();
+  }
+});
+const endNetDrag = () => {
+  const d = netDrag;
+  netDrag = null;
+  if (!d) return;
+  if (d.moved) { if (d.kind === 'node') save(); return; }
+  if (d.kind === 'node' || d.kind === 'click') {
+    if (d.id === 'sif') { setNetBox('white'); return; }
+    // the first click redraws the network, so the browser's own dblclick loses its target
+    const now = performance.now(), dbl = netLastClick && netLastClick.id === d.id && now - netLastClick.t < 400;
+    netLastClick = dbl ? null : { id: d.id, t: now };
+    if (dbl && opIdx(d.id) >= 0) { netOpen(opIdx(d.id)); return; }
+    netSelect({ t: 'node', id: d.id });
+  } else if (d.kind === 'flow') netSelect({ t: 'flow', id: d.id });
+  else if (netSel) netSelect(null);
+};
+const dropTouch = e => { netTouches.delete(e.pointerId); if (netTouches.size < 2) netPinch = null; };
+netSvg.addEventListener('pointerup', e => { dropTouch(e); endNetDrag(); });
+netSvg.addEventListener('pointercancel', e => { dropTouch(e); netDrag = null; });
+netSvg.addEventListener('wheel', e => {
+  e.preventDefault();
+  const before = netPt(e);
+  let dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1);
+  dy = clamp(dy, -120, 120) * (e.ctrlKey ? 0.01 : 0.0018);
+  netView.s = clamp(netView.s * Math.exp(-dy), 0.2, 3);
+  const after = netPt(e);
+  netView.cx += before[0] - after[0]; netView.cy += before[1] - after[1];
+  renderNetSvg();
+}, { passive: false });
+function openNetCtx(cx, cy, t) {
+  const lv = level(), items = [];
+  const it = (ic, text, fn, extra) => items.push(Object.assign({ ic, text, fn }, extra || {}));
+  const sep = () => items.push({ sep: true });
+  let head = '';
+  const id = t && t.dataset.id, fid = t && t.dataset.flow;
+  if (id === 'sif') {
+    head = '<div class="ch"><span class="k">System-in-Focus</span><b>' + esc(levelName(lv)) + '</b></div>';
+    it('▢', 'Open the white box', () => setNetBox('white'));
+  } else if (id) {
+    const isOp = opIdx(id) >= 0;
+    head = '<div class="ch"><span class="k">' + (isOp ? 'Primary activity · ' + esc(codeOf(lv, id)) : esc(NET_KINDS[(actorById(lv, id) || {}).kind] || 'Actor')) + '</span><b>' + esc(netName(lv, id)) + '</b></div>';
+    it('ⓘ', 'Show details', () => netSelect({ t: 'node', id }));
+    it('✎', 'Rename', () => { netSelect({ t: 'node', id }); focusNetName(); });
+    it('⇝', 'Draw a flow from here', () => netStartConnect(id));
+    if (isOp) {
+      const child = lv.children[id] && db.levels[lv.children[id]];
+      sep();
+      it('↘', child ? 'Open lower level' : 'Create lower level', () => netOpen(opIdx(id)), { kbd: 'dbl-click' });
+      it('◫', 'Show in the VSM', () => { setDiagram('vsm'); setTimeout(() => select(id, { reveal: true }), 60); });
+      if (child) it('−', 'Remove lower levels', () => deleteLevel(child.id), { warn: true });
+      if (lv.opCount > MIN_OPS) it('−', 'Remove operation', () => removeOpUI(lv.id, opIdx(id)), { warn: true });
+    } else { sep(); it('−', 'Remove actor', () => netRemoveActor(id), { warn: true }); }
+  } else if (fid) {
+    const f = netOf(lv).flows.find(x => x.id === fid);
+    head = '<div class="ch"><span class="k">Flow · ' + esc(netName(lv, f.from)) + ' → ' + esc(netName(lv, f.to)) + '</span><b>' + esc(flowName(f)) + '</b></div>';
+    it('✎', 'Rename', () => { netSelect({ t: 'flow', id: fid }); focusNetName(); });
+    it('⇄', 'Reverse', () => { const x = f.from; f.from = f.to; f.to = x; netFlowsChanged(); });
+    sep();
+    it('−', 'Remove flow', () => netRemoveFlow(fid), { warn: true });
+  } else if (!netBlack()) {
+    it('○', 'Add an activity (S1)', netAddActivity);
+    it('◌', 'Add a customer', () => netAddActor('customer'));
+    it('◌', 'Add a supplier', () => netAddActor('supplier'));
+    it('◌', 'Add another actor', () => netAddActor('other'));
+    it('⇝', 'Draw a flow', () => netStartConnect(null));
+    sep();
+    it('⤢', 'Tidy the layout', netTidy);
+    it('■', 'Show as a black box', () => setNetBox('black'));
+    it('◫', 'Switch to the VSM', () => setDiagram('vsm'), { kbd: 'N' });
+    if (lv.parent) it('↑', 'Up to ' + levelName(db.levels[lv.parent.level]), exitToParent);
+  } else {
+    it('▢', 'Open the white box', () => setNetBox('white'));
+    it('◫', 'Switch to the VSM', () => setDiagram('vsm'), { kbd: 'N' });
+  }
+  showCtxMenu(cx, cy, head, items, null);
+}
+netSvg.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  if (netConnect) { netEndConnect(); return; }
+  openNetCtx(e.clientX, e.clientY, e.target.closest('[data-id],[data-flow]'));
+});
+// long-press opens the same menu on touch screens
+let netPress = 0;
+netSvg.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'touch') return;
+  clearTimeout(netPress);
+  const t = e.target.closest('[data-id],[data-flow]'), x = e.clientX, y = e.clientY;
+  netPress = setTimeout(() => { if (netDrag && !netDrag.moved) { netDrag = null; openNetCtx(x, y, t); } }, 550);
+});
+['pointerup', 'pointercancel', 'pointermove'].forEach(ev => netSvg.addEventListener(ev, e => { if (ev !== 'pointermove' || (netDrag && netDrag.moved)) clearTimeout(netPress); }));
+
+$('#dVsm').addEventListener('click', () => setDiagram('vsm'));
+$('#dNet').addEventListener('click', () => setDiagram('net'));
+$('#nbWhite').addEventListener('click', () => setNetBox('white'));
+$('#nbBlack').addEventListener('click', () => setNetBox('black'));
+$('#nbAct').addEventListener('click', netAddActivity);
+$('#nbCust').addEventListener('click', () => netAddActor('customer'));
+$('#nbSupp').addEventListener('click', () => netAddActor('supplier'));
+$('#nbOther').addEventListener('click', () => netAddActor('other'));
+$('#nbConnect').addEventListener('click', () => { if (netConnect) netEndConnect(); else netStartConnect(null); });
+$('#nbTidy').addEventListener('click', netTidy);
+$('#nbFit').addEventListener('click', () => { netView = null; renderNet(); });
+new ResizeObserver(() => { if (prefs.diagram === 'net' && netView) renderNetSvg(); }).observe(netEl);
+
+/* A small café, after the lecture example: six primary activities between customers and suppliers */
+const CAFE = {
+  ops: 6, name: 'Café (example)',
+  purpose: 'The purpose of the café is to take orders, brew and serve coffee, prepare food, and keep its supplies stocked for the customers of a busy urban street.',
+  labels: {
+    env: 'Busy urban neighbourhood', fut: 'Changing tastes, rents and coffee prices', meta: 'Owner and shift manager',
+    s2: 'Order tickets and shift rota', s3: 'Shift manager', s3s: 'Spot checks', s4: 'Owner: new menu and location ideas', s5: 'Owner',
+    o0: 'Order Taking and Cashier', o1: 'Barista Station', o2: 'Brewing Station', o3: 'Pastry & Food Prep', o4: 'Serving', o5: 'Supplies & Stock'
+  },
+  net: {
+    seq: 40,
+    actors: [{ id: 'x1', kind: 'customer', name: 'Customers' }, { id: 'x2', kind: 'supplier', name: 'Suppliers' }],
+    flows: [
+      ['x1', 'o0', 'Orders'], ['x1', 'o0', '$'],
+      ['o0', 'o1', 'Espresso orders'], ['o0', 'o2', 'Coffee orders'], ['o0', 'o3', 'Food orders'],
+      ['o5', 'o1', 'Espresso supplies'], ['o5', 'o2', 'Coffee beans'], ['o5', 'o3', 'Food ingredients'],
+      ['o1', 'o4', 'Drinks'], ['o2', 'o4', 'Drip coffee'], ['o3', 'o4', 'Food'],
+      ['o4', 'x1', 'Coffee & food'],
+      ['x2', 'o5', 'Coffee beans & food ingredients'], ['o5', 'x2', '$']
+    ],
+    pos: { x1: [480, -340], x2: [-270, 290], o0: [0, -150], o5: [0, 170], o1: [240, -170], o2: [240, 0], o3: [240, 170], o4: [480, 0] }
+  },
+  // one level down, the brewing station is a viable system of its own
+  brewing: {
+    ops: 2, labels: { o0: 'Grinding', o1: 'Brewing' },
+    net: {
+      seq: 40,
+      actors: [{ id: 'x1', kind: 'supplier', name: 'Supplies & Stock' }, { id: 'x2', kind: 'other', name: 'Order Taking and Cashier' }, { id: 'x3', kind: 'customer', name: 'Serving' }],
+      flows: [['x1', 'o0', 'Coffee beans'], ['o0', 'o1', 'Ground coffee'], ['x2', 'o1', 'Coffee orders'], ['o1', 'x3', 'Drip coffee']],
+      pos: { x1: [-260, 0], o0: [0, 0], o1: [220, 0], x2: [220, -190], x3: [470, 0] }
+    }
+  }
+};
+function cafeNet(spec) {
+  return { seq: spec.seq, actors: spec.actors.map(a => Object.assign({}, a)), flows: spec.flows.map((f, i) => ({ id: 'f' + (i + 1), from: f[0], to: f[1], name: f[2] })), pos: JSON.parse(JSON.stringify(spec.pos)) };
+}
+function applyCafe(lv) {
+  Object.values(lv.children || {}).forEach(cid => { const c = db.levels[cid]; if (c) { deleteSubtree(c); delete db.levels[cid]; } });
+  lv.children = {};
+  lv.labels = Object.assign({}, CAFE.labels);
+  if (lv.parent) setLevelName(lv, 'Café'); else lv.name = 'Café';
+  lv.opCount = CAFE.ops; lv.flows = {}; lv.diag = {};
+  lv.purpose = CAFE.purpose;
+  lv.net = cafeNet(CAFE.net);
+  const b = newLevel(lv, 'o2');
+  b.opCount = CAFE.brewing.ops; b.labels = Object.assign({}, CAFE.brewing.labels);
+  b.purpose = 'Grind and brew filter coffee to order.';
+  b.net = cafeNet(CAFE.brewing.net);
+}
+
+/* =====================================================================
    Boot
    ===================================================================== */
 const hadSaved = load();
@@ -4235,6 +5070,7 @@ $('#btnFlows').setAttribute('aria-pressed', String(prefs.flows));
 $('#btnNested').setAttribute('aria-pressed', String(prefs.nested));
 syncSide();
 syncDiagramControls();
+syncDiagram();
 
 const intro = !hadSaved && !reduceMotion;
 if (intro) prefs.view = '2d';
@@ -4252,6 +5088,7 @@ function frame(now) {
   const moved = controls.update();
   if ((moved || camMoved) && !tw) { updateMinisShown(); checkRecursionZoom(now); }
   camMoved = false;
+  if (prefs.diagram === 'net') return;
   if (prefs.flows && particles) { updateParticles((now - t0) / 1000); dirty = true; }
   if (dirty || tw || moved) {
     renderer.render(scene, camera);

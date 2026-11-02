@@ -1655,11 +1655,15 @@ function buildLayout(n, opts) {
   const RHW = Math.max(35, 1.63 * (S2UX - 9) + 6);     // rhombus: wide enough to hold both triangles
   const ops = Array.from({ length: n }, (_, i) => i);
 
+  const RECT = { x0: 9 - MHALF, x1: 9 + MHALF, y0: 18, y1: Math.max(80, 18 + 2 * MHALF) };
+  // Systems Three, Four and Five spread up the box, so the square is filled rather than empty at the top
+  const Y3 = 37, GAP = sq ? Math.max(16.5, (RECT.y1 - 14 - Y3) / 2) : 16.5, Y4 = Y3 + GAP, Y5 = Y3 + 2 * GAP, YH = (Y3 + Y4) / 2;
   add({ id: 'env', type: 'envTotal', group: 'env', container: true, layer: LAYER.env, zoff: 0, z2: -0.6,
     shape: { kind: 'blob', cx: -63 + ENVDX, cy: envCy, rx: 20.5, ry: envRy, p: 3.4, amp: 0.03, seed: 2.1 },
     label: { dx: 0, dy: envTop - envCy - 6, w: 32, big: true } });
   add({ id: 'fut', type: 'envFuture', group: 'env', layer: LAYER.env, z2: -0.45,
-    shape: { kind: 'blob', cx: -62 + ENVDX, cy: envTop - 23, rx: 15, ry: 12.5, p: 2.2, amp: 0.07, seed: 7.3 },
+    // level with System Four, so the outside-and-then link runs straight across as in Beer's diagram
+    shape: { kind: 'blob', cx: -62 + ENVDX, cy: Y4, rx: 15, ry: 12.5, p: 2.2, amp: 0.07, seed: 7.3 },
     label: { dx: 0, dy: 0, w: 24 } });
   ops.forEach(i => {
     const y = yOp(i);
@@ -1677,9 +1681,6 @@ function buildLayout(n, opts) {
   });
   add({ id: 'sys1', type: 'sys1', group: 'ops', container: true, layer: LAYER.ops, z2: -0.5, zs: 0.55,
     shape: { kind: 'circle', cx: S1CX, cy: S1CY, r: S1R }, label: { dx: 0, dy: -S1R - 4, w: 30, big: true, nameOnly: true } });
-  const RECT = { x0: 9 - MHALF, x1: 9 + MHALF, y0: 18, y1: Math.max(80, 18 + 2 * MHALF) };
-  // Systems Three, Four and Five spread up the box, so the square is filled rather than empty at the top
-  const Y3 = 37, GAP = sq ? Math.max(16.5, (RECT.y1 - 14 - Y3) / 2) : 16.5, Y4 = Y3 + GAP, Y5 = Y3 + 2 * GAP, YH = (Y3 + Y4) / 2;
   add(sq
     ? { id: 'meta', type: 'meta', group: 'meta', container: true, layer: LAYER.meta, z2: -0.3,
         shape: { kind: 'rect', cx: (RECT.x0 + RECT.x1) / 2, cy: (RECT.y0 + RECT.y1) / 2, hw: (RECT.x1 - RECT.x0) / 2, hh: (RECT.y1 - RECT.y0) / 2 },
@@ -1761,7 +1762,7 @@ function buildLayout(n, opts) {
   ]);
   chan('c45', 's45', ['s4', 's5'], [['s4'], ['s5']], [{ pts: [P(at('s4', 0, 1), M), P(at('s5', 0, -1), M)], arrows: 'both' }]);
   chan('s5h', 's5h', ['s5', 'h34'], [['s5'], ['h34']], [{ pts: [P(at('s5', 1, -0.36), M), P([18.5, Y5 - 2], M), P([18.5, YH], M), P([15.1, YH], M)], corner: 2, arrows: 'both' }]);
-  chan('c4f', 's4f', ['s4', 'fut'], [['s4'], ['fut']], [{ pts: [P(at('s4', -1, 0.36), M), P(at('fut', 1, 0), E)], arrows: 'both' }]);
+  chan('c4f', 's4f', ['s4', 'fut'], [['s4'], ['fut']], [{ pts: [P(at('s4', -1, 0), M), P(at('fut', 1, 0), E)], arrows: 'both' }]);
 
   // extensions: System Four into the Resource Bargain, and a direct System One - System Four link
   if (opts.s4cmd) {

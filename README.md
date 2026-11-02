@@ -26,7 +26,7 @@ Use **Auto / Light / Dark** in the toolbar to override the system theme.
 
 The layout follows Beer's diagram from *Brain of the Firm* and *Diagnosing the System for Organizations*:
 
-- Environments are amoebas on the left: the total environment, the future environment beside System 4, and one operational environment per operation.
+- Environments are amoebas on the left: the total environment, the future environment level with System 4 (so their link runs straight across), and one operational environment per operation.
 - The operational elements of System One are circles in a column, each with its local management up and to the right.
 - A large circle (a translucent sphere in 3D) encloses all of System One: every operation and its local management. It is sized from the column, so the rows drop below the metasystem and the System Two units and environment move outward as operations are added.
 - **Drawing convention** (Settings tab): *Square* draws the metasystem as a square box holding Systems Three, Three-Star, Four, Five and the System Two regulatory centre, with each local management as a square tilted 45 degrees (the next recursion's metasystem seen on the diagonal). *Diamond* draws the metasystem as a rhombus with upright local managements, the form Jon Walker prefers.

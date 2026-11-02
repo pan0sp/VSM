@@ -113,7 +113,7 @@ button { cursor: pointer; }
 .net .nl { font: 600 12.5px var(--f-body); fill: var(--ink); }
 .net .nl.big { font-size: 16px; }
 .net .nc { font: 600 11px var(--f-mono); fill: var(--ink-2); }
-.net .fl { cursor: pointer; color: var(--ink-2); }
+.net .fl { cursor: pointer; color: var(--fc, var(--ink-2)); }
 .net .fl .hit { fill: none; stroke: transparent; stroke-width: 16; }
 .net .fl .w { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; }
 .net .fl polygon { fill: currentColor; }
@@ -4615,7 +4615,7 @@ function renderNetSvg() {
   const vw = r.width / netView.s, vh = r.height / netView.s, vx = netView.cx - vw / 2, vy = netView.cy - vh / 2;
   netSvg.setAttribute('viewBox', [vx, vy, vw, vh].map(v => v.toFixed(1)).join(' '));
   const black = netBlack(), out = [];
-  const envCol = lv.groupColors.env || DEFAULT_GROUP_COLORS.env, opsCol = lv.groupColors.ops || DEFAULT_GROUP_COLORS.ops;
+  const opsCol = lv.groupColors.ops || DEFAULT_GROUP_COLORS.ops;
   const isSel = (t, id) => netSel && netSel.t === t && netSel.id === id;
   const posOf = id => id === 'sif' ? sifPos(lv) : net.pos[id];
   out.push('<rect class="bg" x="' + vx + '" y="' + vy + '" width="' + vw + '" height="' + vh + '"/>');
@@ -4660,7 +4660,8 @@ function renderNetSvg() {
   });
   list.forEach(f => {
     const sel = !f.merged && isSel('flow', f.id);
-    out.push('<g class="fl' + (sel ? ' sel' : '') + '"' + (f.merged ? '' : ' data-flow="' + f.id + '"') + '>' +
+    const fc = !f.merged && (net.flows.find(x => x.id === f.id) || {}).color;
+    out.push('<g class="fl' + (sel ? ' sel' : '') + '"' + (f.merged ? '' : ' data-flow="' + f.id + '"') + (fc ? ' style="--fc:' + fc + '"' : '') + '>' +
       '<path class="hit" d="M' + f.p0.join(' ') + 'Q' + f.c.join(' ') + ' ' + f.p1.join(' ') + '"/>' +
       '<path class="w" d="' + wavyD(f.p0, f.c, f.p1) + '"/><polygon points="' + f.arrow + '"/>' +
       '<text class="ft' + (f.unnamed ? ' un' : '') + '" x="' + f.at[0].toFixed(1) + '" y="' + (f.at[1] - 7).toFixed(1) + '">' + tspans(f.lines, 12, f.at[0].toFixed(1)) + '</text></g>');
@@ -4679,7 +4680,7 @@ function renderNetSvg() {
     if (!p) return;
     const cls = 'nn actor' + (isSel('node', a.id) ? ' sel' : '') + (netConnect && netConnect.from === a.id ? ' src' : '');
     out.push('<g class="' + cls + '" data-id="' + a.id + '" transform="translate(' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + ')">' +
-      '<path d="' + blobD(i * 1.7 + 0.4) + '" style="fill:' + envCol + ';stroke:' + envCol + '"/>' +
+      '<path d="' + blobD(i * 1.7 + 0.4) + '" style="fill:' + actorColor(lv, a) + ';stroke:' + actorColor(lv, a) + '"/>' +
       '<text class="nk" y="-17">' + esc(NET_KINDS[a.kind] || 'Actor') + '</text><text class="nl" y="5">' + tspans(wrapText(netName(lv, a.id), 16, 2), 13) + '</text>' + netHandle(a.id, NET_RX) + '</g>');
   });
   out.push('<path id="netRubber" class="rubber" d=""/>');
@@ -4694,6 +4695,11 @@ function netCardFlowRows(lv, id) {
   });
   return rows.length ? '<ul class="io links">' + rows.join('') + '</ul>' : '<p class="src">No flows yet. Drag the + handle on its edge to another element, or into empty space to add a connected customer or supplier.</p>';
 }
+// a colour row for the card: the value, whether it is custom, and what resetting returns to
+const netColorRow = (val, custom, groupName) => '<div class="fld"><span>Colour</span><div class="color-row"><input type="color" class="sw" id="nColor" value="' + val + '" aria-label="Colour">' +
+  '<small id="nColorNote">' + (custom ? 'Custom colour' : 'Using the ' + groupName + ' colour') + '</small>' +
+  '<button class="linkish" id="nColorReset" type="button"' + (custom ? '' : ' hidden') + '>Use ' + groupName + ' colour</button></div></div>';
+const actorColor = (lv, a) => a.color || lv.groupColors.env || DEFAULT_GROUP_COLORS.env;
 function renderNetCard() {
   const lv = level(), net = ensureNet(lv);
   let h = '';
@@ -4711,14 +4717,16 @@ function renderNetCard() {
     const env = actorsOfOp(lv, k);
     h = '<div class="nhead"><span class="code-chip" style="background:' + colorOf(lv, id, L) + '">' + esc(codeOf(lv, id)) + '</span><span class="insp-kind"><span class="k">Primary activity</span><span class="r">Operation of System One</span></span></div>' +
       '<label class="fld"><span>Name</span><input type="text" id="nName" value="' + esc(labelOf(lv, id)) + '"></label>' +
+      netColorRow(colorOf(lv, id, L), !!lv.colors[id], 'operations') +
       '<div class="isec"><h4>Flows</h4>' + netCardFlowRows(lv, id) + '</div>' +
       '<div class="isec"><h4>In the VSM</h4><p class="src">' + (env.length ? 'Its local environment: ' + esc(env.map(x => netName(lv, x)).join(', ')) + '.' : 'No outside actor exchanges flows with it, so its environment is the other operations.') + '</p></div>' +
       '<div class="btn-row"><button class="btn primary" type="button" id="nOpen">' + (child ? 'Open lower level' : 'Create lower level') + '</button><button class="btn" type="button" id="nShow">Show in the VSM</button></div>' +
       (lv.opCount > MIN_OPS ? '<div class="btn-row"><button class="btn warn" type="button" id="nRemove">Remove operation</button></div>' : '');
   } else if (netSel.t === 'node') {
     const a = actorById(lv, netSel.id), ks = opsOfActor(lv, a.id);
-    h = '<div class="nhead"><span class="code-chip" style="background:' + (lv.groupColors.env || DEFAULT_GROUP_COLORS.env) + '">E</span><span class="insp-kind"><span class="k">Environment</span><span class="r">' + esc(NET_KINDS[a.kind] || 'Actor') + '</span></span></div>' +
+    h = '<div class="nhead"><span class="code-chip" style="background:' + actorColor(lv, a) + '">E</span><span class="insp-kind"><span class="k">Environment</span><span class="r">' + esc(NET_KINDS[a.kind] || 'Actor') + '</span></span></div>' +
       '<label class="fld"><span>Name</span><input type="text" id="nName" value="' + esc(a.name || '') + '" placeholder="' + esc(NET_DEFAULT_NAMES[a.kind] || '') + '"></label>' +
+      netColorRow(actorColor(lv, a), !!a.color, 'environment') +
       '<label class="fld"><span>Kind</span><select class="inp" id="nKind">' + Object.keys(NET_KINDS).map(k => '<option value="' + k + '"' + (k === a.kind ? ' selected' : '') + '>' + NET_KINDS[k] + '</option>').join('') + '</select></label>' +
       '<div class="isec"><h4>Flows</h4>' + netCardFlowRows(lv, a.id) + '</div>' +
       '<div class="isec"><h4>In the VSM</h4><p class="src">' + (ks.length ? 'Part of the local environment of ' + esc(ks.map(k => codeOf(lv, 'o' + k) + ' ' + labelOf(lv, 'o' + k)).join(', ')) + '.' + (ks.length > 1 ? ' Shared between operations, it is an environmental intersect.' : '') : 'Not yet connected to any activity.') + '</p></div>' +
@@ -4731,6 +4739,7 @@ function renderNetCard() {
       : 'the channel between ' + codeOf(lv, a >= 0 ? f.from : f.to) + ' and its environment';
     h = '<div class="nhead"><span class="code-chip">⇝</span><span class="insp-kind"><span class="k">Flow</span><span class="r">Value exchanged</span></span></div>' +
       '<label class="fld"><span>What flows</span><input type="text" id="nName" value="' + esc(f.name || '') + '" placeholder="Coffee orders, $, ingredients…"></label>' +
+      netColorRow(f.color || '#6b7c78', !!f.color, 'default') +
       '<label class="fld"><span>From</span><select class="inp" id="nFrom">' + opts(f.from) + '</select></label>' +
       '<label class="fld"><span>To</span><select class="inp" id="nTo">' + opts(f.to) + '</select></label>' +
       '<div class="isec"><h4>In the VSM</h4><p class="src">Travels on ' + esc(where) + '.</p></div>' +
@@ -4746,7 +4755,17 @@ function wireNetCard(lv) {
   netCard.querySelectorAll('[data-flow]').forEach(b => b.addEventListener('click', () => netSelect({ t: 'flow', id: b.dataset.flow })));
   if (!netSel) return;
   const name = q('#nName');
+  // colour: set, live while dragging the picker; reset returns to the group colour
+  const wireColor = (get, set) => {
+    const inp = q('#nColor'), rs = q('#nColorReset'), note = q('#nColorNote'), chip = netCard.querySelector('.nhead .code-chip');
+    if (!inp) return;
+    const show = custom => { rs.hidden = !custom; note.textContent = custom ? 'Custom colour' : note.textContent; if (chip && netSel.t === 'node') chip.style.background = get(); };
+    inp.addEventListener('input', () => { set(inp.value); show(true); renderNetSvg(); });
+    rs.addEventListener('click', () => { set(null); renderNetCard(); renderNetSvg(); });
+  };
   if (netSel.t === 'node' && opIdx(netSel.id) >= 0) {
+    const cid = netSel.id;
+    wireColor(() => colorOf(lv, cid, L), v => recolorElement(cid, v, 'net'));
     const id = netSel.id, k = opIdx(id);
     name.addEventListener('input', () => { renameElement(id, name.value, 'net'); renderNetSvg(); });
     q('#nOpen').addEventListener('click', () => netOpen(k));
@@ -4754,11 +4773,13 @@ function wireNetCard(lv) {
     const rm = q('#nRemove'); if (rm) rm.addEventListener('click', () => removeOpUI(lv.id, k));
   } else if (netSel.t === 'node') {
     const a = actorById(lv, netSel.id);
+    wireColor(() => actorColor(lv, a), v => { if (v) a.color = v; else delete a.color; save(); });
     name.addEventListener('input', () => { a.name = name.value.slice(0, 60); save(); renderNetSvg(); });
     q('#nKind').addEventListener('change', e => { a.kind = e.target.value; save(); renderNet(); });
     q('#nRemove').addEventListener('click', () => netRemoveActor(a.id));
   } else {
     const f = net.flows.find(x => x.id === netSel.id);
+    wireColor(() => f.color, v => { if (v) f.color = v; else delete f.color; save(); });
     name.addEventListener('input', () => { f.name = name.value.slice(0, 80); save(); renderNetSvg(); });
     const ends = () => {
       const from = q('#nFrom').value, to = q('#nTo').value;

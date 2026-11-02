@@ -71,7 +71,7 @@ The **Value network** view (toolbar, or key `N`) maps System One before the VSM 
    - Flows with actors travel on the environment–operation channels.
    - These flows appear, read-only, in the Flows tab and in the moving dots.
 
-Squiggly lines are value flows; the straight lines of the VSM are its cybernetic channels. Drag to move things. To draw a flow, drag the **+** handle on an element to another one, Shift-drag the element, press `L`, or use **Connect** or the right-click menu; dropping into empty space adds a customer (outputs side) or supplier (inputs side) there, already connected. Press Delete to remove the selection (with Undo). The **Labels preset** menu has a café example, with its value network and a lower level for the brewing station.
+Squiggly lines are value flows; the straight lines of the VSM are its cybernetic channels. Drag to move things. To draw a flow, drag the **+** handle on an element to another one, Shift-drag the element, press `L`, or use **Connect** or the right-click menu; dropping into empty space adds a customer (outputs side) or supplier (inputs side) there, already connected. Press Delete to remove the selection (with Undo). Select any activity, actor or flow to change its colour in the card; an activity's colour is its operation's colour in the VSM too. The **Labels preset** menu has a café example, with its value network and a lower level for the brewing station.
 
 ## Data flows and the model company
 

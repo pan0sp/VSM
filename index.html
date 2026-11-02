@@ -546,6 +546,15 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 
 /* Recursion view: a top-down hierarchy of viable systems */
 .rec { position: absolute; inset: 0; background: var(--stage); display: flex; flex-direction: column; }
+.method-card { z-index: 3; }
+.app.insp-open .method-card { display: none; }
+.app.method-on .rec-scroll, .app.method-on .rec-head { padding-right: 312px; }
+@media (max-width: 700px) { .app.method-on .rec-scroll, .app.method-on .rec-head { padding-right: 16px; } }
+.method-card .mstep { border-top: 1px solid var(--rule); padding: 8px 0 6px; }
+.method-card .mstep h4 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 0; font-size: 12.5px; }
+.method-card .mstep.cur h4 { color: var(--accent); }
+.method-card .mstep .src { margin: 4px 0 0; }
+.method-card .mhead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .rec-head { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; padding: 58px 16px 10px; }
 .rec-head > div:first-child { max-width: 640px; font-size: 12.5px; color: var(--ink-2); }
 .rec-head b { display: block; font: 650 15px var(--f-display); color: var(--ink); margin-bottom: 2px; }
@@ -623,6 +632,8 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 #gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; outline: none; transition: opacity .18s ease; }
 #gl.fade { opacity: 0; }
 .labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.lbl .achip { display: inline-block; padding: 0 5px; margin: 1px 2px; border-radius: 8px; background: var(--halo); border: 1px solid currentColor; font-weight: 600; line-height: 1.35; }
+.lbl.unmapped { opacity: .55; font-style: italic; }
 .lbl {
   position: absolute;
   left: 0;
@@ -1008,6 +1019,10 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.3"/><circle cx="8" cy="9.2" r="2.2"/><path d="M8 3.6l1.6 1.8L8 7.2 6.4 5.4z"/></svg>
         <span class="t">Nested</span>
       </button>
+      <button class="tool" id="btnMethod" type="button" aria-pressed="true" title="Show the method for this view">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 3.5h10M3 8h10M3 12.5h6"/><circle cx="13" cy="12.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+        <span class="t">Method</span>
+      </button>
       <button class="tool" id="btnTheme" type="button" title="Colour theme: automatic, light or dark">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.6"/><path d="M8 2.4v11.2A5.6 5.6 0 0 0 8 2.4z" fill="currentColor" stroke="none"/></svg>
         <span class="t" id="themeTx">Auto</span>
@@ -1148,7 +1163,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
     <section class="pane guide" id="pane-guide" role="tabpanel" aria-labelledby="tab-guide" hidden>
       <div class="block">
         <h3>Three views of one model</h3>
-        <p>The toolbar switches between three views. <b>VSM</b> draws Beer's diagram in 2D or 3D. <b>Value network</b> maps the primary activities of System One, the actors around them and the flows between them. <b>Recursion</b> shows the hierarchy of viable systems, with the System-in-Focus marked. All three edit the same model, and the System-in-Focus is the same in each. This panel holds the settings and data: the Settings tab for the level, labels, conventions and colours, the Flows tab for what travels on each channel.</p>
+        <p>The toolbar switches between three views. <b>VSM</b> draws Beer's diagram in 2D or 3D. <b>Value network</b> maps the primary activities of System One, the actors around them and the flows between them. <b>Recursion</b> shows the hierarchy of viable systems, with the System-in-Focus marked. All three edit the same model, and the System-in-Focus is the same in each. This panel holds the settings and data: the Settings tab for the level, labels, conventions and colours, the Flows tab for what travels on each channel. <b>Method</b> in the toolbar shows the four steps (purpose, value network, recursion, VSM) beside whichever view is open. In the value network, squiggly lines are value flows; the straight lines of the VSM are its cybernetic channels.</p>
       </div>
       <div class="block">
         <h3>What the model describes</h3>
@@ -1179,11 +1194,6 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
         <p>The Flows tab names what travels along each channel and in which direction; the moving dots follow those directions. The coverage bar shows how many channels carry something. An empty channel is worth asking about: in a real organization it often marks a missing function.</p>
         <p>Load the model company to see a bicycle maker mapped across three levels. Fill gaps with standard flows gives any level a neutral starting point. In a Claude artifact you can also describe an organization and let Claude map it, then map each operation one level down from the inspector.</p>
         <p>When you open an operation, its environment becomes the environment one level down and its local management becomes the metasystem, following Beer's recursion. Scroll toward any operation to zoom into it: the next recursion sits inside each circle, turned 45 degrees, and becomes the System-in-Focus as you arrive. Zoom far out to rise a level.</p>
-      </div>
-      <div class="block">
-        <h3>Value network</h3>
-        <p>The Value network view (key N) maps System One before the VSM is drawn. Step 1 states the purpose in verbs: the purpose of a system is what it does. Step 2 identifies the primary activities and maps them. Each activity is a circle inside the System-in-Focus (the white box); the customers, suppliers and other actors it deals with sit outside as amoebas; squiggly lines carry what they exchange. The black box shows the same system as one box in its business context, with only the flows that cross its boundary. Double-click an activity to map its own network one level down. To draw a flow, drag the + handle on any element to another one, Shift-drag the element, or press L; dropping into empty space adds a customer or supplier there, already connected.</p>
-        <p>The two views share one model. Each activity is an operation of System One, so adding, renaming or removing one changes the VSM as well. The actors an operation exchanges flows with name its local environment, and an actor shared by several operations marks an environmental intersect. Flows between activities travel on the operational linkages; the VSM column only joins neighbours, so a flow between distant operations runs along each linkage in between. Flows with actors travel on the environment–operation channels. Squiggly lines are value flows; the straight lines of the VSM are its cybernetic channels.</p>
       </div>
       <div class="block">
         <h3>How the 3D view uses depth</h3>
@@ -1236,6 +1246,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
       </div>
       <div class="net-card" id="netCard" aria-live="polite"></div>
     </div>
+    <div class="net-card method-card" id="methodCard" hidden></div>
     <div class="rec" id="rec" hidden>
       <div class="rec-head">
         <div><b>Recursion</b><span>Recursion runs only through System One: every operation contains a whole viable system. Click a level to make it the System-in-Focus; a dashed operation has no lower level yet. Right-click, or use ⋯, for more.</span></div>
@@ -1289,6 +1300,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
       <p class="summary" id="iSummary"></p>
       <div class="isec" id="iDiagSec"><h4>Diagnosis</h4><div id="iDiag"></div></div>
       <div class="isec" id="iFlowSec"><h4>Data flows</h4><div id="iFlows"></div></div>
+      <div class="isec" id="iNetSec" hidden><h4>In the value network</h4><div id="iNet"></div></div>
       <div class="isec" id="iIOSec"><h4>Information in and out</h4><ul class="io" id="iIO"></ul></div>
       <div id="iRecur"></div>
       <div class="isec" id="iLinksSec"><h4>Connected</h4><ul class="links" id="iLinks"></ul></div>
@@ -2487,6 +2499,7 @@ function refreshVisuals() {
     else if (el.type === 'sys1') op = lerp(0.55, 0.12, d);
     else if (el.type === 'envTotal') op = lerp(1, 0.16, d);
     else if ((el.type === 'op' || el.type === 'mgmt') && minisShown) op = lerp(0.45, 0.18, d);
+    if (el.type === 'envOp' && envUnmapped(lv, id)) { fill.lerp(theme.stage, 0.5); op *= 0.5; }
     const related = !focusSet || focusSet.has(id);
     const dimF = related ? 1 : (el.container ? 0.5 : 0.22);
     const dgn = prefs.diagShow && diagOf(lv, id);
@@ -2722,7 +2735,7 @@ function buildLabels() {
     const lab = el.label;
     div.className = 'lbl ' + (lab.align || 'c') + (lab.big ? ' big' : '');
     const code = lab.nameOnly ? '' : '<span class="code">' + esc(codeOf(lv, el.id)) + '</span>';
-    div.innerHTML = '<span class="dg"></span>' + code + '<span class="nm">' + esc(labelOf(lv, el.id)) + '</span>';
+    div.innerHTML = '<span class="dg"></span>' + code + '<span class="nm">' + labelHTML(lv, el.id) + '</span>';
     labelsEl.appendChild(div);
     let codeDiv = null;
     if (lab.codeIn) { // triangles: code sits inside, name beside
@@ -2766,9 +2779,23 @@ function updateDiagBadges() {
 }
 function updateLabelText(id) {
   const n = labelNodes.get(id);
-  if (n) n.div.querySelector('.nm').textContent = labelOf(level(), id);
+  if (n) n.div.querySelector('.nm').innerHTML = labelHTML(level(), id);
+}
+// a local environment named by the value network lists its actors as chips
+function labelHTML(lv, id) {
+  const m = /^e(\d+)$/.exec(id);
+  if (!m || !lv.net || (lv.labels[id] != null && lv.labels[id] !== '')) return esc(labelOf(lv, id));
+  const xs = actorsOfOp(lv, +m[1]);
+  return xs.length ? xs.map(x => '<span class="achip">' + esc(netName(lv, x)) + '</span>').join('') : esc(labelOf(lv, id));
+}
+// once a value network has actors, a local environment no actor reaches is shown faintly
+function envUnmapped(lv, id) {
+  const m = /^e(\d+)$/.exec(id);
+  return !!m && !!lv.net && netOf(lv).actors.length > 0 && !(lv.labels[id] != null && lv.labels[id] !== '') && !actorsOfOp(lv, +m[1]).length;
 }
 function updateLabelClasses() {
+  const lvU = level();
+  labelNodes.forEach((n, id) => n.div.classList.toggle('unmapped', envUnmapped(lvU, id)));
   labelNodes.forEach((n, id) => {
     const dim = focusSet && !focusSet.has(id) && !n.el.container;
     const off = isHidden(id) && !n.el.container;
@@ -3697,7 +3724,29 @@ function renderInspector() {
   if (isCh) $('#iIOSec').hidden = true; else renderIO();
   renderLinks();
   renderRecursion();
+  renderInspectorNet();
   if (wasHidden) $('.insp-body').scrollTop = 0;
+}
+/* A local environment or operation, seen from the value network: its actors and what they exchange */
+function renderInspectorNet() {
+  const lv = level(), id = selected, sec = $('#iNetSec'), box = $('#iNet');
+  const me = /^e(\d+)$/.exec(id || ''), mo = /^o(\d+)$/.exec(id || '');
+  if (!me && !mo) { sec.hidden = true; return; }
+  const k = +(me || mo)[1], xs = actorsOfOp(lv, k);
+  sec.hidden = false;
+  if (!xs.length) {
+    box.innerHTML = '<p class="src">' + (lv.net && netOf(lv).actors.length ? 'No actor in the value network deals with ' + esc(labelOf(lv, 'o' + k)) + ' yet. In Beer\'s model every operation has an environment of its own: worth checking whether one is missing from the map, or whether this is a primary activity at all.' : 'Map the customers, suppliers and other actors this operation deals with in the value network; they become its local environment here.') + '</p>' +
+      '<div class="btn-row"><button class="btn" type="button" id="iNetGo">Open the value network</button></div>';
+  } else {
+    box.innerHTML = '<ul class="io">' + xs.map(x => {
+      const a = actorById(lv, x), fl = netFlows(lv).filter(f => (f.from === x && f.to === 'o' + k) || (f.to === x && f.from === 'o' + k));
+      return '<li><span class="ar">◌</span><span><button class="linkish" type="button" data-actor="' + x + '">' + esc(netName(lv, x)) + '</button> <span class="via">' + esc(NET_KINDS[a.kind] || 'Actor') + '</span>' +
+        fl.map(f => '<span class="via">' + (f.from === x ? 'sends ' : 'receives ') + esc(flowName(f)) + '</span>').join('') + '</span></li>';
+    }).join('') + '</ul><div class="btn-row"><button class="btn" type="button" id="iNetGo">Edit in the value network</button></div>';
+  }
+  const go = target => { setDiagram('net'); setTimeout(() => netSelect(target), 40); };
+  $('#iNetGo').addEventListener('click', () => go({ t: 'node', id: 'o' + k }));
+  box.querySelectorAll('[data-actor]').forEach(b => b.addEventListener('click', () => go({ t: 'node', id: b.dataset.actor })));
 }
 function setDiag(id, key, note) {
   const lv = level();
@@ -3849,6 +3898,7 @@ function renderAllPanels() {
   renderInspector();
   renderFocusBar();
   renderNet();
+  renderMethod();
 }
 
 /* ---------- data flows: list, editor, coverage ---------- */
@@ -4581,8 +4631,8 @@ function netFit() {
   const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
   const x0 = Math.min(...xs) - 120, x1 = Math.max(...xs) + 120, y0 = Math.min(...ys) - 110, y1 = Math.max(...ys) + 120;
   // fit into the space the tool bar and the card leave free
-  const bar = netEl.querySelector('.net-bar').getBoundingClientRect(), card = netCard.getBoundingClientRect(), narrow = r.width < 700;
-  const top = bar.bottom - r.top + 8, bottom = narrow ? Math.max(12, r.bottom - card.top + 8) : 12, right = narrow ? 12 : Math.max(12, r.right - card.left + 12), left = 12;
+  const bar = netEl.querySelector('.net-bar').getBoundingClientRect(), card = netCard.getBoundingClientRect(), narrow = r.width < 700, cardOn = !netCard.hidden && card.width > 0;
+  const top = bar.bottom - r.top + 8, bottom = narrow && cardOn ? Math.max(12, r.bottom - card.top + 8) : 12, right = !narrow && cardOn ? Math.max(12, r.right - card.left + 12) : 12, left = 12;
   const aw = Math.max(80, r.width - left - right), ah = Math.max(80, r.height - top - bottom);
   const s = clamp(Math.min(aw / (x1 - x0), ah / (y1 - y0)), 0.25, 1.1);
   netView = { cx: (x0 + x1) / 2 + (r.width / 2 - (left + aw / 2)) / s, cy: (y0 + y1) / 2 + (r.height / 2 - (top + ah / 2)) / s, s };
@@ -4695,6 +4745,36 @@ function netCardFlowRows(lv, id) {
   });
   return rows.length ? '<ul class="io links">' + rows.join('') + '</ul>' : '<p class="src">No flows yet. Drag the + handle on its edge to another element, or into empty space to add a connected customer or supplier.</p>';
 }
+/* The method, shared by every view: the current view's step is open, the others link to their views */
+function methodHTML(view) {
+  const lv = level();
+  const step = (n, key, title, body) => '<div class="mstep' + (key === view ? ' cur' : '') + '"><h4><span>Step ' + n + ' · ' + title + '</span>' +
+    (key && key !== view ? '<button class="linkish" type="button" data-view="' + key + '">' + ({ net: 'Value network', rec: 'Recursion', vsm: 'VSM' })[key] + ' →</button>' : '') + '</h4>' +
+    (key === view || !key ? body : '') + '</div>';
+  return '<div class="mhead"><div class="eyebrow" style="margin:0">Method · ' + esc(levelName(lv)) + '</div><button class="icon-btn" type="button" data-mclose aria-label="Hide the method" style="width:26px;height:26px">×</button></div>' +
+    step(1, null, 'Purpose', '<label class="fld" style="margin-top:4px"><textarea class="mPurpose" rows="3" aria-label="Purpose" placeholder="The purpose of … is to (verbs) … for …">' + esc(lv.purpose || '') + '</textarea></label><p class="src">What the system does, in verbs. The purpose of a system is what it does.</p>') +
+    step(2, 'net', 'Map the S1s', '<p class="src">Add the primary activities that fulfil the purpose: activities, processes or functions, not (yet) roles or departments, and only those the organization performs itself. Add the customers, suppliers and other actors each deals with, and the flows between them. Drag an element\'s + handle to draw a flow, or into empty space to add a connected actor; key L draws by clicking. Black box shows the system in its business context.</p>') +
+    step(3, 'rec', 'Recursion', '<p class="src">Identify at least one level down from the System-in-Focus, and mark which level is in focus (highlighted here). Click a level to focus it; a dashed operation has no lower level yet. Recursion runs only through System One.</p>') +
+    step(4, 'vsm', 'The VSM', '<p class="src">Operations, their local environments and flows come from the value network. Name the metasystem (Systems Two to Five and Three-Star), then diagnose in order: System One, Two, Three and Three-Star, Four, Five, and the Three–Four homeostat. Right-click any element to flag it as missing, weak and so on.</p>');
+}
+function wireMethod(box, view) {
+  const lv = level(), ta = box.querySelector('.mPurpose');
+  if (ta) { ta.addEventListener('input', () => { lv.purpose = ta.value.slice(0, 400); save(); }); ta.addEventListener('change', () => { if (prefs.diagram === 'net') renderNetSvg(); }); }
+  box.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => setDiagram(b.dataset.view)));
+  const x = box.querySelector('[data-mclose]'); if (x) x.addEventListener('click', () => setMethod(false));
+}
+// open by default on wide screens; on phones it would cover the model, so it starts closed there
+const methodOn = () => prefs.method != null ? prefs.method : !matchMedia('(max-width: 700px)').matches;
+function renderMethod() {
+  const view = ['net', 'rec'].includes(prefs.diagram) ? prefs.diagram : 'vsm', on = methodOn();
+  $('#btnMethod').setAttribute('aria-pressed', String(on));
+  app.classList.toggle('method-on', on && view === 'rec');
+  const card = $('#methodCard');
+  card.hidden = !on || view === 'net';
+  if (!card.hidden && !card.contains(document.activeElement)) { card.innerHTML = methodHTML(view); wireMethod(card, view); }
+}
+function setMethod(on) { prefs.method = on; save(); renderMethod(); if (prefs.diagram === 'net') { renderNetCard(); netView = null; renderNet(); } }
+
 // a colour row for the card: the value, whether it is custom, and what resetting returns to
 const netColorRow = (val, custom, groupName) => '<div class="fld"><span>Colour</span><div class="color-row"><input type="color" class="sw" id="nColor" value="' + val + '" aria-label="Colour">' +
   '<small id="nColorNote">' + (custom ? 'Custom colour' : 'Using the ' + groupName + ' colour') + '</small>' +
@@ -4704,14 +4784,8 @@ function renderNetCard() {
   const lv = level(), net = ensureNet(lv);
   let h = '';
   if (!netSel) {
-    const nf = netFlows(lv).length;
-    h = '<div class="eyebrow">Value network · ' + esc(levelName(lv)) + '</div>' +
-      '<label class="fld"><span>Step 1 · Purpose: what the system does, in verbs</span><textarea id="nPurpose" rows="3" placeholder="The purpose of the café is to brew and serve coffee and food to…">' + esc(lv.purpose || '') + '</textarea></label>' +
-      '<p class="src">Remember POSIWID: the purpose of a system is what it does.</p>' +
-      '<div class="isec"><h4>Step 2 · Identify and map the S1s</h4><p class="src">Add the primary activities that fulfil the purpose: activities, processes or functions, not (yet) roles or departments, and only those the organization performs itself. Then add the customers, suppliers and other actors each one deals with, and connect them with the flows they exchange: drag the + handle on an activity to another element, or into empty space to add an actor there. Key L draws a flow by clicking.</p></div>' +
-      '<div class="isec"><h4>Step 3 · Recursion</h4><p class="src">Double-click an activity to map its own value network one level down. The Recursion view shows the hierarchy.</p></div>' +
-      '<div class="isec"><h4>Step 4 · The VSM</h4><p class="src">Nothing to transfer by hand: each activity is an operation of System One, the actors around it form its local environment, and the flows travel on the operational linkages and environment channels of the VSM.</p></div>' +
-      '<p class="src">' + lv.opCount + (lv.opCount === 1 ? ' activity, ' : ' activities, ') + net.actors.length + (net.actors.length === 1 ? ' actor, ' : ' actors, ') + nf + (nf === 1 ? ' flow.' : ' flows.') + '</p>';
+    netCard.hidden = !methodOn();
+    h = methodHTML('net');
   } else if (netSel.t === 'node' && opIdx(netSel.id) >= 0) {
     const id = netSel.id, k = opIdx(id), cid = lv.children[id], child = cid && db.levels[cid];
     const env = actorsOfOp(lv, k);
@@ -4745,13 +4819,13 @@ function renderNetCard() {
       '<div class="isec"><h4>In the VSM</h4><p class="src">Travels on ' + esc(where) + '.</p></div>' +
       '<div class="btn-row"><button class="btn" type="button" id="nRev">Reverse</button><button class="btn warn" type="button" id="nRemove">Remove flow</button></div>';
   }
+  if (netSel) netCard.hidden = false;
   netCard.innerHTML = h;
   wireNetCard(lv);
 }
 function wireNetCard(lv) {
   const q = s => netCard.querySelector(s), net = ensureNet(lv);
-  const p = q('#nPurpose');
-  if (p) { p.addEventListener('input', () => { lv.purpose = p.value.slice(0, 400); save(); }); p.addEventListener('change', renderNetSvg); }
+  if (!netSel) { wireMethod(netCard, 'net'); return; }
   netCard.querySelectorAll('[data-flow]').forEach(b => b.addEventListener('click', () => netSelect({ t: 'flow', id: b.dataset.flow })));
   if (!netSel) return;
   const name = q('#nName');
@@ -4916,6 +4990,7 @@ function setDiagram(mode) {
   prefs.diagram = mode; save();
   closeCtx(); tip.hidden = true; $('#toast').hidden = true;
   syncDiagram();
+  renderMethod();
   if (mode === 'net') { netSel = null; netConnect = null; netView = null; select(null); renderNet(); }
   else if (mode === 'rec') { select(null); renderTree(); }
   else { buildScene(); renderAllPanels(); setCam(fitState()); dirty = true; }
@@ -5096,6 +5171,7 @@ netSvg.addEventListener('pointerdown', e => {
 $('#dVsm').addEventListener('click', () => setDiagram('vsm'));
 $('#dNet').addEventListener('click', () => setDiagram('net'));
 $('#dRec').addEventListener('click', () => setDiagram('rec'));
+$('#btnMethod').addEventListener('click', () => setMethod(!methodOn()));
 $('#recVsm').addEventListener('click', () => setDiagram('vsm'));
 $('#recNet').addEventListener('click', () => setDiagram('net'));
 $('#nbWhite').addEventListener('click', () => setNetBox('white'));

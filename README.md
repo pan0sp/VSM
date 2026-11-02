@@ -50,7 +50,7 @@ The 3D model keeps every x and y position and adds one dimension. The environmen
 
 ## Three views
 
-The toolbar switches between three views of one model: **VSM** (Beer's diagram in 2D or 3D), **Value network** (key `N`) and **Recursion** (key `R`), a top-down hierarchy of viable systems with the System-in-Focus marked. Click a level in the Recursion view to make it the System-in-Focus; dashed operations have no lower level yet, and each node's **⋯** or right-click menu opens it in the VSM or the value network, creates a lower level, or removes it. The left panel holds the settings and data: **Settings** (the level, labels, conventions, colours, diagnosis), **Flows** and **Guide**.
+The toolbar switches between three views of one model: **VSM** (Beer's diagram in 2D or 3D), **Value network** (key `N`) and **Recursion** (key `R`), a top-down hierarchy of viable systems with the System-in-Focus marked. Click a level in the Recursion view to make it the System-in-Focus; dashed operations have no lower level yet, and each node's **⋯** or right-click menu opens it in the VSM or the value network, creates a lower level, or removes it. **Method** (toolbar) shows the four steps beside any view, with the current view's step open: purpose, value network, recursion, VSM. The left panel holds the settings and data: **Settings** (the level, labels, conventions, colours, diagnosis), **Flows** and **Guide**.
 
 ## Value network
 
@@ -70,6 +70,7 @@ The **Value network** view (toolbar, or key `N`) maps System One before the VSM 
    - Flows between activities travel on the operational linkages. The VSM column only joins neighbours, so a flow between distant operations runs along each linkage in between.
    - Flows with actors travel on the environment–operation channels.
    - These flows appear, read-only, in the Flows tab and in the moving dots.
+   - In the VSM, a local environment named this way lists its actors as chips, and its details pane lists them with their flows and an **Edit in the value network** button. Once the network has actors, a local environment no actor reaches is drawn faintly: it may be missing from the map, or the operation may not be a primary activity.
 
 Squiggly lines are value flows; the straight lines of the VSM are its cybernetic channels. Drag to move things. To draw a flow, drag the **+** handle on an element to another one, Shift-drag the element, press `L`, or use **Connect** or the right-click menu; dropping into empty space adds a customer (outputs side) or supplier (inputs side) there, already connected. Press Delete to remove the selection (with Undo). Select any activity, actor or flow to change its colour in the card; an activity's colour is its operation's colour in the VSM too. The **Labels preset** menu has a café example, with its value network and a lower level for the brewing station.
 

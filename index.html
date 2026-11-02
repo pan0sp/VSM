@@ -1249,8 +1249,8 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
     <div class="net-card method-card" id="methodCard" hidden></div>
     <div class="rec" id="rec" hidden>
       <div class="rec-head">
-        <div><b>Recursion</b><span>Recursion runs only through System One: every operation contains a whole viable system. Click a level to make it the System-in-Focus; a dashed operation has no lower level yet. Right-click, or use ⋯, for more.</span></div>
-        <div class="btn-row"><button class="btn" type="button" id="recVsm">Open in the VSM</button><button class="btn" type="button" id="recNet">Open the value network</button></div>
+        <div><b>Recursion</b><span>Recursion runs only through System One: every operation contains a whole viable system. Click a level to make it the System-in-Focus; a dashed operation has no lower level yet. Level 0 is the main System-in-Focus: add levels above it, or set another level as 0, from ⋯ or right-click.</span></div>
+        <div class="btn-row"><button class="btn" type="button" id="recUp" title="Add a supersystem above the top level">+ Level above</button><button class="btn" type="button" id="recVsm">Open in the VSM</button><button class="btn" type="button" id="recNet">Open the value network</button></div>
       </div>
       <div class="rec-scroll"><ul class="rtree" id="tree"></ul></div>
     </div>
@@ -1964,6 +1964,8 @@ function defaultLabel(lv, id) {
 
 const labelOf = (lv, id) => (lv.labels[id] != null && lv.labels[id] !== '' ? lv.labels[id] : defaultLabel(lv, id));
 const level = () => db.levels[db.currentId];
+// levels are numbered from the main System-in-Focus (level 0): levels above it are negative
+const levelNo = lv => { const r = db.refId && db.levels[db.refId]; const n = lv.depth - (r ? r.depth : 0); return n < 0 ? '−' + (-n) : String(n); };
 function levelName(lv) {
   if (!lv.parent) return lv.name || 'Organization';
   const p = db.levels[lv.parent.level];
@@ -3534,8 +3536,8 @@ function renderCrumbs() {
     const cur = i === chain.length - 1;
     const code = lv.parent ? codeOf(db.levels[lv.parent.level], lv.parent.el) : '';
     return (i ? '<span class="crumb-sep" aria-hidden="true">›</span>' : '') +
-      '<button class="crumb" type="button" data-level="' + lv.id + '"' + (cur ? ' aria-current="page"' : '') + ' title="Level ' + lv.depth + (code ? ' · ' + esc(code) : '') + '">' +
-      '<span class="lv">L' + lv.depth + '</span><span class="nm">' + esc(levelName(lv)) + '</span></button>';
+      '<button class="crumb" type="button" data-level="' + lv.id + '"' + (cur ? ' aria-current="page"' : '') + ' title="Level ' + levelNo(lv) + (code ? ' · ' + esc(code) : '') + '">' +
+      '<span class="lv">L' + levelNo(lv) + '</span><span class="nm">' + esc(levelName(lv)) + '</span></button>';
   }).join('');
   nav.querySelectorAll('.crumb').forEach(b => b.addEventListener('click', () => goToLevel(b.dataset.level)));
   const last = nav.lastElementChild; if (last && last.scrollIntoView) last.scrollIntoView({ block: 'nearest', inline: 'end' });
@@ -3544,19 +3546,19 @@ function renderCrumbs() {
   const chip = $('#levelChip');
   if (lv.parent) {
     const p = db.levels[lv.parent.level];
-    chip.innerHTML = '<span class="lv">Level ' + lv.depth + '</span><span class="tx">Inside <b>' + esc(codeOf(p, lv.parent.el)) + ' ' + esc(levelName(lv)) + '</b> of ' + esc(levelName(p)) + '</span>';
+    chip.innerHTML = '<span class="lv">Level ' + levelNo(lv) + '</span><span class="tx">Inside <b>' + esc(codeOf(p, lv.parent.el)) + ' ' + esc(levelName(lv)) + '</b> of ' + esc(levelName(p)) + '</span>';
     $('#upBtn').hidden = false;
     $('#upTx').textContent = 'Up to ' + levelName(p);
-    $('#upBtn').title = 'Back to level ' + p.depth + ': ' + levelName(p);
+    $('#upBtn').title = 'Back to level ' + levelNo(p) + ': ' + levelName(p);
   } else {
-    chip.innerHTML = '<span class="lv">Level 0</span><span class="tx">System in focus: <b>' + esc(levelName(lv)) + '</b></span>';
+    chip.innerHTML = '<span class="lv">Level ' + levelNo(lv) + '</span><span class="tx">System in focus: <b>' + esc(levelName(lv)) + '</b></span>';
     $('#upBtn').hidden = true;
   }
 }
 
 function renderModelPane() {
   const lv = level();
-  $('#focusEyebrow').textContent = 'System in focus · Level ' + lv.depth;
+  $('#focusEyebrow').textContent = 'System in focus · Level ' + levelNo(lv);
   const nameInp = $('#levelName');
   if (document.activeElement !== nameInp) nameInp.value = levelName(lv);
   $('#opCount').textContent = lv.opCount;
@@ -3642,7 +3644,7 @@ function renderTree() {
     const isCur = lv.id === cur, flags = levelFlags(lv), parent = lv.parent && db.levels[lv.parent.level];
     const code = parent ? codeOf(parent, lv.parent.el) : '';
     let html = '<li><div class="rcard level' + (isCur ? ' current' : '') + '" data-level="' + lv.id + '"><button class="tbtn" type="button" data-level="' + lv.id + '">' +
-      '<span class="chips"><span class="lv">L' + lv.depth + '</span>' + (code ? '<span class="cd">' + esc(code) + '</span>' : '') + (flags ? '<span class="tflag" title="' + flags + ' flagged in the diagnosis">⚑' + flags + '</span>' : '') + '</span>' +
+      '<span class="chips"><span class="lv">L' + levelNo(lv) + '</span>' + (lv.id === (db.refId || db.rootId) && db.refId && db.refId !== db.rootId ? '<span class="cd" title="Main System-in-Focus: level 0">MAIN</span>' : '') + (code ? '<span class="cd">' + esc(code) + '</span>' : '') + (flags ? '<span class="tflag" title="' + flags + ' flagged in the diagnosis">⚑' + flags + '</span>' : '') + '</span>' +
       '<span class="tn">' + esc(levelName(lv)) + '</span>' +
       '<span class="sub">' + (isCur ? '<span class="here">SYSTEM IN FOCUS</span>' : lv.opCount + (lv.opCount === 1 ? ' operation' : ' operations')) + '</span></button>' +
       more('data-lv="' + lv.id + '"') + '</div>';
@@ -3667,13 +3669,43 @@ function renderTree() {
   tree.querySelectorAll('.more').forEach(b => b.addEventListener('click', () => { const r = b.getBoundingClientRect(); menu(b, r.left, r.bottom + 4); }));
   tree.querySelectorAll('.tbtn').forEach(b => b.addEventListener('contextmenu', e => { e.preventDefault(); menu(b, e.clientX, e.clientY); }));
 }
+/* A supersystem above the top level: the old top becomes its first operation, and keeps its number */
+function addLevelAbove() {
+  const old = db.levels[db.rootId], name = levelName(old);
+  lastRemoved = JSON.stringify(db);
+  if (!db.refId) db.refId = old.id;
+  db.seq += 1;
+  const id = 'L' + db.seq;
+  const top = { id, depth: 0, tag: '', parent: null, name: 'Supersystem', opCount: 2,
+    labels: { o0: name, e0: labelOf(old, 'env'), m0: labelOf(old, 'meta') }, colors: {}, notes: {}, flows: {}, diag: {},
+    groupColors: Object.assign({}, old.groupColors), children: { o0: old.id } };
+  if (db.scheme && COLOR_SCHEMES[db.scheme]) Object.assign(top, schemeColors(db.scheme));
+  Object.values(db.levels).forEach(l => { l.depth += 1; });
+  db.levels[id] = top;
+  old.parent = { level: id, el: 'o0' };
+  delete old.name;
+  const retag = p => Object.values(p.children).forEach(cid => { const c = db.levels[cid]; if (c) { c.tag = childTag(p, c.parent.el); retag(c); } });
+  retag(top);
+  db.rootId = id;
+  save();
+  if (prefs.diagram === 'vsm') { const cam = camState(); buildScene(); setCam(cam); }
+  renderAllPanels();
+  offerUndo('Added a supersystem above ' + name + '. ' + (db.refId === old.id ? name + ' stays level 0; the new level is −1.' : ''));
+}
+function setMainLevel(id) {
+  db.refId = id; save();
+  renderAllPanels();
+  showToast(levelName(db.levels[id]) + ' is now level 0, the main System-in-Focus. Levels above it are numbered −1, −2…');
+}
 function openRecCtx(x, y, lvId, fromId, el) {
   const items = [], it = (ic, text, fn, extra) => items.push(Object.assign({ ic, text, fn }, extra || {})), sep = () => items.push({ sep: true });
   let head;
   if (lvId) {
     const lv = db.levels[lvId], parent = lv.parent && db.levels[lv.parent.level];
-    head = '<div class="ch"><span class="k">Level ' + lv.depth + (parent ? ' · ' + esc(codeOf(parent, lv.parent.el)) : '') + '</span><b>' + esc(levelName(lv)) + '</b></div>';
+    head = '<div class="ch"><span class="k">Level ' + levelNo(lv) + (parent ? ' · ' + esc(codeOf(parent, lv.parent.el)) : '') + '</span><b>' + esc(levelName(lv)) + '</b></div>';
     if (lvId !== db.currentId) it('◎', 'Make it the System-in-Focus', () => goToLevel(lvId));
+    if (lvId !== (db.refId || db.rootId)) it('⓪', 'Set as level 0 (main System-in-Focus)', () => setMainLevel(lvId));
+    if (!parent) it('↑', 'Add a level above', addLevelAbove);
     it('◫', 'Open in the VSM', async () => { if (lvId !== db.currentId) await goToLevel(lvId); setDiagram('vsm'); });
     it('⇝', 'Open its value network', async () => { if (lvId !== db.currentId) await goToLevel(lvId); setDiagram('net'); });
     if (parent) {
@@ -3915,7 +3947,7 @@ function renderCoverage() {
 }
 function renderFlowsPane() {
   const lv = level();
-  $('#flowsEyebrow').textContent = 'Data flows · Level ' + lv.depth + ' · ' + levelName(lv);
+  $('#flowsEyebrow').textContent = 'Data flows · Level ' + levelNo(lv) + ' · ' + levelName(lv);
   renderCoverage();
   const brief = $('#aiBrief');
   if (document.activeElement !== brief && !aiBusy) brief.value = nearestBrief(lv);
@@ -4754,7 +4786,7 @@ function methodHTML(view) {
   return '<div class="mhead"><div class="eyebrow" style="margin:0">Method · ' + esc(levelName(lv)) + '</div><button class="icon-btn" type="button" data-mclose aria-label="Hide the method" style="width:26px;height:26px">×</button></div>' +
     step(1, null, 'Purpose', '<label class="fld" style="margin-top:4px"><textarea class="mPurpose" rows="3" aria-label="Purpose" placeholder="The purpose of … is to (verbs) … for …">' + esc(lv.purpose || '') + '</textarea></label><p class="src">What the system does, in verbs. The purpose of a system is what it does.</p>') +
     step(2, 'net', 'Map the S1s', '<p class="src">Add the primary activities that fulfil the purpose: activities, processes or functions, not (yet) roles or departments, and only those the organization performs itself. Add the customers, suppliers and other actors each deals with, and the flows between them. Drag an element\'s + handle to draw a flow, or into empty space to add a connected actor; key L draws by clicking. Black box shows the system in its business context.</p>') +
-    step(3, 'rec', 'Recursion', '<p class="src">Identify at least one level down from the System-in-Focus, and mark which level is in focus (highlighted here). Click a level to focus it; a dashed operation has no lower level yet. Recursion runs only through System One.</p>') +
+    step(3, 'rec', 'Recursion', '<p class="src">Identify at least one level up and one level down from the System-in-Focus, and mark it clearly: it is highlighted here, and level 0 is the main one. Use + Level above for the supersystem. Click a level to focus it; a dashed operation has no lower level yet. Recursion runs only through System One.</p>') +
     step(4, 'vsm', 'The VSM', '<p class="src">Operations, their local environments and flows come from the value network. Name the metasystem (Systems Two to Five and Three-Star), then diagnose in order: System One, Two, Three and Three-Star, Four, Five, and the Three–Four homeostat. Right-click any element to flag it as missing, weak and so on.</p>');
 }
 function wireMethod(box, view) {
@@ -5173,6 +5205,7 @@ $('#dNet').addEventListener('click', () => setDiagram('net'));
 $('#dRec').addEventListener('click', () => setDiagram('rec'));
 $('#btnMethod').addEventListener('click', () => setMethod(!methodOn()));
 $('#recVsm').addEventListener('click', () => setDiagram('vsm'));
+$('#recUp').addEventListener('click', addLevelAbove);
 $('#recNet').addEventListener('click', () => setDiagram('net'));
 $('#nbWhite').addEventListener('click', () => setNetBox('white'));
 $('#nbBlack').addEventListener('click', () => setNetBox('black'));

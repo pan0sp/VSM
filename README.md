@@ -38,6 +38,16 @@ The layout follows Beer's diagram from *Brain of the Firm* and *Diagnosing the S
 
 Terminology follows Beer's books as collected in the [Pure VSM](https://wiki.cybernetic-futures.org/pure-vsm/) source set: inside-and-now (System Three), outside-and-then (System Four), closure and identity (System Five), anti-oscillation and regulatory centre (System Two), System-in-Focus, local management.
 
+### The Hemispheres convention
+
+A third drawing convention, after the author's clay and Tinkercad ("VSM 3D-Hemispheres") models:
+- **The environment** is a bowl. Each operation's local environment is a cap set in its rim, and the future environment is a faint dome above.
+- **System One** lies on a plane inside the bowl. Its operations sit on a ring with their local managements toward the centre, and System Two is a ring of arcs.
+- **The metasystem** stands at right angles to that plane: Three at the base, then Four, then Five, with Three-Star beneath Three.
+- **Lower levels** sit inside each operation that has one, tilted 45 degrees toward the centre, as in the square convention. The lower level's System One sits in the operation and its column in the local management; **Nested** shows one in every operation.
+- **Same model.** It draws the same elements and channels as the classic diagram, so selection, details, diagnosis, colours and the right-click menu all carry over.
+- **2D and 3D.** 2D gives the plan from above. Double-click an operation to open its level.
+
 ### Options in the Settings tab
 
 - **System 2 centre: Inside / Bridge.** Bridge draws the centre on the metasystem boundary and, in 3D, puts all of System 2 on its own plane between operations and metasystem. It is an interpretive option, prompted by a Stanford Medicine study (*Nature Neuroscience*, September 2026) reporting that the forebrain and midbrain arise from one progenitor lineage and the hindbrain from another.

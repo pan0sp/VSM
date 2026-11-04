@@ -3186,8 +3186,9 @@ function buildHemi() {
   anchor('meta', V(HG.COL + 4, HG.S5 + 9, 0));
   const lab = { s3: Math.PI / 2 + 0.75, s4: Math.PI / 2, s5: Math.PI / 2 - 0.75 };
   ['s3', 's4', 's5'].forEach(id => { hClone(id, V(0, HG[id.toUpperCase()], 0), front); anchor(id, hPolar(9.5, lab[id], HG[id.toUpperCase()])); });
-  const s3sPos = hPolar(HG.COL - 2, -Math.PI / 2, HG.S3 - 9);
-  hClone('s3s', s3sPos, front); anchor('s3s', s3sPos.clone().add(V(0, -6, 0)));
+  // System Three-Star is a function of System Three, not a body: no triangle here, only its audit lines,
+  // which leave System Three and reach each operation directly, passing beside its local management
+  anchor('s3s', hPolar(HG.COL + 1.5, -Math.PI / 2, HG.S3 - 3));
   // System Two, after the clay model: a ring through the local managements joins the operations' metasystems,
   // as the operational linkages join the operations; its regulatory centre rings the foot of the column
   const RING = HG.COL + 0.7, ringAt = a => hPolar(RING, a, HG.MGY), s2Pos = ringAt(Math.PI / 2);
@@ -3231,7 +3232,10 @@ function buildHemi() {
       case 's2ch': for (let k = 0; k < n; k++) { const sa = P[k].a + Math.PI / n * 0.55; line(toward(ringAt(sa), P[k].s2, 0.7), toward(P[k].s2, ringAt(sa), 1.3), 'none'); } break;
       case 's2s3': line(toward(s2Pos, V(0, HG.S3, 0), 0.7), toward(V(0, HG.S3, 0), s2Pos, 7)); break;
       case 'ci': case 'rb': for (let k = 0; k < n; k++) { const o = side(k, ch.type === 'ci' ? -2 : 2); line(hPolar(6.5, P[k].a, HG.S3).add(o), toward(P[k].mg, V(0, HG.S3, 0), 7.5).add(o)); } break;
-      case 'audit': line(toward(V(0, HG.S3, 0), s3sPos, 7), toward(s3sPos, V(0, HG.S3, 0), 5), 'none'); for (let k = 0; k < n; k++) line(toward(s3sPos, P[k].op, 5), toward(up(P[k].op, 2), s3sPos, 9.5), 'end'); break;
+      case 'audit': for (let k = 0; k < n; k++) {
+        const b = P[k].a - 0.34, mid = hPolar(HG.MG, b, 3), end = toward(up(P[k].op, 2), mid, 10);
+        hChan(id, [hPolar(HG.COL * 0.75, b, HG.S3 - 1), hPolar(HG.MG * 0.55, b, 2.5), mid, end], 'end');
+      } break;
       case 's34': line(V(2.5, HG.S3 + 6, 0), V(2.5, HG.S4 - 6, 0), 'end'); line(V(-2.5, HG.S4 - 6, 0), V(-2.5, HG.S3 + 6, 0), 'end'); break;
       case 's45': line(V(0, HG.S4 + 6, 0), V(0, HG.S5 - 6, 0)); break;
       case 's5h': hChan(id, [hPolar(6.5, 0.3, HG.S5), hPolar(10, 0.3, (HG.S5 + HG.S4) / 2), hPolar(9, 0.3, (HG.S3 + HG.S4) / 2), hPolar(3.5, 0.3, (HG.S3 + HG.S4) / 2)], arrows); break;

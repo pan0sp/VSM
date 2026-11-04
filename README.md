@@ -44,8 +44,8 @@ A 3D alternative beside 2D and 3D in the toolbar (key `H`), after the author's c
 - **The environment** is a bowl. Each operation's local environment is a cap set in its rim, and the future environment is a faint dome above.
 - **System One** lies on a plane inside the bowl. Its operations sit on a ring with their local managements toward the centre, and System Two is a ring of arcs.
 - **The metasystem** stands at right angles to that plane: Three at the base, then Four, then Five, with Three-Star beneath Three.
-- **Lower levels** sit inside each operation that has one, tilted 45 degrees toward the centre, as in the square convention. The lower level's System One sits in the operation and its column in the local management; **Nested** shows one in every operation.
-- **Same model.** It draws the same elements and channels as the classic diagram, so selection, details, diagnosis, colours and the right-click menu all carry over.
+- **Lower levels** sit inside each operation that has one, at right angles to the plane: the lower level's System One stands upright in the operation, facing the centre, and its column lies in the local management, pointing inward. **Nested** shows one in every operation.
+- **Same model, same look.** Nothing is added: every shape, material and channel is the classic one, only arranged radially, so selection, details, diagnosis, colours and the right-click menu read the same in both views.
 - **Navigation.** Double-click an operation to open its level; Up returns.
 
 ### Options in the Settings tab

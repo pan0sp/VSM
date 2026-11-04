@@ -1206,7 +1206,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
       </div>
       <div class="block">
         <h3>The Hemispheres view</h3>
-        <p>After Panagiotis Panagiotakopoulos's clay and Tinkercad models. The environment is a bowl, with each operation's local environment set in its rim and the future environment as a faint dome above. System One lies on a plane inside the bowl, its operations on a ring with their local managements toward the centre, and System Two as a ring of arcs. The metasystem stands at right angles to that plane: Three at the base, then Four, then Five. Each operation with a lower level holds it, tilted 45 degrees toward the centre: its System One in the operation and its column in the local management. Nested shows a lower level in every operation. Switch to it with Hemispheres beside 2D and 3D, or key H.</p>
+        <p>After Panagiotis Panagiotakopoulos's clay and Tinkercad models. The environment is a bowl, with each operation's local environment set in its rim and the future environment as a faint dome above. System One lies on a plane inside the bowl, its operations on a ring with their local managements toward the centre, and System Two as a ring of arcs. The metasystem stands at right angles to that plane: Three at the base, then Four, then Five. Each operation with a lower level holds it at right angles to the plane: its System One stands upright in the operation, facing the centre, and its column lies in the local management, pointing inward. Every shape, colour and channel is the classic one; only the arrangement changes. Nested shows a lower level in every operation. Switch to it with Hemispheres beside 2D and 3D, or key H.</p>
       </div>
       <div class="block">
         <h3>How the 3D view uses depth</h3>
@@ -2502,9 +2502,10 @@ function strokeColor(base, out) {
   if (theme.dark) out.lerp(tmpC2.set(0xffffff), 0.18); else out.lerp(theme.ink, 0.12);
   return out;
 }
-function refreshVisuals() {
+// the Hemispheres view borrows the classic materials, so its own adjustments follow every classic refresh
+function refreshVisuals() { refreshClassic(); if (isHemi() && L) hemiRefresh(); }
+function refreshClassic() {
   if (!L) return;
-  if (isHemi()) hemiRefresh();
   const d = anim.d, lv = level();
   hemi.intensity = lerp(0.64, 0.5, d);
   hemi.groundColor.set(theme.dark ? 0x9aa6a4 : 0xc7cfcc);
@@ -2993,165 +2994,169 @@ async function setView(mode) {
 }
 
 /* =====================================================================
-   Hemispheres: a third drawing convention, after the clay and Tinkercad
-   models. The environment is a bowl with each local environment set in
-   its rim, System One lies on a plane inside it, and the metasystem
-   stands at right angles to that plane as a column (Three, Four, Five).
-   Each operation holds its own lower level, tilted 45 degrees and
-   spanning the operation and its local management, as in the square
-   convention. It draws the same elements and channels as the classic
-   layout, so selection, details, diagnosis and flows all carry over.
+   Hemispheres: the same model, re-interpreted in 3D after the clay and
+   Tinkercad models. The environment becomes a bowl with each local
+   environment set in its rim, System One lies on a plane inside it, and
+   the metasystem stands at right angles to that plane (Three, Four,
+   Five). Nothing is added: every shape is the classic view's own shape
+   and material, and every channel is a classic channel, so colours,
+   selection, focus and diagnosis read the same in both views. Each
+   operation with a lower level holds it at right angles to the plane.
    ===================================================================== */
 const isHemi = () => prefs.view === 'hemi';
 const hscene = new THREE.Scene();
-hscene.add(new THREE.HemisphereLight(0xffffff, 0x8a9894, 0.72));
-const hsun = new THREE.DirectionalLight(0xffffff, 0.62); hsun.position.set(30, 60, 40); hscene.add(hsun);
+hscene.add(new THREE.HemisphereLight(0xffffff, 0xffffff, 0.5));
+const hsun = new THREE.DirectionalLight(0xffffff, 0.78); hsun.position.set(60, 140, 90); hscene.add(hsun);
 const hroot = new THREE.Group(); hscene.add(hroot);
-const HU = 4;                                   // model units to scene units, so the camera limits suit both conventions
-const HR = 10, HBOWL = 0.5, HPLANE = -2.2, HR_OP = 6.1, HR_MG = 3.7, HR_S2 = 2.55, HCOL = { s3: -0.55, s4: 1.95, s5: 4.45 };
+// the radial layout, in world units so the classic shapes keep their size
+const HG = { R: 76, BOWL: 0.5, DOME: 0.74, PLANE: -12, OP: 45, OPY: -5, MG: 29.5, MGY: -6, S2: 17.5, S2Y: -8, CAPY: -7, S3: 6, S4: 23.5, S5: 41, COL: 10 };
 const HVIEW = { az: 0.55, el: 0.5 };
-let hPick = [], hEls = new Map(), hChs = new Map(), hAnchors = new Map(), hLabels = [];
+let hPick = [], hEls = new Map(), hChs = new Map(), hAnchors = new Map(), hLabels = [], hNested = new Set();
 const hlabelsEl = $('#hlabels');
 
 const hAngle = (k, n) => -Math.PI / 2 + (k + 0.5) * 2 * Math.PI / n;
 const hPolar = (r, a, y) => new THREE.Vector3(Math.cos(a) * r, y, Math.sin(a) * r);
-const hEnvAt = (a, y) => { const r = HR * Math.sqrt(Math.max(0, 1 - Math.pow(y / (HR * HBOWL), 2))); return hPolar(r - 0.35, a, y); };
-function hMat(color, op, extra) {
-  return new THREE.MeshStandardMaterial(Object.assign({ color: new THREE.Color(color), roughness: 0.62, metalness: 0.04, transparent: true, opacity: op, depthWrite: op > 0.6 }, extra || {}));
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+function hCapAt(a) { const y = HG.CAPY, r = HG.R * Math.sqrt(Math.max(0, 1 - Math.pow(y / (HG.R * HG.BOWL), 2))); return hPolar(r - 5, a, y); }
+
+/* a clone of the classic element: same geometry, same material, so it always looks and reacts the same */
+function hClone(id, pos, rotY) {
+  const o = els.get(id); if (!o) return null;
+  const c = o.group.clone(true);
+  if (o.ring) { const r = c.children.find(x => x.geometry === o.ring.geometry); if (r) c.remove(r); }
+  c.position.copy(pos); c.rotation.set(0, rotY || 0, 0);
+  c.userData.src = id;
+  c.traverse(m => { if (m.userData.pick) hPick.push(m); });
+  hroot.add(c);
+  if (!hEls.has(id)) hEls.set(id, []);
+  hEls.get(id).push(c);
+  return c;
 }
-function hReg(map, id, mesh, base, kind, container) {
-  mesh.userData.pick = { kind, id, container: container === true, shell: container === 'shell' };
-  mesh.userData.baseOp = base;
-  if (!map.has(id)) map.set(id, []);
-  map.get(id).push(mesh);
-  hPick.push(mesh);
-  return mesh;
+/* a reinterpreted container (bowl, plane, column, dome) that wears the classic element's material */
+function hShell(id, geo, kind) {
+  const o = els.get(id); if (!o) return null;
+  const m = new THREE.Mesh(geo, o.fill.material);
+  m.userData.own = true;
+  m.userData.pick = { kind: 'el', id, container: kind === 'container', shell: kind === 'shell' };
+  m.renderOrder = id === 'env' ? -1 : 1;
+  hPick.push(m); hroot.add(m);
+  if (!hEls.has(id)) hEls.set(id, []);
+  hEls.get(id).push(m);
+  return m;
 }
-function hRod(parent, a, b, r, color, op) {
-  const d = new THREE.Vector3().subVectors(b, a), len = Math.max(0.01, d.length());
-  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 8), hMat(color, op == null ? 1 : op));
-  m.position.copy(a).addScaledVector(d, 0.5);
-  m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
-  parent.add(m); return m;
+/* a classic channel along a new path: the classic tube width, arrowheads and hit area, and the channel's own material */
+function hChan(id, pts, arrows) {
+  const o = chs.get(id); if (!o || pts.length < 2) return;
+  const g = new THREE.Group(); g.userData.src = id;
+  const curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal');
+  const len = curve.getLength(), segs = clamp(Math.round(len * 1.2), 8, 200);
+  const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, segs, 0.3, 8, false), o.mat); tube.userData.own = true; g.add(tube);
+  const hit = new THREE.Mesh(new THREE.TubeGeometry(curve, clamp(Math.round(segs / 2), 4, 60), 1.6, 6, false), hitMat);
+  hit.userData.own = true; hit.userData.pick = { kind: 'ch', id }; hPick.push(hit); g.add(hit);
+  const cone = (tip, prev) => {
+    const dir = tip.clone().sub(prev).normalize(), c = new THREE.Mesh(coneGeo, o.mat);
+    c.quaternion.setFromUnitVectors(V(0, 1, 0), dir); c.position.copy(tip).addScaledVector(dir, -1.3); g.add(c);
+  };
+  if (arrows === 'both' || arrows === 'end') cone(curve.getPointAt(1), curve.getPointAt(Math.max(0, 1 - 2.2 / len)));
+  if (arrows === 'both') cone(curve.getPointAt(0), curve.getPointAt(Math.min(1, 2.2 / len)));
+  hroot.add(g);
+  if (!hChs.has(id)) hChs.set(id, []);
+  hChs.get(id).push(g);
 }
-function hTube(parent, pts, r, color, op) {
-  const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), Math.max(24, pts.length * 3), r, 6, false), hMat(color, op == null ? 1 : op));
-  parent.add(m); return m;
-}
-/* the squiggle of a value flow along an arc of the ring */
-function hSquiggle(r, a0, a1, y, amp) {
-  const pts = [], waves = Math.max(3, Math.round(Math.abs(a1 - a0) * r / 1.2));
-  for (let i = 0; i <= waves * 6; i++) { const t = i / (waves * 6), a = a0 + (a1 - a0) * t; pts.push(hPolar(r + Math.sin(t * Math.PI * 2 * waves) * amp, a, y + Math.cos(t * Math.PI * 2 * waves) * amp * 0.7)); }
+/* a squiggle along the ring, for operational linkages and environmental intersects (Beer's wavy lines) */
+function hWave(r, a0, a1, y) {
+  const pts = [], waves = Math.max(3, Math.round(Math.abs(a1 - a0) * r / 6));
+  for (let i = 0; i <= waves * 6; i++) { const t = i / (waves * 6), a = a0 + (a1 - a0) * t; pts.push(hPolar(r + Math.sin(t * Math.PI * 2 * waves) * 1.8, a, y)); }
   return pts;
 }
 
-/* A whole viable system in miniature, for the lower level inside an operation: its System One part
-   (bowl, plane, operations, System Two ring) and its metasystem part (the column) are built apart so
-   they can sit in the operation and in its local management */
-function hMini(child, colorFor) {
+/* The lower level in miniature, at right angles to the plane: its System One part sits in the
+   operation, facing the centre, and its column lies in the local management, pointing inward */
+function hMini(child, colorFor, k, a, P) {
   const n = child ? child.opCount : 3, ops = new THREE.Group(), meta = new THREE.Group();
-  const bowl = new THREE.Mesh(new THREE.SphereGeometry(HR, 32, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), hMat(colorFor('env'), 0.22, { side: THREE.DoubleSide }));
-  bowl.scale.y = HBOWL; ops.add(bowl);
-  const disc = new THREE.Mesh(new THREE.CylinderGeometry(HR * 0.86, HR * 0.86, 0.2, 32), hMat(colorFor('sys1'), 0.3)); disc.position.y = HPLANE; ops.add(disc);
-  for (let k = 0; k < n; k++) {
-    const a = hAngle(k, n);
-    const s = new THREE.Mesh(new THREE.SphereGeometry(1.25, 16, 10), hMat(colorFor('o' + k), 1)); s.position.copy(hPolar(HR_OP, a, HPLANE + 1.1)); ops.add(s);
-    const c = new THREE.Mesh(new THREE.SphereGeometry(1.7, 14, 8), hMat(colorFor('e' + k), 0.75)); c.position.copy(hEnvAt(a, HPLANE + 0.4)); ops.add(c);
+  const mat = (c, op) => { const m = new THREE.MeshStandardMaterial({ color: new THREE.Color(c), roughness: 0.62, transparent: op < 1, opacity: op, depthWrite: op > 0.6 }); m.userData.own = true; return m; };
+  const bowl = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), mat(colorFor('env'), 0.25)); bowl.material.side = THREE.DoubleSide;
+  bowl.scale.y = 0.5; ops.add(bowl);
+  for (let j = 0; j < n; j++) {
+    const b = hAngle(j, n);
+    const s = new THREE.Mesh(new THREE.SphereGeometry(1.35, 16, 10), mat(colorFor('o' + j), 1)); s.position.copy(hPolar(6.1, b, -1.1)); ops.add(s);
+    const c = new THREE.Mesh(new THREE.SphereGeometry(1.7, 14, 8), mat(colorFor('e' + j), 0.8)); c.position.copy(hPolar(8.9, b, -1.8)); ops.add(c);
   }
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(HR_S2, 0.22, 6, 40), hMat(colorFor('s2'), 0.9)); ring.rotation.x = Math.PI / 2; ring.position.y = HPLANE + 0.35; ops.add(ring);
-  ['s3', 's4', 's5'].forEach((id, i) => { const b = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), hMat(colorFor(id), 1)); b.position.y = i * 1.35; meta.add(b); });
-  return { ops, meta };
+  ['s3', 's4', 's5'].forEach((id, i) => { const b = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mat(colorFor(id), 1)); b.position.y = (i - 1) * 1.3; meta.add(b); });
+  const inward = V(-Math.cos(a), 0, -Math.sin(a));
+  const q = new THREE.Quaternion().setFromUnitVectors(V(0, 1, 0), inward);
+  ops.scale.setScalar(0.68); ops.quaternion.copy(q); ops.position.copy(P.op);
+  meta.scale.setScalar(2.3); meta.quaternion.copy(q); meta.position.copy(P.mg);
+  [ops, meta].forEach(gr => gr.traverse(m => { if (m.isMesh) m.userData.own = true; }));
+  hroot.add(ops); hroot.add(meta);
 }
 
 function buildHemi() {
-  while (hroot.children.length) { const c = hroot.children.pop(); c.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); }
-  hPick = []; hEls = new Map(); hChs = new Map(); hAnchors = new Map();
-  hroot.scale.setScalar(HU);
+  while (hroot.children.length) {
+    const c = hroot.children.pop();
+    // only what this view made is disposed: the classic geometry and materials it borrows stay
+    c.traverse(o => { if (o.userData && o.userData.own) { if (o.geometry) o.geometry.dispose(); if (o.material && o.material.userData && o.material.userData.own) o.material.dispose(); } });
+  }
+  hPick = []; hEls = new Map(); hChs = new Map(); hAnchors = new Map(); hNested = new Set();
   if (!isHemi()) { hlabelsEl.innerHTML = ''; hLabels = []; return; }
-  const lv = level(), n = lv.opCount, g = hroot, col = id => colorOf(lv, id, L);
-  const el = (id, mesh, op, container) => { g.add(mesh); hReg(hEls, id, mesh, op, 'el', container); return mesh; };
+  const lv = level(), n = lv.opCount;
   const anchor = (id, v) => { hAnchors.set(id, v.clone()); return v; };
-  // environment: the bowl, its rim, and the future dome above
-  const bowl = new THREE.Mesh(new THREE.SphereGeometry(HR, 64, 24, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), hMat(col('env'), 0.16, { side: THREE.DoubleSide }));
-  bowl.scale.y = HBOWL; el('env', bowl, 0.16, 'shell'); anchor('env', new THREE.Vector3(HR * 0.72, -HR * HBOWL * 0.7, HR * 0.4));
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(HR, 0.09, 8, 96), hMat(col('env'), 0.8)); rim.rotation.x = Math.PI / 2; el('env', rim, 0.8, 'shell');
-  const dome = new THREE.Mesh(new THREE.SphereGeometry(HR * 1.02, 48, 16, 0, Math.PI * 2, 0, Math.PI / 2), hMat(col('fut'), 0.06, { side: THREE.DoubleSide }));
-  dome.scale.y = 0.62; el('fut', dome, 0.06, 'shell'); anchor('fut', new THREE.Vector3(-HR * 0.5, HR * 0.62 * 0.8, -HR * 0.55));
-  const wire = new THREE.Mesh(new THREE.SphereGeometry(HR * 1.02, 24, 8, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshBasicMaterial({ color: new THREE.Color(col('fut')), wireframe: true, transparent: true, opacity: 0.14 }));
-  wire.scale.y = 0.62; g.add(wire); wire.userData.baseOp = 0.14; hEls.get('fut').push(wire);
-  // the plane of System One
-  const disc = new THREE.Mesh(new THREE.CylinderGeometry(HR * 0.86, HR * 0.86, 0.12, 72), hMat(col('sys1'), 0.13));
-  disc.position.y = HPLANE; el('sys1', disc, 0.13, true); anchor('sys1', hPolar(HR * 0.86, Math.PI * 0.75, HPLANE - 0.5));
-  // the metasystem: a column at right angles to the plane, in a see-through sleeve
-  const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(1.55, 1.55, HCOL.s5 - HPLANE + 1.4, 40, 1, true), hMat(col('meta'), 0.12, { side: THREE.DoubleSide }));
-  sleeve.position.y = (HCOL.s5 + HPLANE) / 2 + 0.7; el('meta', sleeve, 0.12, true); anchor('meta', new THREE.Vector3(1.9, HCOL.s5 + 1.6, 0));
-  const HLAB = { s3: Math.PI / 2 + 0.7, s4: Math.PI / 2, s5: Math.PI / 2 - 0.7 };   // labels beside the column, apart in plan view too
-  ['s3', 's4', 's5'].forEach(id => { const b = new THREE.Mesh(new THREE.BoxGeometry(1.25, 1.25, 1.25), hMat(col(id), 1)); b.position.y = HCOL[id]; el(id, b, 1); anchor(id, hPolar(2.2, HLAB[id], HCOL[id])); });
-  // Three-Star: a small inverted pyramid beneath Three
-  const s3sPos = hPolar(1.0, -Math.PI / 2, HCOL.s3 - 0.95);
-  const s3s = new THREE.Mesh(new THREE.ConeGeometry(0.5, 0.8, 3), hMat(col('s3s'), 1)); s3s.rotation.x = Math.PI; s3s.position.copy(s3sPos); el('s3s', s3s, 1); anchor('s3s', s3sPos);
-  // System Two: the regulatory centre is the inner ring; each operation's unit is an arc beside it
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(HR_S2 - 0.55, 0.06, 6, 64), hMat(col('s2'), 0.9)); ring.rotation.x = Math.PI / 2; ring.position.y = HPLANE + 0.35; el('s2', ring, 0.9);
-  anchor('s2', hPolar(HR_S2 - 0.55, Math.PI / 2, HPLANE + 0.35));
+  const front = HVIEW.az;   // central shapes face the default viewpoint
+  // environment: the bowl, and the future environment as a dome above it
+  const bowl = hShell('env', new THREE.SphereGeometry(HG.R, 72, 28, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), 'shell');
+  bowl.scale.y = HG.BOWL; anchor('env', V(HG.R * 0.72, -HG.R * HG.BOWL * 0.72, HG.R * 0.42));
+  const dome = hShell('fut', new THREE.SphereGeometry(HG.R * 1.01, 56, 18, 0, Math.PI * 2, 0, Math.PI / 2), 'shell');
+  dome.scale.y = HG.DOME; anchor('fut', V(-HG.R * 0.5, HG.R * HG.DOME * 0.8, -HG.R * 0.55));
+  // the plane of System One, and the metasystem as a column at right angles to it
+  const disc = hShell('sys1', new THREE.CylinderGeometry(HG.R * 0.84, HG.R * 0.84, 0.6, 96), 'container'); disc.position.y = HG.PLANE;
+  anchor('sys1', hPolar(HG.R * 0.84, Math.PI * 0.75, HG.PLANE - 2));
+  const colH = HG.S5 - HG.PLANE + 12;
+  const box = hShell('meta', new THREE.BoxGeometry(HG.COL * 2, colH, HG.COL * 2), 'container'); box.position.y = HG.PLANE + colH / 2; box.rotation.y = front;
+  anchor('meta', V(HG.COL + 4, HG.S5 + 9, 0));
+  const lab = { s3: Math.PI / 2 + 0.75, s4: Math.PI / 2, s5: Math.PI / 2 - 0.75 };
+  ['s3', 's4', 's5'].forEach(id => { hClone(id, V(0, HG[id.toUpperCase()], 0), front); anchor(id, hPolar(9.5, lab[id], HG[id.toUpperCase()])); });
+  const s3sPos = hPolar(HG.COL - 2, -Math.PI / 2 + front * 0, HG.S3 - 9), s2Pos = hPolar(HG.COL - 2, Math.PI / 2, HG.S3 - 9);
+  hClone('s3s', s3sPos, front); anchor('s3s', s3sPos.clone().add(V(0, -6, 0)));
+  hClone('s2', s2Pos, front); anchor('s2', s2Pos.clone().add(V(0, -6, 0)));
   const local = !!L.byId.a0;
-  const P = {};    // positions per operation
+  const P = {};
   for (let k = 0; k < n; k++) {
-    const a = hAngle(k, n);
-    P[k] = { a, op: hPolar(HR_OP, a, HPLANE + 1.08), mg: hPolar(HR_MG, a, HPLANE + 0.75), cap: hEnvAt(a, HPLANE + 0.4), s2: hPolar(HR_S2, a, HPLANE + 0.35) };
-    if (local) {
-      const span = (2 * Math.PI / n) * 0.62, pts = [];
-      for (let i = 0; i <= 12; i++) pts.push(hPolar(HR_S2, a - span / 2 + span * i / 12, HPLANE + 0.35));
-      const arc = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.16, 6, false), hMat(col('a' + k), 1));
-      el('a' + k, arc, 1); anchor('a' + k, P[k].s2);
-    }
-    // the operation, and its lower level if it has one (or always, with Nested on)
+    const a = hAngle(k, n), out = Math.PI / 2 - a;
+    P[k] = { a, op: hPolar(HG.OP, a, HG.OPY), mg: hPolar(HG.MG, a, HG.MGY), cap: hCapAt(a), s2: hPolar(HG.S2, a, HG.S2Y) };
+    hClone('o' + k, P[k].op, out); anchor('o' + k, P[k].op.clone().add(V(0, 11, 0)));
+    hClone('m' + k, P[k].mg, out); anchor('m' + k, P[k].mg.clone().add(V(0, 9, 0)));
+    hClone('e' + k, P[k].cap, out); anchor('e' + k, P[k].cap.clone().add(V(0, 12, 0)));
+    if (local) { hClone('a' + k, P[k].s2, out); anchor('a' + k, P[k].s2.clone().add(V(0, -6, 0))); }
     const cid = lv.children['o' + k], child = cid && db.levels[cid];
-    const nest = !!child || prefs.nested;
-    const sph = new THREE.Mesh(new THREE.SphereGeometry(1.05, 32, 20), hMat(col('o' + k), nest ? 0.24 : 1)); sph.position.copy(P[k].op); el('o' + k, sph, nest ? 0.24 : 1);
-    anchor('o' + k, P[k].op);
-    const box = new THREE.Mesh(new THREE.BoxGeometry(1.15, 1.15, 1.15), hMat(col('m' + k), nest ? 0.3 : 1));
-    box.position.copy(P[k].mg); box.rotation.set(Math.PI / 4, -a, 0); el('m' + k, box, nest ? 0.3 : 1); anchor('m' + k, P[k].mg);
-    const cap = new THREE.Mesh(new THREE.SphereGeometry(1.7, 28, 16), hMat(col('e' + k), 0.72)); cap.scale.set(1, 0.8, 1); cap.position.copy(P[k].cap); el('e' + k, cap, 0.72); anchor('e' + k, P[k].cap);
-    if (nest) {
-      // tilted 45 degrees toward the centre: the lower level's column points from the operation to its local management
-      const cf = id => child ? colorOf(child, id, L) : colorOf(lv, id === 'sys1' ? 'sys1' : /^o\d/.test(id) ? 'o' + k : /^e\d/.test(id) ? 'e' + k : id, L);
-      const mini = hMini(child, cf);
-      const inward = new THREE.Vector3(-Math.cos(a), 0, -Math.sin(a)), upT = inward.clone().multiplyScalar(Math.SQRT1_2).add(new THREE.Vector3(0, Math.SQRT1_2, 0)).normalize();
-      const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), upT);
-      const spin = new THREE.Quaternion().setFromAxisAngle(upT, -a);
-      mini.ops.scale.setScalar(0.088); mini.ops.quaternion.copy(spin.clone().multiply(q)); mini.ops.position.copy(P[k].op); g.add(mini.ops);
-      mini.meta.scale.setScalar(0.3); mini.meta.quaternion.copy(q); mini.meta.position.copy(P[k].mg).addScaledVector(upT, -0.4); g.add(mini.meta);
-      mini.ops.traverse(o => { if (o.isMesh) { o.userData.mini = 'o' + k; } });
-      mini.meta.traverse(o => { if (o.isMesh) { o.userData.mini = 'm' + k; } });
-      (hEls.get('o' + k)).push(...mini.ops.children); (hEls.get('m' + k)).push(...mini.meta.children);
-      mini.ops.children.concat(mini.meta.children).forEach(m => { m.userData.baseOp = m.material.opacity; });
+    if (child || prefs.nested) {
+      hNested.add('o' + k); hNested.add('m' + k);
+      const cf = id => child ? colorOf(child, id, L) : colorOf(lv, /^o\d/.test(id) ? 'o' + k : /^e\d/.test(id) ? 'e' + k : id, L);
+      hMini(child, cf, k, a, P[k]);
     }
   }
-  // channels: the same ones the classic layout defines, drawn as rods between the radial positions
-  const C = (id, mesh, op) => { hReg(hChs, id, mesh, op == null ? 1 : op, 'ch'); return mesh; };
-  const ccol = id => colorOf(lv, id, L);
-  const side = (k, off) => { const a = P[k].a; return new THREE.Vector3(-Math.sin(a) * off, 0, Math.cos(a) * off); };
+  // channels: each classic channel, drawn between the radial positions
+  const up = (v, d) => v.clone().add(V(0, d, 0)), toward = (a, b, d) => a.clone().add(b.clone().sub(a).normalize().multiplyScalar(d));
+  const side = (k, off) => V(-Math.sin(P[k].a) * off, 0, Math.cos(P[k].a) * off);
   L.chans.forEach(ch => {
-    const id = ch.id, c = ccol(id), m = /(\d+)$/.exec(id), i = m ? +m[1] : -1, ext = !!ch.ext;
-    const r = ext ? 0.04 : 0.07, op = ext ? 0.55 : 1;
-    const rod = (a, b, rr, oo) => C(id, hRod(g, a, b, rr || r, c, oo == null ? op : oo), oo == null ? op : oo);
+    const id = ch.id, m = /(\d+)$/.exec(id), i = m ? +m[1] : -1, arrows = (ch.paths[0] || {}).arrows;
+    const line = (a, b, ar) => hChan(id, [a, b], ar == null ? arrows : ar);
     switch (ch.type) {
-      case 'eo': rod(P[i].op.clone().lerp(P[i].cap, 0.18), P[i].cap.clone().lerp(P[i].op, 0.3)); break;
-      case 'om': rod(P[i].mg.clone().lerp(P[i].op, 0.22), P[i].op.clone().lerp(P[i].mg, 0.38)); break;
-      case 'ms2': rod(P[i].mg.clone().lerp(P[i].s2, 0.3), local ? P[i].s2.clone().lerp(P[i].mg, 0.15) : hPolar(HR_S2 - 0.55, P[i].a, HPLANE + 0.35)); break;
-      case 'oo': { const a0 = P[i].a + 1.3 / HR_OP, a1 = P[i + 1].a - 1.3 / HR_OP; C(id, hTube(g, hSquiggle(HR_OP, a0, a1, HPLANE + 0.95, 0.16), 0.045, c, 0.95), 0.95); break; }
-      case 'ee': { const a0 = P[i].a + 2 / HR, a1 = P[i + 1].a - 2 / HR; C(id, hTube(g, hSquiggle(HR * 0.97, a0, a1, HPLANE + 0.9, 0.18), 0.05, c, 0.9), 0.9); break; }
-      case 's2ch': for (let k = 0; k < n; k++) rod(hPolar(HR_S2 - 0.55, P[k].a, HPLANE + 0.35), local ? P[k].s2 : P[k].mg.clone().lerp(new THREE.Vector3(0, HPLANE + 0.35, 0), 0.25), 0.04); break;
-      case 's2s3': rod(hPolar(HR_S2 - 0.55, Math.PI / 2, HPLANE + 0.35), new THREE.Vector3(0, HCOL.s3 - 0.6, 0.5), 0.05); break;
-      case 'ci': case 'rb': for (let k = 0; k < n; k++) { const o = side(k, ch.type === 'ci' ? -0.2 : 0.2); rod(hPolar(1.1, P[k].a, HCOL.s3 + 0.15).add(o), P[k].mg.clone().add(new THREE.Vector3(0, 0.35, 0)).add(o)); } break;
-      case 'audit': rod(new THREE.Vector3(0, HCOL.s3 - 0.6, 0), s3sPos, 0.05); for (let k = 0; k < n; k++) rod(s3sPos, hPolar(HR_OP - 0.5, P[k].a, HPLANE + 1.9), 0.035); break;
-      case 's34': rod(new THREE.Vector3(0.24, HCOL.s3 + 0.62, 0), new THREE.Vector3(0.24, HCOL.s4 - 0.62, 0)); rod(new THREE.Vector3(-0.24, HCOL.s3 + 0.62, 0), new THREE.Vector3(-0.24, HCOL.s4 - 0.62, 0)); anchor(id, new THREE.Vector3(0, (HCOL.s3 + HCOL.s4) / 2, 0)); break;
-      case 's45': rod(new THREE.Vector3(0, HCOL.s4 + 0.62, 0), new THREE.Vector3(0, HCOL.s5 - 0.62, 0)); break;
-      case 's5h': C(id, hTube(g, [new THREE.Vector3(0.62, HCOL.s5, 0.3), new THREE.Vector3(1.25, (HCOL.s5 + HCOL.s4) / 2, 0.35), new THREE.Vector3(1.0, (HCOL.s3 + HCOL.s4) / 2, 0.3), new THREE.Vector3(0.3, (HCOL.s3 + HCOL.s4) / 2, 0.1)], 0.05, c, 1)); break;
-      case 's4f': for (let k = 0; k < n; k++) { const ga = P[k].a + Math.PI / n; rod(hPolar(0.7, ga, HCOL.s4 + 0.3), hPolar(HR * 0.6, ga, 4.9), 0.045); } break;
-      case 's4cmd': for (let k = 0; k < n; k++) { const mid = hPolar(1.1, P[k].a, HCOL.s3 + 0.15).lerp(P[k].mg.clone().add(new THREE.Vector3(0, 0.35, 0)), 0.45).add(side(k, 0.2)); rod(hPolar(0.6, P[k].a, HCOL.s4 - 0.3), mid); } break;
-      case 's14': for (let k = 0; k < n; k++) rod(P[k].op.clone().add(new THREE.Vector3(0, 0.9, 0)), hPolar(0.66, P[k].a + 0.25, HCOL.s4 - 0.2)); break;
-      case 'alg': for (let k = 0; k < n; k++) C(id, hTube(g, [P[k].mg.clone().add(new THREE.Vector3(0, 0.5, 0)), hPolar(HR_MG * 0.75, P[k].a, 1.6), hPolar(1.5, P[k].a, HCOL.s5 - 0.2), hPolar(0.66, P[k].a, HCOL.s5)], 0.04, c, 0.85), 0.85); break;
+      case 'eo': line(toward(P[i].op, P[i].cap, 9.5), toward(P[i].cap, P[i].op, 11)); break;
+      case 'om': line(toward(P[i].mg, P[i].op, 7.5), toward(P[i].op, P[i].mg, 9.5)); break;
+      case 'ms2': line(toward(P[i].mg, P[i].s2, 7.5), local ? toward(P[i].s2, P[i].mg, 5) : toward(s2Pos, P[i].mg, 5)); break;
+      case 'oo': hChan(id, hWave(HG.OP, P[i].a + 10.5 / HG.OP, P[i + 1].a - 10.5 / HG.OP, HG.OPY), arrows); break;
+      case 'ee': hChan(id, hWave(HG.R * 0.9, P[i].a + 13 / HG.R, P[i + 1].a - 13 / HG.R, HG.CAPY - 3), arrows); break;
+      case 's2ch': for (let k = 0; k < n; k++) line(toward(s2Pos, local ? P[k].s2 : P[k].mg, 5), local ? toward(P[k].s2, s2Pos, 5) : toward(P[k].mg, s2Pos, 7.5), 'none'); break;
+      case 's2s3': line(toward(s2Pos, V(0, HG.S3, 0), 5), toward(V(0, HG.S3, 0), s2Pos, 7)); break;
+      case 'ci': case 'rb': for (let k = 0; k < n; k++) { const o = side(k, ch.type === 'ci' ? -2 : 2); line(hPolar(6.5, P[k].a, HG.S3).add(o), toward(P[k].mg, V(0, HG.S3, 0), 7.5).add(o)); } break;
+      case 'audit': line(toward(V(0, HG.S3, 0), s3sPos, 7), toward(s3sPos, V(0, HG.S3, 0), 5), 'none'); for (let k = 0; k < n; k++) line(toward(s3sPos, P[k].op, 5), toward(up(P[k].op, 2), s3sPos, 9.5), 'end'); break;
+      case 's34': line(V(2.5, HG.S3 + 6, 0), V(2.5, HG.S4 - 6, 0), 'end'); line(V(-2.5, HG.S4 - 6, 0), V(-2.5, HG.S3 + 6, 0), 'end'); break;
+      case 's45': line(V(0, HG.S4 + 6, 0), V(0, HG.S5 - 6, 0)); break;
+      case 's5h': hChan(id, [hPolar(6.5, 0.3, HG.S5), hPolar(10, 0.3, (HG.S5 + HG.S4) / 2), hPolar(9, 0.3, (HG.S3 + HG.S4) / 2), hPolar(3.5, 0.3, (HG.S3 + HG.S4) / 2)], arrows); break;
+      case 's4f': { const a = -Math.PI / 2 + 2.6; line(hPolar(6.5, a, HG.S4), hPolar(HG.R * 0.62, a, HG.R * HG.DOME * 0.72)); break; }
+      case 's4cmd': line(hPolar(6.5, Math.PI + 0.4, HG.S4 - 3), hPolar(10, Math.PI + 0.4, HG.S3 + 1)); break;
+      case 's14': for (let k = 0; k < n; k++) line(toward(up(P[k].op, 3), V(0, HG.S4, 0), 9.5), hPolar(6.5, P[k].a + 0.35, HG.S4 - 2), 'end'); break;
+      case 'alg': for (let k = 0; k < n; k++) hChan(id, [up(P[k].mg, 7), hPolar(HG.MG * 0.75, P[k].a, 12), hPolar(9, P[k].a, HG.S5 - 2), hPolar(6.5, P[k].a, HG.S5)], 'end'); break;
       default: break;
     }
   });
@@ -3159,7 +3164,7 @@ function buildHemi() {
   hemiRefresh();
 }
 
-/* Labels: codes always, names beside the larger elements */
+/* Labels: the classic label for each element, placed beside its shape */
 function buildHemiLabels() {
   hlabelsEl.innerHTML = ''; hLabels = [];
   const lv = level();
@@ -3174,9 +3179,9 @@ function buildHemiLabels() {
     d.addEventListener('dblclick', e => { e.stopPropagation(); if (isSystemType(typeOfId(L, id))) dive(id); });
     d.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); openCtx(e.clientX, e.clientY, id); });
     hlabelsEl.appendChild(d);
-    hLabels.push({ id, d, p: p.clone().multiplyScalar(HU) });
+    hLabels.push({ id, d, p: p.clone() });
   };
-  ['env', 'fut', 'sys1', 's3', 's4', 's5', 's3s', 's2'].forEach(id => add(id, ['env', 'fut', 'sys1'].includes(id)));
+  ['env', 'fut', 'sys1', 'meta', 's3', 's4', 's5', 's3s', 's2'].forEach(id => add(id, ['env', 'fut', 'sys1', 'meta'].includes(id)));
   for (let k = 0; k < lv.opCount; k++) { add('o' + k); add('m' + k); add('e' + k); if (hAnchors.has('a' + k)) add('a' + k); }
   hemiBadges();
 }
@@ -3192,45 +3197,36 @@ function hemiBadges() {
 const hpv = new THREE.Vector3();
 function placeHemiLabels() {
   const w = stage.clientWidth, h = stage.clientHeight, dist = camera.position.distanceTo(controls.target);
-  const near = dist < 70;   // small labels (local managements, System Two units) only once zoomed in
+  const near = dist < hemiFit().dist * 0.7;   // small labels (local managements, System Two units) only once zoomed in
   hLabels.forEach(l => {
-    const far = l.p.distanceTo(camera.position) > dist + HR * HU * 0.35;
+    const far = l.p.distanceTo(camera.position) > dist + HG.R * 0.35;
     hpv.copy(l.p).project(camera);
     const small = /^[ma]\d/.test(l.id) || l.id === 's2' || l.id === 's3s';
-    const vis = hpv.z < 1 && !isHidden(l.id) && (!small || near) && dist > 14;
+    const vis = hpv.z < 1 && !isHidden(l.id) && (!small || near || selSet.has(l.id)) && dist > 30;
     l.d.style.display = vis ? '' : 'none';
     if (vis) { l.d.style.left = ((hpv.x + 1) / 2 * w) + 'px'; l.d.style.top = ((1 - hpv.y) / 2 * h) + 'px'; l.d.classList.toggle('sel', selSet.has(l.id)); l.d.classList.toggle('far', far && !selSet.has(l.id)); }
   });
 }
-/* Selection, hover, focus and diagnosis, on the same terms as the classic view */
+/* The classic refresh already sets colour, emphasis and diagnosis on the shared materials; here only what
+   the Hemispheres view does differently: focus visibility, see-through operations that hold a lower level,
+   and a faint dome for the future environment */
 function hemiRefresh() {
   if (!isHemi()) return;
-  const lv = level(), acc = theme.accent;
-  const paint = (id, list) => list.forEach(m => {
-    const mat = m.material; if (!mat || !mat.color) return;
-    const related = !focusSet || focusSet.has(id);
-    const dg = prefs.diagShow && diagOf(lv, id);
-    let op = m.userData.baseOp == null ? 1 : m.userData.baseOp;
-    if (!m.userData.mini) mat.color.set(colorOf(lv, id, L));
-    if (dg && dg.s === 'absent') { mat.color.lerp(new THREE.Color(0.6, 0.62, 0.62), 0.75); op *= 0.4; }
-    else if (dg && dg.s === 'nominal') op *= 0.6;
-    if (!related) op *= 0.18;
-    mat.opacity = op; mat.depthWrite = op > 0.6;
-    if (mat.emissive) { mat.emissive.set(0x000000); if (selSet.has(id)) mat.emissive.copy(acc).multiplyScalar(0.45); else if (hovered === id) mat.emissive.copy(acc).multiplyScalar(0.18); }
-    m.visible = !(focusMode && focusSet && !focusSet.has(id)) || !!(m.userData.pick && (m.userData.pick.container || m.userData.pick.shell));
-  });
-  hEls.forEach((list, id) => paint(id, list));
-  hChs.forEach((list, id) => paint(id, list));
+  hEls.forEach((list, id) => { const o = els.get(id); if (o) list.forEach(c => { if (!(c.userData.pick && (c.userData.pick.container || c.userData.pick.shell))) c.visible = o.group.visible; }); });
+  hChs.forEach((list, id) => { const o = chs.get(id); if (o) list.forEach(g => { g.visible = o.group.visible; }); });
+  hNested.forEach(id => { const o = els.get(id); if (o) { setOpacity(o.fill.material, Math.min(o.fill.material.opacity, 0.28)); } });
+  const fut = els.get('fut'); if (fut) setOpacity(fut.fill.material, Math.min(fut.fill.material.opacity, 0.07));
   hemiBadges();
+  dirty = true;
 }
-/* Camera: an angled view of the bowl, or the plan view from straight above */
+/* Camera: an angled view into the bowl */
 function hemiFit() {
   const w = stage.clientWidth || 800, h = stage.clientHeight || 600, tanHalf = Math.tan(camera.fov * Math.PI / 360), aspect = w / h;
-  const halfW = HR * 1.12 * HU, halfH = HR * 0.85 * HU;
+  const halfW = HG.R * 1.12, halfH = HG.R * 0.82;
   const dist = Math.max(halfH / tanHalf, halfW / (tanHalf * aspect)) * 1.08;
-  return { target: new THREE.Vector3(0, 0.6 * HU, 0), dist, az: HVIEW.az, el: HVIEW.el };
+  return { target: V(0, 6, 0), dist, az: HVIEW.az, el: HVIEW.el };
 }
-function hemiPos(id) { const p = hAnchors.get(id); return p ? p.clone().multiplyScalar(HU) : null; }
+function hemiPos(id) { const p = hAnchors.get(id); return p ? p.clone() : null; }
 
 /* =====================================================================
    Picking, hover, selection
@@ -3379,7 +3375,7 @@ function worldPointAt(cx, cy) {
   const r = canvas.getBoundingClientRect();
   ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(ndc, camera);
-  const plane = isHemi() ? new THREE.Plane(new THREE.Vector3(0, 1, 0), -HPLANE * HU) : new THREE.Plane(new THREE.Vector3(0, 0, 1), 0).applyMatrix4(world.matrixWorld);
+  const plane = isHemi() ? new THREE.Plane(new THREE.Vector3(0, 1, 0), -HG.PLANE) : new THREE.Plane(new THREE.Vector3(0, 0, 1), 0).applyMatrix4(world.matrixWorld);
   return ray.ray.intersectPlane(plane, new THREE.Vector3());
 }
 function centreOn(p) {

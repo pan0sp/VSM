@@ -178,7 +178,7 @@ button { cursor: pointer; }
   align-items: center;
   gap: 2px;
   min-width: 0;
-  flex: 1 1 260px;
+  flex: 1 1 140px;
   overflow-x: auto;
   scrollbar-width: none;
   padding: 2px 0;
@@ -381,6 +381,8 @@ button { cursor: pointer; }
 .row.wrap .seg { flex: 1 1 auto; }
 .row.wrap .seg button { flex: 1; }
 #hlabels .lbl.far { opacity: .45; }
+#hlabels .lbl { pointer-events: auto; cursor: pointer; }
+@media (max-width: 1560px) { #vHemi .dlong { display: none; } #vHemi .dshort { display: inline !important; } }
 .stepper { display: inline-flex; align-items: center; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
 .stepper button { border: 0; background: var(--surface-2); width: 30px; height: 28px; font-size: 16px; line-height: 1; color: var(--ink); }
 .stepper button:disabled { opacity: .35; cursor: default; }
@@ -1016,6 +1018,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
       <div class="seg vsm-only" role="group" aria-label="View mode">
         <button id="v2d" type="button" aria-pressed="false" title="Classic 2D diagram (key 2)">2D</button>
         <button id="v3d" type="button" aria-pressed="true" title="3D model (key 3)">3D</button>
+        <button id="vHemi" type="button" aria-pressed="false" title="Hemispheres: a 3D alternative after the clay and Tinkercad models, with the metasystem at right angles to System One (key H)"><span class="dlong">Hemispheres</span><span class="dshort">Hemi</span></button>
       </div>
       <button class="tool vsm-only" id="btnFlows" type="button" aria-pressed="true" title="Animate information flow along channels">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 8h9"/><path d="M8 4.5L11.5 8 8 11.5"/><circle cx="14" cy="8" r="1.2" fill="currentColor" stroke="none"/></svg>
@@ -1082,7 +1085,6 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
           <div class="seg small" role="group" aria-label="Drawing convention">
             <button id="stSquare" type="button" aria-pressed="true" title="Metasystem as a square box holding 3, 3*, 4, 5 and System Two; local managements as tilted squares">Square</button>
             <button id="stDiamond" type="button" aria-pressed="false" title="Metasystem as a rhombus; local managements as upright squares (Jon Walker's preference)">Diamond</button>
-            <button id="stHemi" type="button" aria-pressed="false" title="The environment as a bowl, System One on a plane inside it, and the metasystem as a column at right angles to it">Hemispheres</button>
           </div>
         </div>
         <div class="row">
@@ -1203,8 +1205,8 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
         <p>When you open an operation, its environment becomes the environment one level down and its local management becomes the metasystem, following Beer's recursion. Scroll toward any operation to zoom into it: the next recursion sits inside each circle, turned 45 degrees, and becomes the System-in-Focus as you arrive. Zoom far out to rise a level.</p>
       </div>
       <div class="block">
-        <h3>The Hemispheres convention</h3>
-        <p>After Panagiotis Panagiotakopoulos's clay and Tinkercad models. The environment is a bowl, with each operation's local environment set in its rim and the future environment as a faint dome above. System One lies on a plane inside the bowl, its operations on a ring with their local managements toward the centre, and System Two as a ring of arcs. The metasystem stands at right angles to that plane: Three at the base, then Four, then Five. Each operation with a lower level holds it, tilted 45 degrees toward the centre: its System One in the operation and its column in the local management. 2D shows the plan from above; Nested shows a lower level in every operation.</p>
+        <h3>The Hemispheres view</h3>
+        <p>After Panagiotis Panagiotakopoulos's clay and Tinkercad models. The environment is a bowl, with each operation's local environment set in its rim and the future environment as a faint dome above. System One lies on a plane inside the bowl, its operations on a ring with their local managements toward the centre, and System Two as a ring of arcs. The metasystem stands at right angles to that plane: Three at the base, then Four, then Five. Each operation with a lower level holds it, tilted 45 degrees toward the centre: its System One in the operation and its column in the local management. Nested shows a lower level in every operation. Switch to it with Hemispheres beside 2D and 3D, or key H.</p>
       </div>
       <div class="block">
         <h3>How the 3D view uses depth</h3>
@@ -1224,7 +1226,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
           <kbd>N</kbd><span>Switch between the VSM and the value network</span>
           <kbd>R</kbd><span>Switch to the recursion view and back</span>
           <kbd>L</kbd><span>Value network: draw a flow (or drag an element's + handle)</span>
-          <kbd>2 / 3</kbd><span>Switch between 2D and 3D</span>
+          <kbd>2 / 3 / H</kbd><span>Switch between 2D, 3D and the Hemispheres view</span>
           <kbd>C</kbd><span>Recentre the model face-on</span>
           <kbd>Right-click</kbd><span>Menu: details, focus, centre here, lower levels, remove, diagnosis</span>
           <kbd>Esc</kbd><span>Leave focus, then clear the selection</span>
@@ -2018,6 +2020,7 @@ function load() {
         Object.values(db.levels).forEach(l => { if (l.parent && !/^o\d+$/.test(l.parent.el)) { const p = db.levels[l.parent.level]; if (p) delete p.children[l.parent.el]; deleteSubtree(l); delete db.levels[l.id]; } });
         if (!db.levels[db.currentId]) db.currentId = db.rootId;
         Object.assign(prefs, data.prefs || {});
+        if (prefs.style === 'hemi') { prefs.style = 'square'; prefs.view = 'hemi'; }
         return true;
       }
     }
@@ -2250,7 +2253,7 @@ scene.add(rim);
 const world = new THREE.Group();
 scene.add(world);
 
-const anim = { d: prefs.view === '3d' ? 1 : 0 };   // morph factor: 0 = classic 2D, 1 = 3D
+const anim = { d: prefs.view !== '2d' ? 1 : 0 };   // morph factor: 0 = classic 2D, 1 = 3D
 let L = null;            // current layout
 const els = new Map();   // id -> element objects
 const chs = new Map();   // id -> channel objects
@@ -2946,7 +2949,7 @@ function camTween(to, dur) {
 
 let busy = false;
 function applyControlMode() {
-  const is3d = prefs.view === '3d';
+  const is3d = prefs.view !== '2d';
   controls.enableRotate = is3d;
   controls.mouseButtons = is3d
     ? { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN }
@@ -2955,7 +2958,8 @@ function applyControlMode() {
     ? { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN }
     : { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN };
   $('#v2d').setAttribute('aria-pressed', String(!is3d));
-  $('#v3d').setAttribute('aria-pressed', String(is3d));
+  $('#v3d').setAttribute('aria-pressed', String(prefs.view === '3d'));
+  $('#vHemi').setAttribute('aria-pressed', String(isHemi()));
   $('#depthCtl').hidden = !is3d;
   $('#app').classList.toggle('mode3d', is3d);
   const narrow = matchMedia('(pointer: coarse)').matches;
@@ -2966,9 +2970,10 @@ function applyControlMode() {
 
 async function setView(mode) {
   if (busy || prefs.view === mode) return;
-  if (isHemi()) {   // in the Hemispheres convention 2D is the plan view from above
-    prefs.view = mode; save(); applyControlMode(); anim.d = mode === '3d' ? 1 : 0;
-    busy = true; await camTween(hemiFit(), 900); busy = false; return;
+  if (mode === 'hemi' || isHemi()) {   // to or from the Hemispheres view: a different model, so rebuild and reframe
+    prefs.view = mode; save(); anim.d = mode === '2d' ? 0 : 1;
+    applyControlMode(); relayout();
+    busy = true; await camTween(fitState(), 800); busy = false; return;
   }
   busy = true;
   prefs.view = mode; save();
@@ -2997,14 +3002,14 @@ async function setView(mode) {
    convention. It draws the same elements and channels as the classic
    layout, so selection, details, diagnosis and flows all carry over.
    ===================================================================== */
-const isHemi = () => prefs.style === 'hemi';
+const isHemi = () => prefs.view === 'hemi';
 const hscene = new THREE.Scene();
 hscene.add(new THREE.HemisphereLight(0xffffff, 0x8a9894, 0.72));
 const hsun = new THREE.DirectionalLight(0xffffff, 0.62); hsun.position.set(30, 60, 40); hscene.add(hsun);
 const hroot = new THREE.Group(); hscene.add(hroot);
 const HU = 4;                                   // model units to scene units, so the camera limits suit both conventions
 const HR = 10, HBOWL = 0.5, HPLANE = -2.2, HR_OP = 6.1, HR_MG = 3.7, HR_S2 = 2.55, HCOL = { s3: -0.55, s4: 1.95, s5: 4.45 };
-const HVIEW = { az: 0.55, el: 0.5 }, HPLAN = { az: 0, el: 1.5 };
+const HVIEW = { az: 0.55, el: 0.5 };
 let hPick = [], hEls = new Map(), hChs = new Map(), hAnchors = new Map(), hLabels = [];
 const hlabelsEl = $('#hlabels');
 
@@ -3164,6 +3169,10 @@ function buildHemiLabels() {
     d.className = 'lbl c' + (big ? ' big' : '');
     const code = codeOf(lv, id);
     d.innerHTML = '<span class="dg"></span>' + (code ? '<span class="code">' + esc(code) + '</span>' : '') + '<span class="nm">' + labelHTML(lv, id) + '</span>';
+    // labels sit beside their shapes here, so they select, open and offer the menu themselves
+    d.addEventListener('click', e => { e.stopPropagation(); if (e.shiftKey || e.metaKey || e.ctrlKey) select(id, { add: true, reveal: true }); else select(id, { reveal: true }); });
+    d.addEventListener('dblclick', e => { e.stopPropagation(); if (isSystemType(typeOfId(L, id))) dive(id); });
+    d.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); openCtx(e.clientX, e.clientY, id); });
     hlabelsEl.appendChild(d);
     hLabels.push({ id, d, p: p.clone().multiplyScalar(HU) });
   };
@@ -3217,10 +3226,9 @@ function hemiRefresh() {
 /* Camera: an angled view of the bowl, or the plan view from straight above */
 function hemiFit() {
   const w = stage.clientWidth || 800, h = stage.clientHeight || 600, tanHalf = Math.tan(camera.fov * Math.PI / 360), aspect = w / h;
-  const plan = prefs.view === '2d', halfW = HR * 1.12 * HU, halfH = (plan ? HR * 1.12 : HR * 0.85) * HU;
+  const halfW = HR * 1.12 * HU, halfH = HR * 0.85 * HU;
   const dist = Math.max(halfH / tanHalf, halfW / (tanHalf * aspect)) * 1.08;
-  const v = plan ? HPLAN : HVIEW;
-  return { target: new THREE.Vector3(0, (plan ? 0 : 0.6) * HU, 0), dist, az: v.az, el: v.el };
+  return { target: new THREE.Vector3(0, 0.6 * HU, 0), dist, az: HVIEW.az, el: HVIEW.el };
 }
 function hemiPos(id) { const p = hAnchors.get(id); return p ? p.clone().multiplyScalar(HU) : null; }
 
@@ -3510,7 +3518,7 @@ canvas.addEventListener('pointermove', e => {
     if (busy || (ev.buttons && ev.buttons !== 0) || ev.pointerType === 'touch') { tip.hidden = true; return; }
     const id = pickAt(ev.clientX, ev.clientY);
     if (id !== hovered) { hovered = id; refreshVisuals(); }
-    canvas.style.cursor = id ? 'pointer' : (prefs.view === '3d' ? 'grab' : 'move');
+    canvas.style.cursor = id ? 'pointer' : (prefs.view !== '2d' ? 'grab' : 'move');
     if (id) {
       tip.innerHTML = describe(id);
       tip.hidden = false;
@@ -4444,6 +4452,7 @@ async function runMapping(target, brief, source) {
    ===================================================================== */
 $('#v2d').addEventListener('click', () => setView('2d'));
 $('#v3d').addEventListener('click', () => setView('3d'));
+$('#vHemi').addEventListener('click', () => setView('hemi'));
 $('#spread').addEventListener('input', e => { prefs.spread = +e.target.value; save(); updateGeometry(); });
 $('#btnFlows').addEventListener('click', () => {
   prefs.flows = !prefs.flows; save();
@@ -4562,9 +4571,8 @@ $('#resetAll').addEventListener('click', e => {
 // diagram options: where System 2's centre sits, and the two extension channels
 function syncDiagramControls() {
   const bridge = prefs.s2mode === 'bridge', diamond = prefs.style === 'diamond';
-  $('#stSquare').setAttribute('aria-pressed', String(!diamond && !isHemi()));
+  $('#stSquare').setAttribute('aria-pressed', String(!diamond));
   $('#stDiamond').setAttribute('aria-pressed', String(diamond));
-  $('#stHemi').setAttribute('aria-pressed', String(isHemi()));
   $('#s2Inside').setAttribute('aria-pressed', String(!bridge));
   $('#s2Bridge').setAttribute('aria-pressed', String(bridge));
   $('#extS4cmd').checked = prefs.extS4cmd !== false;
@@ -4583,12 +4591,10 @@ function relayout() {
 }
 function setStyle(st) {
   if (prefs.style === st || busy) return;
-  const was = prefs.style; prefs.style = st; save(); relayout();
-  if (was === 'hemi' || st === 'hemi') camTween(fitState(), 700);   // the two kinds of model need different framing
+  prefs.style = st; save(); relayout();
 }
 $('#stSquare').addEventListener('click', () => setStyle('square'));
 $('#stDiamond').addEventListener('click', () => setStyle('diamond'));
-$('#stHemi').addEventListener('click', () => setStyle('hemi'));
 
 // theme: follow the system (or the host page), or force light or dark
 const hostTheme = document.documentElement.getAttribute('data-theme');
@@ -4703,7 +4709,8 @@ window.addEventListener('keydown', e => {
     }
     return;
   }
-  if (e.key === '2') setView('2d');
+  if (e.key === 'h' || e.key === 'H') setView('hemi');
+  else if (e.key === '2') setView('2d');
   else if (e.key === '3') setView('3d');
   else if (e.key === 'c' || e.key === 'C') recentre();
   else if (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)) {
@@ -5555,7 +5562,7 @@ syncDiagram();
 
 const intro = !hadSaved && !reduceMotion;
 if (intro) prefs.view = '2d';
-anim.d = prefs.view === '3d' ? 1 : 0;
+anim.d = prefs.view !== '2d' ? 1 : 0;
 applyControlMode();
 resize();
 buildScene();

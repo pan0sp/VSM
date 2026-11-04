@@ -3211,7 +3211,7 @@ function buildHemi() {
       anchor('a' + k, P[k].s2.clone().add(V(0, -5, 0)));
     } else P[k].s2 = hPolar(HG.MG, a + Math.PI / n * 0.55, HG.MGY);
     const cid = lv.children['o' + k], child = cid && db.levels[cid];
-    if (child || prefs.nested) {
+    if (prefs.nested) {   // only when Nested is on, as in the classic views
       hNested.add('o' + k); hNested.add('m' + k);
       const cf = id => child ? colorOf(child, id, L) : colorOf(lv, /^o\d/.test(id) ? 'o' + k : /^e\d/.test(id) ? 'e' + k : id, L);
       hMini(child, cf, k, a, P[k]);

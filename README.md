@@ -70,7 +70,7 @@ The **Value network** view (toolbar, or key `N`) maps System One before the VSM 
 2. **Identify and map the S1s.**
    - Each primary activity is a circle inside the System-in-Focus (the *white box*). These are activities, processes or functions, not (yet) roles or departments, and only those the organization performs itself.
    - The customers, suppliers and other actors each activity deals with sit outside as amoebas.
-   - Squiggly lines carry what they exchange, money included.
+   - Wide pale ribbons with broad arrowheads carry what they exchange, money included.
    - The *black box* shows the system as one box in its business context, with only the flows that cross its boundary.
 3. **Recursion.** Double-click an activity to map its own value network one level down.
 4. **Transfer to the VSM.** There is nothing to copy across, because both views share one model:
@@ -82,7 +82,7 @@ The **Value network** view (toolbar, or key `N`) maps System One before the VSM 
    - These flows appear, read-only, in the Flows tab and in the moving dots.
    - In the VSM, a local environment named this way lists its actors as chips, and its details pane lists them with their flows and an **Edit in the value network** button. Once the network has actors, a local environment no actor reaches is drawn faintly: it may be missing from the map, or the operation may not be a primary activity.
 
-Squiggly lines are value flows; the straight lines of the VSM are its cybernetic channels. Drag to move things. To draw a flow, drag the **+** handle on an element to another one, Shift-drag the element, press `L`, or use **Connect** or the right-click menu; dropping into empty space adds a customer (outputs side) or supplier (inputs side) there, already connected. Press Delete to remove the selection (with Undo). Select any activity, actor or flow to change its colour in the card; an activity's colour is its operation's colour in the VSM too. The **Labels preset** menu has a café example, with its value network and a lower level for the brewing station.
+In every view, wide pale ribbons are value flows, after the material-flow arrows of value-stream maps, and thin lines are Beer's cybernetic channels. Environmental intersects are left undrawn for now. Drag to move things. To draw a flow, drag the **+** handle on an element to another one, Shift-drag the element, press `L`, or use **Connect** or the right-click menu; dropping into empty space adds a customer (outputs side) or supplier (inputs side) there, already connected. Press Delete to remove the selection (with Undo). Select any activity, actor or flow to change its colour in the card; an activity's colour is its operation's colour in the VSM too. The **Labels preset** menu has a café example, with its value network and a lower level for the brewing station.
 
 ## Data flows and the model company
 

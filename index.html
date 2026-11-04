@@ -115,12 +115,13 @@ button { cursor: pointer; }
 .net .nl { font: 600 12.5px var(--f-body); fill: var(--ink); }
 .net .nl.big { font-size: 16px; }
 .net .nc { font: 600 11px var(--f-mono); fill: var(--ink-2); }
-.net .fl { cursor: pointer; color: var(--fc, var(--ink-2)); }
+.net .fl { cursor: pointer; color: var(--fc, var(--vflow, var(--ink-2))); }
 .net .fl .hit { fill: none; stroke: transparent; stroke-width: 16; }
-.net .fl .w { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; }
+.net .fl .w { fill: none; stroke: currentColor; stroke-width: 7; stroke-opacity: .42; stroke-linecap: butt; }
+.net .fl polygon { fill-opacity: .6; }
 .net .fl polygon { fill: currentColor; }
 .net .fl:hover, .net .fl.sel { color: var(--accent); }
-.net .fl.sel .w { stroke-width: 2.4; }
+.net .fl.sel .w { stroke-opacity: .7; }
 .net .ft { font: 500 11px var(--f-body); fill: var(--ink); text-anchor: middle; paint-order: stroke; stroke: var(--stage); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
 .net .ft.un { fill: var(--ink-2); font-style: italic; }
 .net .hd { opacity: 0; cursor: crosshair; transition: opacity .12s; }
@@ -1172,7 +1173,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
     <section class="pane guide" id="pane-guide" role="tabpanel" aria-labelledby="tab-guide" hidden>
       <div class="block">
         <h3>Three views of one model</h3>
-        <p>The toolbar switches between three views. <b>VSM</b> draws Beer's diagram in 2D or 3D. <b>Value network</b> maps the primary activities of System One, the actors around them and the flows between them. <b>Recursion</b> shows the hierarchy of viable systems, with the System-in-Focus marked. All three edit the same model, and the System-in-Focus is the same in each. This panel holds the settings and data: the Settings tab for the level, labels, conventions and colours, the Flows tab for what travels on each channel. <b>Method</b> in the toolbar shows the four steps (purpose, value network, recursion, VSM) beside whichever view is open. In the value network, squiggly lines are value flows; the straight lines of the VSM are its cybernetic channels.</p>
+        <p>The toolbar switches between three views. <b>VSM</b> draws Beer's diagram in 2D or 3D. <b>Value network</b> maps the primary activities of System One, the actors around them and the flows between them. <b>Recursion</b> shows the hierarchy of viable systems, with the System-in-Focus marked. All three edit the same model, and the System-in-Focus is the same in each. This panel holds the settings and data: the Settings tab for the level, labels, conventions and colours, the Flows tab for what travels on each channel. <b>Method</b> in the toolbar shows the four steps (purpose, value network, recursion, VSM) beside whichever view is open. In every view, wide pale ribbons with broad arrowheads are value flows (operational linkages, and exchanges between an operation and its environment); thin lines are Beer's cybernetic channels. Environmental intersects are left undrawn for now.</p>
       </div>
       <div class="block">
         <h3>What the model describes</h3>
@@ -1463,7 +1464,7 @@ const KB = {
   },
   oo: {
     kind: 'Channel', role: 'Operational linkage',
-    summary: 'The operations interact directly: Beer draws these as squiggly lines and lists them among the vertical channels. They supply each other and compete for resources, a source of synergy and of the oscillation that System Two damps.',
+    summary: 'The operations interact directly: Beer draws these as squiggly lines and lists them among the vertical channels; here, as value flows, they are wide pale ribbons. They supply each other and compete for resources, a source of synergy and of the oscillation that System Two damps.',
     practice: ['Internal supply, shared staff, hand-offs between units'],
     questions: ['Where do operations depend on one another?', 'Which interactions cause recurring oscillation?'],
     watch: ['Hidden dependencies that surface only in a crisis']
@@ -1728,8 +1729,8 @@ function buildLayout(n, opts) {
     if (localS2) chan('ms' + i, 'ms2', ['m' + i, 'a' + i], [['m' + i], ['a' + i]], [{ pts: [P(at('m' + i, 1, 0), O), P(at('a' + i, -1, 0), S2L)], arrows: 'both' }], { idx: i });
     else chan('ms' + i, 'ms2', ['m' + i, 's2'], [['m' + i], ['s2']], [{ pts: [P([S2UX, yOp(i) + 7], S2L), P(at('m' + i, 1, 0), O)], arrows: 'end', sgn: -1 }], { idx: i });
     if (i < n - 1) {
-      chan('ee' + i, 'ee', ['e' + i, 'e' + (i + 1)], [['e' + i], ['e' + (i + 1)]], [{ pts: [P(at('e' + i, 0, -1), E), P(at('e' + (i + 1), 0, 1), E)], mode: 'wave', amp: 1.8, arrows: 'both' }], { idx: i });
-      chan('oo' + i, 'oo', ['o' + i, 'o' + (i + 1)], [['o' + i], ['o' + (i + 1)]], [{ pts: [P(at('o' + i, 0, -1), O), P(at('o' + (i + 1), 0, 1), O)], mode: 'wave', amp: 1.8, arrows: 'both' }], { idx: i });
+      chan('ee' + i, 'ee', ['e' + i, 'e' + (i + 1)], [['e' + i], ['e' + (i + 1)]], [{ pts: [P(at('e' + i, 0, -1), E), P(at('e' + (i + 1), 0, 1), E)], arrows: 'both' }], { idx: i });
+      chan('oo' + i, 'oo', ['o' + i, 'o' + (i + 1)], [['o' + i], ['o' + (i + 1)]], [{ pts: [P(at('o' + i, 0, -1), O), P(at('o' + (i + 1), 0, 1), O)], arrows: 'both' }], { idx: i });
     }
   });
 
@@ -2320,6 +2321,44 @@ function fillGeometry(el, quality) {
 }
 
 /* A flat band that follows an outline: Beer's ink line in 2D */
+/* Value flows (what the operations make and exchange) are drawn as wide pale ribbons with broad arrowheads,
+   after the material-flow arrows of value-stream maps; Beer's cybernetic channels stay thin lines.
+   Environmental intersects are not flows: they are left undrawn until overlaps have a form of their own. */
+const VALUE_CH = new Set(['oo', 'eo']);
+const isValueCh = ch => VALUE_CH.has(ch.type);
+const isUndrawnCh = ch => ch.type === 'ee';
+const valueColor = (lv, id) => lv.colors[id] || lv.groupColors.ops || DEFAULT_GROUP_COLORS.ops;
+function ribbonGeometry(pts, width, normal) {
+  const pos = [], idx = [], n = normal || new THREE.Vector3(0, 0, 1), t = new THREE.Vector3(), side = new THREE.Vector3();
+  pts.forEach((p, i) => {
+    t.subVectors(pts[Math.min(i + 1, pts.length - 1)], pts[Math.max(i - 1, 0)]).normalize();
+    side.crossVectors(t, n).normalize().multiplyScalar(width / 2);
+    pos.push(p.x + side.x, p.y + side.y, p.z + side.z, p.x - side.x, p.y - side.y, p.z - side.z);
+    if (i) { const a = (i - 1) * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+  });
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+  return g;
+}
+function arrowheadGeometry(tip, dir, normal, w, len) {
+  const side = new THREE.Vector3().crossVectors(dir, normal || new THREE.Vector3(0, 0, 1)).normalize().multiplyScalar(w / 2);
+  const base = tip.clone().addScaledVector(dir, -len), a = base.clone().add(side), b = base.clone().sub(side);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute([tip.x, tip.y, tip.z, a.x, a.y, a.z, b.x, b.y, b.z], 3)); g.computeVertexNormals();
+  return g;
+}
+/* the ribbon, its arrowheads and the classic hit area for one path of a value channel */
+function valueRibbon(group, pts, arrows, mat, normal) {
+  const VW = 3.4, AW = 7.5, AL = 5.5, parts = [];
+  let a = pts.slice(), dirEnd = null, dirStart = null;
+  const trimEnd = (arr, d) => { let acc = 0; for (let i = arr.length - 1; i > 0; i--) { acc += arr[i].distanceTo(arr[i - 1]); if (acc >= d) return arr.slice(0, i).concat([arr[i - 1].clone().lerp(arr[i], (acc - d) / arr[i].distanceTo(arr[i - 1]))]); } return arr; };
+  if (arrows === 'both' || arrows === 'end') { dirEnd = a[a.length - 1].clone().sub(a[Math.max(0, a.length - 3)]).normalize(); a = trimEnd(a, AL * 0.9); }
+  if (arrows === 'both') { dirStart = pts[0].clone().sub(pts[Math.min(2, pts.length - 1)]).normalize(); a = trimEnd(a.slice().reverse(), AL * 0.9).reverse(); }
+  const rib = new THREE.Mesh(ribbonGeometry(a, VW, normal), mat); group.add(rib); parts.push(rib);
+  if (dirEnd) { const h = new THREE.Mesh(arrowheadGeometry(pts[pts.length - 1], dirEnd, normal, AW, AL), mat); group.add(h); parts.push(h); }
+  if (dirStart) { const h = new THREE.Mesh(arrowheadGeometry(pts[0], dirStart, normal, AW, AL), mat); group.add(h); parts.push(h); }
+  return parts;
+}
 function bandGeometry(pts, width, offset) {
   const n = pts.length, pos = [], idx = [];
   offset = offset || 0;
@@ -2412,13 +2451,14 @@ function buildScene() {
     const mat = stdMat();
     chanMats[ch.id] = mat;
     world.add(group);
-    const obj = { ch, group, mat, parts: [] };
+    const obj = { ch, group, mat, parts: [], rmat: isValueCh(ch) ? new THREE.MeshStandardMaterial({ roughness: 0.8, transparent: true, side: THREE.DoubleSide, depthWrite: false }) : null };
+    if (isUndrawnCh(ch)) group.visible = false;
     ch.paths.forEach(() => {
       const tube = new THREE.Mesh(new THREE.BufferGeometry(), mat);
       const hit = new THREE.Mesh(new THREE.BufferGeometry(), hitMat);
       hit.userData.pick = { kind: 'ch', id: ch.id };
       group.add(tube); group.add(hit);
-      pickables.push(hit);
+      if (!isUndrawnCh(ch)) pickables.push(hit);
       obj.parts.push({ tube, hit, cones: [] });
     });
     chs.set(ch.id, obj);
@@ -2454,7 +2494,9 @@ function updateGeometry() {
       const curve = new PolyCurve(pts);
       const segs = clamp(Math.round(curve.total * 1.2), 6, 180);
       part.tube.geometry.dispose();
-      part.tube.geometry = new THREE.TubeGeometry(curve, segs, 0.3, 8, false);
+      if (part.rib) { part.rib.forEach(m => { o.group.remove(m); m.geometry.dispose(); }); part.rib = null; }
+      if (o.rmat) { part.tube.geometry = new THREE.BufferGeometry(); part.rib = valueRibbon(o.group, curve.getSpacedPoints(Math.max(8, segs)), p.arrows, o.rmat); }
+      else part.tube.geometry = new THREE.TubeGeometry(curve, segs, 0.3, 8, false);
       part.hit.geometry.dispose();
       part.hit.geometry = new THREE.TubeGeometry(curve, clamp(Math.round(segs / 2), 4, 60), 1.6, 6, false);
       part.cones.forEach(c => { o.group.remove(c); });
@@ -2477,8 +2519,8 @@ function updateGeometry() {
         for (let i = 0; i < arr.length - 1; i++) { acc += arr[i].distanceTo(arr[i + 1]); if (acc >= dist) return arr[i + 1]; }
         return arr[arr.length - 1];
       };
-      if (p.arrows === 'both' || p.arrows === 'end') addCone(pts[pts.length - 1], back(pts, pts.length - 1, 2.2));
-      if (p.arrows === 'both') addCone(pts[0], fwd(pts, 2.2));
+      if (!o.rmat && (p.arrows === 'both' || p.arrows === 'end')) addCone(pts[pts.length - 1], back(pts, pts.length - 1, 2.2));
+      if (!o.rmat && p.arrows === 'both') addCone(pts[0], fwd(pts, 2.2));
       // world-space polyline for flow particles
       part.world = p.samples.map(s => new THREE.Vector3(s.x, s.y, chZ(s.L, d, o.ch.z2)));
       part.cum = [0];
@@ -2559,7 +2601,13 @@ function refreshClassic() {
     o.mat.color.copy(c);
     o.mat.emissive.copy(c).multiplyScalar(lerp(0.3, 0.12, d) + (hovered === id ? 0.25 : 0));
     setOpacity(o.mat, (related ? 1 : 0.18) * (cd && cd.s === 'absent' ? 0.35 : cd && cd.s === 'nominal' ? 0.6 : 1));
-    o.group.visible = !isHidden(id);
+    if (o.rmat) {
+      const vc = selSet.has(id) ? theme.accent.clone() : new THREE.Color(valueColor(lv, id));
+      if (cd && cd.s === 'absent' && !selSet.has(id)) vc.lerp(tmpC2.setRGB(0.6, 0.62, 0.62), 0.7);
+      o.rmat.color.copy(vc); o.rmat.emissive.copy(vc).multiplyScalar(0.18 + (hovered === id ? 0.25 : 0));
+      o.rmat.opacity = (selSet.has(id) ? 0.7 : 0.42) * (related ? 1 : 0.3) * (cd && cd.s === 'absent' ? 0.4 : 1);
+    }
+    o.group.visible = !isHidden(id) && !isUndrawnCh(o.ch);
   });
   if (particles) {
     particleSpecs.forEach((p, i) => {
@@ -2601,7 +2649,7 @@ function buildParticles() {
   if (particles) { world.remove(particles); particles.material.dispose(); particles.dispose && particles.dispose(); particles = null; }
   particleSpecs = [];
   const lv = level(), dataMode = levelHasFlows(lv);
-  L.chans.forEach(ch => ch.paths.forEach((p, k) => {
+  L.chans.forEach(ch => !isUndrawnCh(ch) && ch.paths.forEach((p, k) => {
     let len = 0;
     for (let i = 1; i < p.samples.length; i++) len += Math.hypot(p.samples[i].x - p.samples[i - 1].x, p.samples[i].y - p.samples[i - 1].y);
     if (!dataMode) {
@@ -2830,7 +2878,7 @@ function updateLabels() {
   const w = stage.clientWidth, h = stage.clientHeight;
   chBadges.forEach((dv, id) => {
     const o = chs.get(id);
-    if (!o || !dv.firstChild.textContent || isHidden(id)) { dv.style.visibility = 'hidden'; return; }
+    if (!o || !dv.firstChild.textContent || isHidden(id) || isUndrawnCh(o.ch)) { dv.style.visibility = 'hidden'; return; }
     let best = o.parts[0];
     o.parts.forEach(pt => { if (pt.cum && pt.cum[pt.cum.length - 1] > (best.cum ? best.cum[best.cum.length - 1] : 0)) best = pt; });
     const pts = best.world; if (!pts) return;
@@ -3060,7 +3108,10 @@ function hChan(id, pts, arrows) {
   const g = new THREE.Group(); g.userData.src = id;
   const curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal');
   const len = curve.getLength(), segs = clamp(Math.round(len * 1.2), 8, 200);
-  const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, segs, 0.3, 8, false), o.mat); tube.userData.own = true; g.add(tube);
+  if (o.rmat) {   // a value flow: a wide pale ribbon lying in the plane of System One
+    valueRibbon(g, curve.getSpacedPoints(segs), arrows, o.rmat, V(0, 1, 0)).forEach(m => { m.userData.own = true; });
+    arrows = 'none';
+  } else { const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, segs, 0.3, 8, false), o.mat); tube.userData.own = true; g.add(tube); }
   const hit = new THREE.Mesh(new THREE.TubeGeometry(curve, clamp(Math.round(segs / 2), 4, 60), 1.6, 6, false), hitMat);
   hit.userData.own = true; hit.userData.pick = { kind: 'ch', id }; hPick.push(hit); g.add(hit);
   const cone = (tip, prev) => {
@@ -3073,12 +3124,8 @@ function hChan(id, pts, arrows) {
   if (!hChs.has(id)) hChs.set(id, []);
   hChs.get(id).push(g);
 }
-/* a squiggle along the ring, for operational linkages and environmental intersects (Beer's wavy lines) */
-function hWave(r, a0, a1, y) {
-  const pts = [], waves = Math.max(3, Math.round(Math.abs(a1 - a0) * r / 6));
-  for (let i = 0; i <= waves * 6; i++) { const t = i / (waves * 6), a = a0 + (a1 - a0) * t; pts.push(hPolar(r + Math.sin(t * Math.PI * 2 * waves) * 1.8, a, y)); }
-  return pts;
-}
+/* an arc along a ring: operational linkages between neighbouring operations, System Two between local managements */
+function hArc(r, a0, a1, y, steps) { const pts = []; for (let i = 0; i <= (steps || 32); i++) pts.push(hPolar(r, a0 + (a1 - a0) * i / (steps || 32), y)); return pts; }
 
 /* The lower level in miniature, at right angles to the plane: its System One part sits in the
    operation, facing the centre, and its column lies in the local management, pointing inward */
@@ -3127,9 +3174,10 @@ function buildHemi() {
   ['s3', 's4', 's5'].forEach(id => { hClone(id, V(0, HG[id.toUpperCase()], 0), front); anchor(id, hPolar(9.5, lab[id], HG[id.toUpperCase()])); });
   const s3sPos = hPolar(HG.COL - 2, -Math.PI / 2, HG.S3 - 9);
   hClone('s3s', s3sPos, front); anchor('s3s', s3sPos.clone().add(V(0, -6, 0)));
-  // System Two as a ring, after the clay model: the regulatory centre is the inner ring, each operation's unit an arc beside it
-  const RING = HG.S2 - 4.5, ringAt = a => hPolar(RING, a, HG.S2Y), s2Pos = ringAt(Math.PI / 2);
-  const ring = hShape('s2', new THREE.TorusGeometry(RING, 0.7, 10, 120)); ring.rotation.x = Math.PI / 2; ring.position.y = HG.S2Y;
+  // System Two, after the clay model: a ring through the local managements joins the operations' metasystems,
+  // as the operational linkages join the operations; its regulatory centre rings the foot of the column
+  const RING = HG.COL + 4, ringAt = a => hPolar(RING, a, HG.MGY), s2Pos = ringAt(Math.PI / 2);
+  const ring = hShape('s2', new THREE.TorusGeometry(RING, 0.7, 10, 120)); ring.rotation.x = Math.PI / 2; ring.position.y = HG.MGY;
   anchor('s2', ringAt(Math.PI / 2 + 0.5).add(V(0, -5, 0)));
   const local = !!L.byId.a0;
   const P = {};
@@ -3139,12 +3187,12 @@ function buildHemi() {
     hClone('o' + k, P[k].op, out); anchor('o' + k, P[k].op.clone().add(V(0, 11, 0)));
     hClone('m' + k, P[k].mg, out); anchor('m' + k, P[k].mg.clone().add(V(0, 9, 0)));
     hClone('e' + k, P[k].cap, out); anchor('e' + k, P[k].cap.clone().add(V(0, 12, 0)));
-    if (local) {
-      const span = (2 * Math.PI / n) * 0.6, pts = [];
-      for (let i = 0; i <= 24; i++) pts.push(hPolar(HG.S2, a - span / 2 + span * i / 24, HG.S2Y));
-      hShape('a' + k, new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 48, 1.7, 10, false));
+    if (local) {   // this operation's System Two unit: the stretch of the ring either side of its local management
+      const half = Math.PI / n;
+      hShape('a' + k, new THREE.TubeGeometry(new THREE.CatmullRomCurve3(hArc(HG.MG, a - half, a + half, HG.MGY, 24)), 48, 1.3, 10, false));
+      P[k].s2 = hPolar(HG.MG, a + half * 0.55, HG.MGY);
       anchor('a' + k, P[k].s2.clone().add(V(0, -5, 0)));
-    }
+    } else P[k].s2 = hPolar(HG.MG, a, HG.MGY);
     const cid = lv.children['o' + k], child = cid && db.levels[cid];
     if (child || prefs.nested) {
       hNested.add('o' + k); hNested.add('m' + k);
@@ -3161,10 +3209,10 @@ function buildHemi() {
     switch (ch.type) {
       case 'eo': line(toward(P[i].op, P[i].cap, 9.5), toward(P[i].cap, P[i].op, 11)); break;
       case 'om': line(toward(P[i].mg, P[i].op, 7.5), toward(P[i].op, P[i].mg, 9.5)); break;
-      case 'ms2': line(toward(P[i].mg, P[i].s2, 7.5), local ? toward(P[i].s2, P[i].mg, 2.2) : toward(ringAt(P[i].a), P[i].mg, 1)); break;
-      case 'oo': hChan(id, hWave(HG.OP, P[i].a + 10.5 / HG.OP, P[i + 1].a - 10.5 / HG.OP, HG.OPY), arrows); break;
-      case 'ee': hChan(id, hWave(HG.R * 0.9, P[i].a + 13 / HG.R, P[i + 1].a - 13 / HG.R, HG.CAPY - 3), arrows); break;
-      case 's2ch': for (let k = 0; k < n; k++) line(toward(ringAt(P[k].a), P[k].s2, 0.7), local ? toward(P[k].s2, ringAt(P[k].a), 1.7) : toward(P[k].mg, ringAt(P[k].a), 7.5), 'none'); break;
+      case 'ms2': line(up(P[i].mg, -7.5), up(P[i].s2, -1.6), 'both'); break;
+      case 'oo': hChan(id, hArc(HG.OP, P[i].a + 10.5 / HG.OP, P[i + 1].a - 10.5 / HG.OP, HG.OPY), arrows); break;
+      case 'ee': break;   // environmental intersects stay undrawn until overlaps have a form of their own
+      case 's2ch': for (let k = 0; k < n; k++) { const sa = P[k].a + Math.PI / n * 0.55; line(toward(ringAt(sa), P[k].s2, 0.7), toward(P[k].s2, ringAt(sa), 1.3), 'none'); } break;
       case 's2s3': line(toward(s2Pos, V(0, HG.S3, 0), 0.7), toward(V(0, HG.S3, 0), s2Pos, 7)); break;
       case 'ci': case 'rb': for (let k = 0; k < n; k++) { const o = side(k, ch.type === 'ci' ? -2 : 2); line(hPolar(6.5, P[k].a, HG.S3).add(o), toward(P[k].mg, V(0, HG.S3, 0), 7.5).add(o)); } break;
       case 'audit': line(toward(V(0, HG.S3, 0), s3sPos, 7), toward(s3sPos, V(0, HG.S3, 0), 5), 'none'); for (let k = 0; k < n; k++) line(toward(s3sPos, P[k].op, 5), toward(up(P[k].op, 2), s3sPos, 9.5), 'end'); break;
@@ -4882,25 +4930,6 @@ function netRadius(id, dx, dy) {
   return 1 / Math.sqrt((c / NET_RX) ** 2 + (s / NET_RY) ** 2);
 }
 function quad(p0, c, p1, t) { const u = 1 - t; return [u * u * p0[0] + 2 * u * t * c[0] + t * t * p1[0], u * u * p0[1] + 2 * u * t * c[1] + t * t * p1[1]]; }
-// Beer's squiggly line: a value flow, as distinct from the straight cybernetic channels
-function wavyD(p0, c, p1) {
-  const N = Math.max(24, Math.ceil((Math.hypot(c[0] - p0[0], c[1] - p0[1]) + Math.hypot(p1[0] - c[0], p1[1] - c[1])) / 2.5));
-  const S = [];
-  let len = 0;
-  for (let i = 0; i <= N; i++) {
-    const p = quad(p0, c, p1, i / N);
-    if (i) len += Math.hypot(p[0] - S[i - 1][0], p[1] - S[i - 1][1]);
-    S.push([p[0], p[1], len]);
-  }
-  const pts = S.map((p, i) => {
-    const a = S[Math.max(0, i - 1)], b = S[Math.min(N, i + 1)];
-    let tx = b[0] - a[0], ty = b[1] - a[1];
-    const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
-    const w = 3.4 * Math.sin(p[2] / 14 * Math.PI * 2) * Math.max(0, Math.min(1, p[2] / 12, (len - p[2]) / 18));
-    return (p[0] - ty * w).toFixed(1) + ' ' + (p[1] + tx * w).toFixed(1);
-  });
-  return 'M' + pts.join('L');
-}
 function blobD(seed) {
   const pts = [];
   for (let i = 0; i < 14; i++) {
@@ -4941,8 +4970,10 @@ function layFlows(list, posOf) {
     f.mid = quad(f.p0, c, f.p1, 0.5);
     let ax = f.p1[0] - c[0], ay = f.p1[1] - c[1];
     const al = Math.hypot(ax, ay) || 1; ax /= al; ay /= al;
-    const b = [f.p1[0] - ax * 10, f.p1[1] - ay * 10];
-    f.arrow = [f.p1, [b[0] - ay * 5, b[1] + ax * 5], [b[0] + ay * 5, b[1] - ax * 5]].map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    // a broad arrowhead, as on the ribbons of the VSM; the ribbon stops at its base
+    const b = [f.p1[0] - ax * 13, f.p1[1] - ay * 13];
+    f.arrow = [f.p1, [b[0] - ay * 9, b[1] + ax * 9], [b[0] + ay * 9, b[1] - ax * 9]].map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    f.pEnd = [f.p1[0] - ax * 12, f.p1[1] - ay * 12];
   }));
 }
 
@@ -4992,6 +5023,7 @@ function renderNetSvg() {
   const opsCol = lv.groupColors.ops || DEFAULT_GROUP_COLORS.ops;
   const isSel = (t, id) => netSel && netSel.t === t && netSel.id === id;
   const posOf = id => id === 'sif' ? sifPos(lv) : net.pos[id];
+  netSvg.style.setProperty('--vflow', lv.groupColors.ops || DEFAULT_GROUP_COLORS.ops);
   out.push('<rect class="bg" x="' + vx + '" y="' + vy + '" width="' + vw + '" height="' + vh + '"/>');
   // the System-in-Focus: a white box holding its activities, or a black box
   const name = levelName(lv);
@@ -5037,7 +5069,7 @@ function renderNetSvg() {
     const fc = !f.merged && (net.flows.find(x => x.id === f.id) || {}).color;
     out.push('<g class="fl' + (sel ? ' sel' : '') + '"' + (f.merged ? '' : ' data-flow="' + f.id + '"') + (fc ? ' style="--fc:' + fc + '"' : '') + '>' +
       '<path class="hit" d="M' + f.p0.join(' ') + 'Q' + f.c.join(' ') + ' ' + f.p1.join(' ') + '"/>' +
-      '<path class="w" d="' + wavyD(f.p0, f.c, f.p1) + '"/><polygon points="' + f.arrow + '"/>' +
+      '<path class="w" d="M' + f.p0.map(v => v.toFixed(1)).join(' ') + 'Q' + f.c.map(v => v.toFixed(1)).join(' ') + ' ' + f.pEnd.map(v => v.toFixed(1)).join(' ') + '"/><polygon points="' + f.arrow + '"/>' +
       '<text class="ft' + (f.unnamed ? ' un' : '') + '" x="' + f.at[0].toFixed(1) + '" y="' + (f.at[1] - 7).toFixed(1) + '">' + tspans(f.lines, 12, f.at[0].toFixed(1)) + '</text></g>');
   });
   // nodes

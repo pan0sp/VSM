@@ -118,10 +118,14 @@ button { cursor: pointer; }
 .net .fl { cursor: pointer; color: var(--fc, var(--vflow, var(--ink-2))); }
 .net .fl .hit { fill: none; stroke: transparent; stroke-width: 16; }
 .net .fl .w { fill: none; stroke: currentColor; stroke-width: 7; stroke-opacity: .42; stroke-linecap: butt; }
-.net .fl polygon { fill-opacity: .6; }
-.net .fl polygon { fill: currentColor; }
+.net .fl polygon { fill: currentColor; fill-opacity: .42; }
+.net .lines .fl { color: var(--fc, var(--ink-2)); }
+.net .lines .fl .w { stroke-width: 1.7; stroke-opacity: 1; stroke-linejoin: round; }
+.net .lines .fl polygon { fill-opacity: 1; }
+.net .lines .fl.sel .w { stroke-width: 2.4; stroke-opacity: 1; }
+.net .lines .fl.sel polygon { fill-opacity: 1; }
 .net .fl:hover, .net .fl.sel { color: var(--accent); }
-.net .fl.sel .w { stroke-opacity: .7; }
+.net .fl.sel .w, .net .fl.sel polygon { stroke-opacity: .7; fill-opacity: .7; }
 .net .ft { font: 500 11px var(--f-body); fill: var(--ink); text-anchor: middle; paint-order: stroke; stroke: var(--stage); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
 .net .ft.un { fill: var(--ink-2); font-style: italic; }
 .net .hd { opacity: 0; cursor: crosshair; transition: opacity .12s; }
@@ -1095,6 +1099,13 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
             <button id="s2Bridge" type="button" aria-pressed="false" title="On the metasystem boundary, bridging management and operations">Bridge</button>
           </div>
         </div>
+        <div class="row">
+          <span>Value flows</span>
+          <div class="seg small" role="group" aria-label="How value flows are drawn">
+            <button id="vfRibbon" type="button" aria-pressed="true" title="Wide pale ribbons with broad arrowheads, after value-stream maps">Ribbons</button>
+            <button id="vfLine" type="button" aria-pressed="false" title="Thin lines, the same as every other channel">Lines</button>
+          </div>
+        </div>
         <label class="chk"><input type="checkbox" id="extS4cmd"><span>System Four into the Resource Bargain<small>Extension: reads the command axis as anticipatory</small></span></label>
         <label class="chk"><input type="checkbox" id="localS2"><span>Local regulatory centres<small>System Two's centre beside each local management; some diagrams omit them</small></span></label>
         <label class="chk"><input type="checkbox" id="extS14"><span>System One ↔ System Four<small>Extension: operations and System Four exchange signals directly</small></span></label>
@@ -1173,7 +1184,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
     <section class="pane guide" id="pane-guide" role="tabpanel" aria-labelledby="tab-guide" hidden>
       <div class="block">
         <h3>Three views of one model</h3>
-        <p>The toolbar switches between three views. <b>VSM</b> draws Beer's diagram in 2D or 3D. <b>Value network</b> maps the primary activities of System One, the actors around them and the flows between them. <b>Recursion</b> shows the hierarchy of viable systems, with the System-in-Focus marked. All three edit the same model, and the System-in-Focus is the same in each. This panel holds the settings and data: the Settings tab for the level, labels, conventions and colours, the Flows tab for what travels on each channel. <b>Method</b> in the toolbar shows the four steps (purpose, value network, recursion, VSM) beside whichever view is open. In every view, wide pale ribbons with broad arrowheads are value flows (operational linkages, and exchanges between an operation and its environment); thin lines are Beer's cybernetic channels. Environmental intersects are left undrawn for now.</p>
+        <p>The toolbar switches between three views. <b>VSM</b> draws Beer's diagram in 2D or 3D. <b>Value network</b> maps the primary activities of System One, the actors around them and the flows between them. <b>Recursion</b> shows the hierarchy of viable systems, with the System-in-Focus marked. All three edit the same model, and the System-in-Focus is the same in each. This panel holds the settings and data: the Settings tab for the level, labels, conventions and colours, the Flows tab for what travels on each channel. <b>Method</b> in the toolbar shows the four steps (purpose, value network, recursion, VSM) beside whichever view is open. In every view, wide pale ribbons with broad arrowheads are value flows (operational linkages, and exchanges between an operation and its environment); thin lines are Beer's cybernetic channels. <b>Value flows</b> in Settings draws them as thin lines like every other channel instead. Environmental intersects are left undrawn for now.</p>
       </div>
       <div class="block">
         <h3>What the model describes</h3>
@@ -2325,6 +2336,7 @@ function fillGeometry(el, quality) {
    after the material-flow arrows of value-stream maps; Beer's cybernetic channels stay thin lines.
    Environmental intersects are not flows: they are left undrawn until overlaps have a form of their own. */
 const VALUE_CH = new Set(['oo', 'eo']);
+const valueRibbons = () => prefs.valueFlows !== 'line';
 const isValueCh = ch => VALUE_CH.has(ch.type);
 const isUndrawnCh = ch => ch.type === 'ee';
 const valueColor = (lv, id) => lv.colors[id] || lv.groupColors.ops || DEFAULT_GROUP_COLORS.ops;
@@ -2347,16 +2359,18 @@ function arrowheadGeometry(tip, dir, normal, w, len) {
   g.setAttribute('position', new THREE.Float32BufferAttribute([tip.x, tip.y, tip.z, a.x, a.y, a.z, b.x, b.y, b.z], 3)); g.computeVertexNormals();
   return g;
 }
-/* the ribbon, its arrowheads and the classic hit area for one path of a value channel */
+/* the ribbon and its arrowheads for one path of a value channel; the ribbon stops exactly at each head's base,
+   so the pale fills never overlap, and short paths (operation to operation in the VSM) get a smaller ribbon */
 function valueRibbon(group, pts, arrows, mat, normal) {
-  const VW = 3.4, AW = 7.5, AL = 5.5, parts = [];
-  let a = pts.slice(), dirEnd = null, dirStart = null;
-  const trimEnd = (arr, d) => { let acc = 0; for (let i = arr.length - 1; i > 0; i--) { acc += arr[i].distanceTo(arr[i - 1]); if (acc >= d) return arr.slice(0, i).concat([arr[i - 1].clone().lerp(arr[i], (acc - d) / arr[i].distanceTo(arr[i - 1]))]); } return arr; };
-  if (arrows === 'both' || arrows === 'end') { dirEnd = a[a.length - 1].clone().sub(a[Math.max(0, a.length - 3)]).normalize(); a = trimEnd(a, AL * 0.9); }
-  if (arrows === 'both') { dirStart = pts[0].clone().sub(pts[Math.min(2, pts.length - 1)]).normalize(); a = trimEnd(a.slice().reverse(), AL * 0.9).reverse(); }
-  const rib = new THREE.Mesh(ribbonGeometry(a, VW, normal), mat); group.add(rib); parts.push(rib);
-  if (dirEnd) { const h = new THREE.Mesh(arrowheadGeometry(pts[pts.length - 1], dirEnd, normal, AW, AL), mat); group.add(h); parts.push(h); }
-  if (dirStart) { const h = new THREE.Mesh(arrowheadGeometry(pts[0], dirStart, normal, AW, AL), mat); group.add(h); parts.push(h); }
+  let len = 0; for (let i = 1; i < pts.length; i++) len += pts[i].distanceTo(pts[i - 1]);
+  const ends = (arrows === 'both' ? 2 : arrows === 'end' ? 1 : 0), k = clamp((len - 2) / (ends * 8 + 10), 0.35, 1);
+  const VW = 3.4 * k, AW = 7 * k, AL = 5 * k, parts = [];
+  const trimEnd = (arr, d) => { let acc = 0; for (let i = arr.length - 1; i > 0; i--) { const sl = arr[i].distanceTo(arr[i - 1]); acc += sl; if (acc >= d) return arr.slice(0, i).concat([arr[i - 1].clone().lerp(arr[i], (acc - d) / sl)]); } return arr.slice(0, 1).concat([arr[0].clone()]); };
+  let a = pts.slice();
+  const head = (tip, base) => { const m = new THREE.Mesh(arrowheadGeometry(tip, tip.clone().sub(base).normalize(), normal, AW, tip.distanceTo(base)), mat); group.add(m); parts.push(m); };
+  if (ends) { a = trimEnd(a, AL); head(pts[pts.length - 1], a[a.length - 1]); }
+  if (ends === 2) { a = trimEnd(a.slice().reverse(), AL).reverse(); head(pts[0], a[0]); }
+  if (a.length > 1 && a[0].distanceTo(a[a.length - 1]) > 0.05) { const rib = new THREE.Mesh(ribbonGeometry(a, VW, normal), mat); group.add(rib); parts.push(rib); }
   return parts;
 }
 function bandGeometry(pts, width, offset) {
@@ -2451,7 +2465,7 @@ function buildScene() {
     const mat = stdMat();
     chanMats[ch.id] = mat;
     world.add(group);
-    const obj = { ch, group, mat, parts: [], rmat: isValueCh(ch) ? new THREE.MeshStandardMaterial({ roughness: 0.8, transparent: true, side: THREE.DoubleSide, depthWrite: false }) : null };
+    const obj = { ch, group, mat, parts: [], rmat: isValueCh(ch) && valueRibbons() ? new THREE.MeshStandardMaterial({ roughness: 0.8, transparent: true, side: THREE.DoubleSide, depthWrite: false }) : null };
     if (isUndrawnCh(ch)) group.visible = false;
     ch.paths.forEach(() => {
       const tube = new THREE.Mesh(new THREE.BufferGeometry(), mat);
@@ -3176,10 +3190,12 @@ function buildHemi() {
   hClone('s3s', s3sPos, front); anchor('s3s', s3sPos.clone().add(V(0, -6, 0)));
   // System Two, after the clay model: a ring through the local managements joins the operations' metasystems,
   // as the operational linkages join the operations; its regulatory centre rings the foot of the column
-  const RING = HG.COL + 4, ringAt = a => hPolar(RING, a, HG.MGY), s2Pos = ringAt(Math.PI / 2);
+  const RING = HG.COL + 0.7, ringAt = a => hPolar(RING, a, HG.MGY), s2Pos = ringAt(Math.PI / 2);
   const ring = hShape('s2', new THREE.TorusGeometry(RING, 0.7, 10, 120)); ring.rotation.x = Math.PI / 2; ring.position.y = HG.MGY;
   anchor('s2', ringAt(Math.PI / 2 + 0.5).add(V(0, -5, 0)));
   const local = !!L.byId.a0;
+  // without local regulatory centres the ring through the local managements is System Two's own
+  if (!local) { const outer = hShape('s2', new THREE.TorusGeometry(HG.MG, 1.3, 10, 160)); outer.rotation.x = Math.PI / 2; outer.position.y = HG.MGY; }
   const P = {};
   for (let k = 0; k < n; k++) {
     const a = hAngle(k, n), out = Math.PI / 2 - a;
@@ -3192,7 +3208,7 @@ function buildHemi() {
       hShape('a' + k, new THREE.TubeGeometry(new THREE.CatmullRomCurve3(hArc(HG.MG, a - half, a + half, HG.MGY, 24)), 48, 1.3, 10, false));
       P[k].s2 = hPolar(HG.MG, a + half * 0.55, HG.MGY);
       anchor('a' + k, P[k].s2.clone().add(V(0, -5, 0)));
-    } else P[k].s2 = hPolar(HG.MG, a, HG.MGY);
+    } else P[k].s2 = hPolar(HG.MG, a + Math.PI / n * 0.55, HG.MGY);
     const cid = lv.children['o' + k], child = cid && db.levels[cid];
     if (child || prefs.nested) {
       hNested.add('o' + k); hNested.add('m' + k);
@@ -4637,6 +4653,8 @@ function syncDiagramControls() {
   $('#stDiamond').setAttribute('aria-pressed', String(diamond));
   $('#s2Inside').setAttribute('aria-pressed', String(!bridge));
   $('#s2Bridge').setAttribute('aria-pressed', String(bridge));
+  $('#vfRibbon').setAttribute('aria-pressed', String(valueRibbons()));
+  $('#vfLine').setAttribute('aria-pressed', String(!valueRibbons()));
   $('#extS4cmd').checked = prefs.extS4cmd !== false;
   $('#extS14').checked = prefs.extS14 !== false;
   $('#localS2').checked = prefs.localS2 !== false;
@@ -4674,6 +4692,9 @@ $('#btnTheme').addEventListener('click', () => {
 });
 $('#s2Inside').addEventListener('click', () => { if (prefs.s2mode !== 'inside') { prefs.s2mode = 'inside'; save(); relayout(); } });
 $('#s2Bridge').addEventListener('click', () => { if (prefs.s2mode !== 'bridge') { prefs.s2mode = 'bridge'; save(); relayout(); } });
+const setValueFlows = v => { if ((prefs.valueFlows || 'ribbon') === v) return; prefs.valueFlows = v; save(); syncDiagramControls(); relayout(); if (typeof renderNet === 'function') renderNet(); };
+$('#vfRibbon').addEventListener('click', () => setValueFlows('ribbon'));
+$('#vfLine').addEventListener('click', () => setValueFlows('line'));
 $('#extS4cmd').addEventListener('change', e => { prefs.extS4cmd = e.target.checked; save(); relayout(); });
 $('#extS14').addEventListener('change', e => { prefs.extS14 = e.target.checked; save(); relayout(); });
 $('#diagShow').addEventListener('change', e => { prefs.diagShow = e.target.checked; save(); refreshVisuals(); updateDiagBadges(); });
@@ -4970,10 +4991,11 @@ function layFlows(list, posOf) {
     f.mid = quad(f.p0, c, f.p1, 0.5);
     let ax = f.p1[0] - c[0], ay = f.p1[1] - c[1];
     const al = Math.hypot(ax, ay) || 1; ax /= al; ay /= al;
-    // a broad arrowhead, as on the ribbons of the VSM; the ribbon stops at its base
-    const b = [f.p1[0] - ax * 13, f.p1[1] - ay * 13];
-    f.arrow = [f.p1, [b[0] - ay * 9, b[1] + ax * 9], [b[0] + ay * 9, b[1] - ax * 9]].map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
-    f.pEnd = [f.p1[0] - ax * 12, f.p1[1] - ay * 12];
+    // ribbons get a broad arrowhead and stop exactly at its base, so the fills never overlap; lines get the classic small head
+    const rib = valueRibbons(), hl = rib ? 12 : 10, hw = rib ? 8 : 5;
+    const b = [f.p1[0] - ax * hl, f.p1[1] - ay * hl];
+    f.arrow = [f.p1, [b[0] - ay * hw, b[1] + ax * hw], [b[0] + ay * hw, b[1] - ax * hw]].map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    f.pEnd = rib ? b : [f.p1[0] - ax * 4, f.p1[1] - ay * 4];
   }));
 }
 
@@ -5023,6 +5045,7 @@ function renderNetSvg() {
   const opsCol = lv.groupColors.ops || DEFAULT_GROUP_COLORS.ops;
   const isSel = (t, id) => netSel && netSel.t === t && netSel.id === id;
   const posOf = id => id === 'sif' ? sifPos(lv) : net.pos[id];
+  netSvg.classList.toggle('lines', !valueRibbons());
   netSvg.style.setProperty('--vflow', lv.groupColors.ops || DEFAULT_GROUP_COLORS.ops);
   out.push('<rect class="bg" x="' + vx + '" y="' + vy + '" width="' + vw + '" height="' + vh + '"/>');
   // the System-in-Focus: a white box holding its activities, or a black box

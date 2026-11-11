@@ -2,6 +2,8 @@
 
 An interactive 2D and 3D explorer for Stafford Beer's Viable System Model (VSM). It draws the canonical diagram, lifts it into a 3D model you can orbit, and lets you label, colour and step through the model's recursive levels to describe a real organization.
 
+Made by [Panagiotis Panagiotakopoulos](https://www.linkedin.com/in/panagio) of [Close the Loop](https://closetheloop.gr). The footer of the app carries the same credit, with the Close the Loop logo from its design system.
+
 Open `index.html` in a recent browser. Everything is in that one file; it loads three.js 0.128 and its OrbitControls from jsDelivr and the Archivo and IBM Plex Mono fonts from Google Fonts. Hosting the repository with GitHub Pages works as is.
 
 ## What it does

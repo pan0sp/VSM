@@ -1,0 +1,11 @@
+{
+  "name": "viable-system-explorer",
+  "private": true,
+  "description": "Interactive 2D/3D explorer for Stafford Beer's Viable System Model. The app is the single file index.html; this package only serves the browser checks.",
+  "scripts": {
+    "test": "node tests/run.js"
+  },
+  "devDependencies": {
+    "three": "0.128.0"
+  }
+}

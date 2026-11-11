@@ -11,12 +11,23 @@ Open `index.html` in a recent browser. Everything is in that one file; it loads 
 | Toggle 2D and 3D | The **2D / 3D** switch (or keys `2` and `3`) morphs one scene between the flat canonical diagram and the 3D model, with the camera swinging from face-on to an angled view. |
 | 3D navigation | Drag to rotate, right-drag or Shift-drag to pan, scroll or pinch to zoom. Scrolling zooms about the point under the pointer, which stays put. **Recentre** (bottom-right of the model, the toolbar, or `C`) brings the model back to dead centre, face-on as in 2D; in 3D the depth stays so you can rotate into it again. Click an element to select it, Shift-click to add more, then **Focus** (or `F`) to show only the selection and what connects directly to it; **Show all** or `Esc` brings everything back. Focusing folds the details pane away; closing the pane keeps the selection and focus, and **Show details** in the right-click menu reopens it. While focused, a small chip beside the level chip reads *Focused on …* with **Show all**; there is no other floating bar. In 2D, dragging pans. |
 | Element interaction | Every system, environment and channel is clickable. Hovering shows a tooltip; clicking opens the inspector with Beer's definition, examples, diagnostic questions, common pathologies and the element's connections, and dims everything not connected to it. |
-| Custom labels | Rename anything in the inspector or in the **Settings** tab's element list. Each element also takes free-text notes. Presets fill in a canonical set of labels or one of two worked examples. |
+| Custom labels | Rename anything in the inspector or in the **Settings** tab's element list. Each element also takes free-text notes. |
 | Recursion | Recursion runs only through System One. Each operation holds its own viable system, drawn inside the circle and turned 45 degrees. Scroll toward an operation to zoom into it; past a threshold it becomes the System-in-Focus, and zooming far out rises to the containing level. Double-click or **Open level n** does the same in one step. The breadcrumb trail, the level chip and the **Recursion** view always show which level is in focus. **Nested** keeps the inner systems visible at every zoom. |
 | Colours | Change any element's colour in the inspector or element list, and the four group colours (Environment, Operations, Metasystem, Channels) in the Settings tab. Child levels inherit their parent's group colours. |
 | Data flows | The **Flows** tab names what travels on each channel and in which direction; the moving dots follow those directions, and a coverage bar shows which channels carry nothing. Load the model company, fill gaps with standard flows, or (in the Claude artifact) describe any organization and let Claude map it. |
 
 Labels, colours, notes, levels and view settings are saved in the browser's local storage.
+
+## Models: new, open, save and examples
+
+The **Model** menu at the top left treats the whole model (every level, with its labels, colours, notes, flows, value networks and diagnosis) as one document:
+
+- **New blank model** starts again with Beer's own labels.
+- **Save to file** (`Ctrl S`) downloads the model as `name.vsm.json`. The file also carries the drawing conventions (square or diamond, System Two centre, local regulatory centres, the two extensions and how value flows are drawn), so it opens looking as it was saved. Personal settings such as the theme and the current view stay with the browser.
+- **Open from file** (`Ctrl O`), or dropping a `.json` file on the page, replaces the model with the saved one. Files are checked and repaired on the way in (missing parts filled, levels that no longer apply dropped); a file that holds no model is refused and nothing changes.
+- **Examples** open complete models: the model company with data flows, a regional hospital, a software company, and the café with its value network and a lower level for the brewing station.
+
+Each of these replaces the whole model, so each offers **Undo**. **Reset this level** at the bottom of the Settings tab clears only the level in focus. In the Claude artifact, saving asks the viewer to confirm the download.
 
 **Colour scheme** (Settings tab) recolours every level at once: *Environment–Operation–Management* (environment green, operations and the System One circle red, local managements and the metasystem blue) or *One colour per system* (Systems One to Five each keep one colour across levels). Individual colours can still be changed afterwards.
 
@@ -82,13 +93,13 @@ The **Value network** view (toolbar, or key `N`) maps System One before the VSM 
    - These flows appear, read-only, in the Flows tab and in the moving dots.
    - In the VSM, a local environment named this way lists its actors as chips, and its details pane lists them with their flows and an **Edit in the value network** button. Once the network has actors, a local environment no actor reaches is drawn faintly: it may be missing from the map, or the operation may not be a primary activity.
 
-In every view, wide pale ribbons are value flows, after the material-flow arrows of value-stream maps, and thin lines are Beer's cybernetic channels; **Value flows** in Settings switches them to thin lines like every other channel. Environmental intersects are left undrawn for now. Drag to move things. To draw a flow, drag the **+** handle on an element to another one, Shift-drag the element, press `L`, or use **Connect** or the right-click menu; dropping into empty space adds a customer (outputs side) or supplier (inputs side) there, already connected. Press Delete to remove the selection (with Undo). Select any activity, actor or flow to change its colour in the card; an activity's colour is its operation's colour in the VSM too. The **Labels preset** menu has a café example, with its value network and a lower level for the brewing station.
+In every view, wide pale ribbons are value flows, after the material-flow arrows of value-stream maps, and thin lines are Beer's cybernetic channels; **Value flows** in Settings switches them to thin lines like every other channel. Environmental intersects are left undrawn for now. Drag to move things. To draw a flow, drag the **+** handle on an element to another one, Shift-drag the element, press `L`, or use **Connect** or the right-click menu; dropping into empty space adds a customer (outputs side) or supplier (inputs side) there, already connected. Press Delete to remove the selection (with Undo). Select any activity, actor or flow to change its colour in the card; an activity's colour is its operation's colour in the VSM too. The **Model** menu's café example has a value network, and a lower level for the brewing station.
 
 ## Data flows and the model company
 
 Each channel has two sides, A and B, and every flow runs A to B, B to A, or both ways. The element inspector lists what reaches and leaves an element through its channels.
 
-- **Load model company** fills the model with Larchmere Cycles, a bicycle maker with three divisions. Level 0 flows are mapped by hand; its divisions (and one product line below them) are generated as recursions with standard flows.
+- **Load model company** (also under **Model › Examples**) replaces the model with Larchmere Cycles, a bicycle maker with three divisions. Level 0 flows are mapped by hand; its divisions (and one product line below them) are generated as recursions with standard flows.
 - **Fill gaps with standard flows** gives any level a neutral starting point per channel type.
 - **Map this level** (Claude artifact only) sends the description you type to Claude, which proposes operations, labels, flows for every channel and sub-operations one level down. Each operation's inspector also offers **Map it with Claude** for its own level, using the flows and names above it as context. Copies of the page opened outside claude.ai hide these buttons.
 

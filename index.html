@@ -388,6 +388,7 @@ button { cursor: pointer; }
 #hlabels .lbl.far { opacity: .45; }
 #hlabels .lbl { pointer-events: auto; cursor: pointer; }
 @media (max-width: 1560px) { #vHemi .dlong { display: none; } #vHemi .dshort { display: inline !important; } }
+@media (max-width: 1560px) { #btnModel .t, #btnFrame .t { display: none; } #btnModel, #btnFrame { padding-left: 9px; padding-right: 9px; } }
 .stepper { display: inline-flex; align-items: center; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
 .stepper button { border: 0; background: var(--surface-2); width: 30px; height: 28px; font-size: 16px; line-height: 1; color: var(--ink); }
 .stepper button:disabled { opacity: .35; cursor: default; }
@@ -1013,6 +1014,12 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
         <span class="brand-sub">Stafford Beer's VSM, in 2D and 3D</span>
       </div>
     </div>
+    <button class="tool" id="btnModel" type="button" aria-haspopup="menu" title="New, open, save and example models (Ctrl+O opens, Ctrl+S saves)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M1.8 4.2V12.8h12.4V5.6H8L6.6 4.2z"/></svg>
+      <span class="t">Model</span>
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="width:10px;height:10px"><path d="M4 6.5l4 4 4-4"/></svg>
+    </button>
+    <input type="file" id="fileOpen" accept=".json,application/json" hidden>
     <nav class="crumbs" id="crumbs" aria-label="Recursion trail"></nav>
     <div class="tools">
       <div class="seg" role="group" aria-label="View">
@@ -1069,17 +1076,6 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
             <output id="opCount" aria-live="polite">3</output>
             <button id="opPlus" type="button" aria-label="Add an operation">+</button>
           </div>
-        </div>
-        <div class="row">
-          <span>Labels preset</span>
-          <select class="inp" id="preset" aria-label="Apply a labels preset to this level">
-            <option value="">Choose…</option>
-            <option value="canonical">Canonical (Beer)</option>
-            <option value="example">Model company with data flows</option>
-            <option value="hospital">Example: regional hospital</option>
-            <option value="software">Example: software company</option>
-            <option value="cafe">Example: café, with its value network</option>
-          </select>
         </div>
       </div>
 
@@ -1144,9 +1140,9 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
       <div class="block">
         <div class="btn-row">
           <button class="btn" id="resetLevel" type="button">Reset this level</button>
-          <button class="btn warn" id="resetAll" type="button">Reset everything</button>
         </div>
         <div class="src" id="saveNote">Changes are saved in this browser.</div>
+        <div class="src">To start again, open an example, or keep a copy as a file, use the <b>Model</b> menu at the top.</div>
       </div>
     </section>
 
@@ -1184,6 +1180,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
     <section class="pane guide" id="pane-guide" role="tabpanel" aria-labelledby="tab-guide" hidden>
       <div class="block">
         <h3>Three views of one model</h3>
+        <p>The <b>Model</b> menu at the top left starts a blank model, opens one from a file, saves this one to a file (Ctrl S), and opens the worked examples as complete models. Each replaces the whole model and offers Undo.</p>
         <p>The toolbar switches between three views. <b>VSM</b> draws Beer's diagram in 2D or 3D. <b>Value network</b> maps the primary activities of System One, the actors around them and the flows between them. <b>Recursion</b> shows the hierarchy of viable systems, with the System-in-Focus marked. All three edit the same model, and the System-in-Focus is the same in each. This panel holds the settings and data: the Settings tab for the level, labels, conventions and colours, the Flows tab for what travels on each channel. <b>Method</b> in the toolbar shows the four steps (purpose, value network, recursion, VSM) beside whichever view is open. In every view, wide pale ribbons with broad arrowheads are value flows (operational linkages, and exchanges between an operation and its environment); thin lines are Beer's cybernetic channels. <b>Value flows</b> in Settings draws them as thin lines like every other channel instead. Environmental intersects are left undrawn for now.</p>
       </div>
       <div class="block">
@@ -2019,18 +2016,33 @@ function freshDb() {
   db.rootId = db.currentId = root.id;
 }
 
+/* make a stored or imported model safe to use: fill missing parts, drop what no longer applies */
+function normaliseDb(d) {
+  const obj = v => v && typeof v === 'object' && !Array.isArray(v) ? v : {};
+  d.levels = obj(d.levels);
+  Object.keys(d.levels).forEach(k => { if (!d.levels[k] || typeof d.levels[k] !== 'object') delete d.levels[k]; });
+  if (!d.levels[d.rootId]) throw new Error('This file has no top level.');
+  d.seq = Math.max(+d.seq || 0, ...Object.keys(d.levels).map(k => +String(k).replace(/\D/g, '') || 0));
+  Object.values(d.levels).forEach(l => {
+    ['flows', 'notes', 'labels', 'diag', 'colors', 'children'].forEach(f => { l[f] = obj(l[f]); });
+    Object.keys(l.labels).forEach(k => { if (typeof l.labels[k] !== 'string') delete l.labels[k]; });
+    l.opCount = clamp(Math.round(+l.opCount || 3), MIN_OPS, MAX_OPS);
+    l.groupColors = Object.assign({}, DEFAULT_GROUP_COLORS, obj(l.groupColors));
+    if (typeof l.name !== 'string') l.name = l.parent ? null : 'Organization';
+  });
+  // recursion runs only through System One: drop levels opened from any other system, and orphans
+  Object.values(d.levels).forEach(l => { if (l.parent && (!/^o\d+$/.test(l.parent.el) || !d.levels[l.parent.level])) { const p = d.levels[l.parent.level]; if (p) delete p.children[l.parent.el]; deleteSubtreeIn(d, l); delete d.levels[l.id]; } });
+  Object.values(d.levels).forEach(l => Object.keys(l.children).forEach(k => { if (!d.levels[l.children[k]]) delete l.children[k]; }));
+  if (!d.levels[d.currentId]) d.currentId = d.rootId;
+  return d;
+}
 function load() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) {
       const data = JSON.parse(raw);
       if (data && data.db && data.db.levels && data.db.levels[data.db.rootId]) {
-        db = data.db;
-        if (!db.levels[db.currentId]) db.currentId = db.rootId;
-        Object.values(db.levels).forEach(l => { l.flows = l.flows || {}; l.notes = l.notes || {}; l.labels = l.labels || {}; l.diag = l.diag || {}; });
-        // recursion runs only through System One: drop levels opened from any other system
-        Object.values(db.levels).forEach(l => { if (l.parent && !/^o\d+$/.test(l.parent.el)) { const p = db.levels[l.parent.level]; if (p) delete p.children[l.parent.el]; deleteSubtree(l); delete db.levels[l.id]; } });
-        if (!db.levels[db.currentId]) db.currentId = db.rootId;
+        db = normaliseDb(data.db);
         Object.assign(prefs, data.prefs || {});
         if (prefs.style === 'hemi') { prefs.style = 'square'; prefs.view = 'hemi'; }
         return true;
@@ -2051,7 +2063,6 @@ function save() {
 
 /* Label presets */
 const PRESETS = {
-  canonical: { ops: 3, name: null, labels: {} },
   hospital: {
     ops: 4, name: 'Regional hospital (example)',
     labels: {
@@ -2188,6 +2199,10 @@ const EXAMPLE = {
   ]
 };
 
+function deleteSubtreeIn(d, lv) {
+  Object.values(lv.children || {}).forEach(cid => { const c = d.levels[cid]; if (c) { deleteSubtreeIn(d, c); delete d.levels[cid]; } });
+  lv.children = {};
+}
 function deleteSubtree(lv) {
   Object.values(lv.children || {}).forEach(cid => { const c = db.levels[cid]; if (c) { deleteSubtree(c); delete db.levels[cid]; } });
   lv.children = {};
@@ -3472,7 +3487,7 @@ function centreOn(p) {
   const s = camState();
   camTween({ target: p, dist: s.dist, az: s.az, el: s.el }, 500);
 }
-function closeCtx() { ctx.hidden = true; ctxAt = null; }
+function closeCtx() { ctx.hidden = true; ctxAt = null; const mb = document.getElementById('btnModel'); if (mb) mb.setAttribute('aria-expanded', 'false'); }
 function openRemoveMenu(x, y, lv, k, kid) {
   const name = labelOf(lv, 'o' + k), opts = [];
   if (kid) { const n = countSubtree(kid); opts.push(['Remove lower levels', 'Keeps ' + name + '; removes the ' + (n > 1 ? n + ' levels' : 'level') + ' inside it', () => deleteLevel(kid.id)]); }
@@ -4599,54 +4614,12 @@ $('#scheme').addEventListener('change', e => {
   refreshVisuals(); renderAllPanels();
   $('#schemeNote').textContent = (key === 'default' ? 'Default colours' : key === 'eom' ? 'Environment–Operation–Management colours' : 'System colours') + ' applied to all ' + Object.keys(db.levels).length + (Object.keys(db.levels).length === 1 ? ' level' : ' levels') + '. Recolour anything to adjust.';
 });
-$('#preset').addEventListener('change', e => {
-  if (e.target.value === 'example') { e.target.value = ''; loadExample(); return; }
-  if (e.target.value === 'cafe') {
-    e.target.value = '';
-    lastRemoved = JSON.stringify(db);
-    applyCafe(level()); save();
-    selected = null; focusSet = null; netSel = null; netView = null;
-    const cam = camState(); buildScene(); setCam(cam); renderAllPanels(); camTween(fitState(), 600);
-    if (prefs.diagram !== 'net') showToast('Café loaded, with its value network and a lower level for the brewing station.', 'Open the value network', () => setDiagram('net'));
-    else offerUndo('Café loaded.');
-    return;
-  }
-  const p = PRESETS[e.target.value];
-  e.target.value = '';
-  if (!p) return;
-  const lv = level();
-  lv.labels = Object.assign({}, p.labels);
-  if (lv.parent) { if (p.name) setLevelName(lv, p.name.replace(' (example)', '')); }
-  else lv.name = p.name || 'Organization';
-  lv.opCount = p.ops;
-  pruneNet(lv);
-  save();
-  const cam = camState();
-  selected = null; focusSet = null;
-  buildScene(); setCam(cam);
-  renderAllPanels();
-  camTween(fitState(), 600);
-});
 $('#resetLevel').addEventListener('click', () => {
   const lv = level();
   lv.labels = {}; lv.colors = {}; lv.notes = {}; lv.flows = {}; lv.opCount = 3; delete lv.net; delete lv.purpose;
   lv.groupColors = Object.assign({}, lv.parent ? db.levels[lv.parent.level].groupColors : DEFAULT_GROUP_COLORS);
   if (!lv.parent) lv.name = 'Organization';
   save();
-  selected = null; focusSet = null;
-  buildScene(); renderAllPanels();
-  camTween(fitState(), 600);
-});
-let resetArmed = 0;
-$('#resetAll').addEventListener('click', e => {
-  const btn = e.currentTarget;
-  if (!resetArmed) {
-    btn.textContent = 'Click again to erase all levels';
-    resetArmed = setTimeout(() => { resetArmed = 0; btn.textContent = 'Reset everything'; }, 3500);
-    return;
-  }
-  clearTimeout(resetArmed); resetArmed = 0; btn.textContent = 'Reset everything';
-  freshDb(); save();
   selected = null; focusSet = null;
   buildScene(); renderAllPanels();
   camTween(fitState(), 600);
@@ -4720,26 +4693,133 @@ function armTwoStep(btn, idle, armed, action) {
 function hasUserContent() {
   return Object.values(db.levels).some(l => Object.keys(l.labels).length || levelHasFlows(l) || Object.keys(l.notes).length) || Object.keys(db.levels).length > 1;
 }
-function loadExample() {
-  const root = db.levels[db.rootId];
-  applySpec(root, EXAMPLE);
-  db.currentId = root.id;
-  save();
-  selected = null; focusSet = null;
-  buildScene(); renderAllPanels();
-  $('#aiBrief').value = EXAMPLE.brief;
-  camTween(fitState(), 600);
-  $('#flowsNote').textContent = 'Model company loaded. Level 0 flows were mapped by hand; the levels below follow the recursion and start from standard flows.';
+$('#btnExample').addEventListener('click', () => loadModel('example'));
+
+/* ---------- the model as a document: new, open, save, examples ---------- */
+const FILE_FORMAT = 'viable-system-explorer', FILE_VERSION = 1;
+// the drawing conventions travel with a model, so a file opens looking as it was saved
+const CONVENTIONS = ['style', 's2mode', 'localS2', 'extS4cmd', 'extS14', 'valueFlows'];
+const pickConventions = src => { const o = {}; CONVENTIONS.forEach(k => { if (src && src[k] !== undefined) o[k] = src[k]; }); return o; };
+const EXAMPLES = {
+  example: { name: 'Model company, with data flows', build: root => { applySpec(root, EXAMPLE); $('#aiBrief').value = EXAMPLE.brief; } },
+  hospital: { name: 'Regional hospital', build: root => applyPreset(root, PRESETS.hospital) },
+  software: { name: 'Software company', build: root => applyPreset(root, PRESETS.software) },
+  cafe: { name: 'Café, with its value network', build: root => applyCafe(root) }
+};
+function applyPreset(lv, p) {
+  lv.labels = Object.assign({}, p.labels);
+  lv.name = (p.name || 'Organization').replace(' (example)', '');
+  lv.opCount = p.ops;
+  pruneNet(lv);
 }
-(function () {
-  const btn = $('#btnExample');
-  let timer = 0;
-  btn.addEventListener('click', () => {
-    if (!hasUserContent() || timer) { clearTimeout(timer); timer = 0; btn.textContent = 'Load model company'; loadExample(); return; }
-    btn.textContent = 'Replace the whole model? Click again';
-    timer = setTimeout(() => { timer = 0; btn.textContent = 'Load model company'; }, 3500);
-  });
-})();
+function modelName() { const r = db.levels[db.rootId]; return (r && r.name) || 'Organization'; }
+// replace the whole model, keeping the previous one for Undo
+function replaceModel(next, msg, conventions) {
+  const before = { db: JSON.stringify(db), conv: pickConventions(prefs) };
+  const restore = () => { db = JSON.parse(before.db); Object.assign(prefs, before.conv); afterModelChange(); };
+  try {
+    db = next;
+    if (conventions) Object.assign(prefs, pickConventions(conventions));
+    afterModelChange();
+  } catch (err) {
+    restore();
+    showToast('That model could not be opened, so nothing changed.' + (err && err.message ? ' (' + err.message + ')' : ''), null, null, 7000);
+    return false;
+  }
+  showToast(msg, 'Undo', restore);
+  return true;
+}
+function afterModelChange() {
+  selected = null; focusSet = null; netSel = null; netView = null;
+  if (focusMode) exitFocus();
+  save(); syncDiagramControls();
+  buildScene(); renderAllPanels(); camTween(fitState(), 600);
+}
+function blankDb() { const keep = db; freshDb(); const d = db; db = keep; return d; }
+function loadModel(key) {
+  const ex = EXAMPLES[key]; if (!ex) return;
+  const keep = db; freshDb(); const d = db; ex.build(d.levels[d.rootId]); d.currentId = d.rootId; db = keep;
+  replaceModel(d, 'Opened the example: ' + ex.name + '.');
+}
+function newModel() { replaceModel(blankDb(), 'Started a blank model.'); }
+function fileText() {
+  return JSON.stringify({ format: FILE_FORMAT, version: FILE_VERSION, app: 'Viable System Explorer', saved: new Date().toISOString(),
+    name: modelName(), levels: Object.keys(db.levels).length, conventions: pickConventions(prefs), model: db }, null, 2);
+}
+const fileSlug = () => (modelName().normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'model') + '.vsm.json';
+const downloadsCap = window.claude && typeof window.claude.use === 'function' ? Promise.resolve(window.claude.use('downloads')).catch(() => null) : Promise.resolve(null);
+async function saveToFile() {
+  const text = fileText(), filename = fileSlug();
+  const dl = await Promise.race([downloadsCap, new Promise(r => setTimeout(() => r(null), 1500))]);
+  if (dl) {
+    try { await dl.save({ filename, data: text }); showToast('Saved ' + filename + '.'); }
+    catch (err) {
+      const code = err && err.code;
+      if (code === 'declined') return;
+      showToast(code === 'rate_limited' ? 'A save is already waiting for an answer.' : 'Saving a file is not available here.', null, null, 5000);
+    }
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+  a.download = filename; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  showToast('Saved ' + filename + ' to your downloads.');
+}
+// accepts a saved file, this browser's own storage format, or a bare model
+function parseModelFile(text) {
+  let data;
+  try { data = JSON.parse(text); } catch (e) { throw new Error('This is not a JSON file.'); }
+  if (!data || typeof data !== 'object') throw new Error('This file holds no model.');
+  if (data.format === FILE_FORMAT && data.version > FILE_VERSION) throw new Error('This file was saved by a newer version of the explorer.');
+  const m = data.format === FILE_FORMAT ? data.model : data.db ? data.db : data.levels ? data : null;
+  if (!m || typeof m !== 'object' || !m.levels) throw new Error('This file holds no Viable System Explorer model.');
+  return { db: normaliseDb(JSON.parse(JSON.stringify(m))), conventions: data.conventions || (data.prefs ? pickConventions(data.prefs) : null) };
+}
+function openText(text, filename) {
+  let parsed;
+  try { parsed = parseModelFile(text); }
+  catch (err) { showToast('Could not open ' + (filename || 'the file') + ': ' + err.message, null, null, 7000); return; }
+  const n = Object.keys(parsed.db.levels).length;
+  replaceModel(parsed.db, 'Opened ' + (filename || 'the file') + ' (' + n + (n === 1 ? ' level' : ' levels') + ').', parsed.conventions);
+}
+function openFile(file) {
+  if (!file) return;
+  if (file.size > 20 * 1024 * 1024) { showToast('That file is too large to be a model.'); return; }
+  const r = new FileReader();
+  r.onload = () => openText(String(r.result), file.name);
+  r.onerror = () => showToast('Could not read ' + file.name + '.');
+  r.readAsText(file);
+}
+$('#fileOpen').addEventListener('change', e => { openFile(e.target.files[0]); e.target.value = ''; });
+const openPicker = () => $('#fileOpen').click();
+function openModelMenu() {
+  const b = $('#btnModel').getBoundingClientRect(), n = Object.keys(db.levels).length;
+  const head = '<div class="ch"><span class="k">Model · ' + n + (n === 1 ? ' level' : ' levels') + '</span><b>' + esc(modelName()) + '</b></div>';
+  const items = [
+    { ic: '＋', text: 'New blank model', fn: newModel },
+    { ic: '↥', text: 'Open from file…', fn: openPicker, kbd: 'Ctrl O' },
+    { ic: '↧', text: 'Save to file', fn: saveToFile, kbd: 'Ctrl S' },
+    { sep: true }, { sub: 'Examples' }
+  ].concat(Object.keys(EXAMPLES).map(k => ({ ic: '◇', text: EXAMPLES[k].name, fn: () => loadModel(k) })));
+  showCtxMenu(b.left, b.bottom + 6, head, items, null);
+  $('#btnModel').setAttribute('aria-expanded', 'true');
+}
+$('#btnModel').addEventListener('click', () => { if (!ctx.hidden && ctxAt && ctxAt.model) { closeCtx(); return; } openModelMenu(); ctxAt.model = true; });
+window.addEventListener('keydown', e => {
+  if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === 's') { e.preventDefault(); saveToFile(); }
+  else if (k === 'o') { e.preventDefault(); openPicker(); }
+});
+// drop a saved model anywhere on the page to open it
+window.addEventListener('dragover', e => { if (e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')) e.preventDefault(); });
+window.addEventListener('drop', e => {
+  const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if (!f) return;
+  e.preventDefault();
+  if (/\.json$/i.test(f.name) || f.type === 'application/json') openFile(f); else showToast('Drop a saved model (.json) to open it.');
+});
 $('#btnSuggest').addEventListener('click', () => {
   const lv = level();
   let added = 0;

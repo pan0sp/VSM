@@ -605,6 +605,24 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 .mhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
 .mhead .eyebrow { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mhead .icon-btn { flex: none; }
+/* ---------- Laws layer ---------- */
+.laws-card { width: 300px; }
+.laws-card .lintro { margin: 0 0 6px; }
+.law { border-top: 1px solid var(--rule); }
+.law > button { display: flex; width: 100%; gap: 8px; align-items: baseline; text-align: left; background: none; border: 0; padding: 7px 0 6px; color: var(--ink); font: inherit; cursor: pointer; }
+.law > button .ln { flex: 1; font-weight: 600; font-size: 12.5px; }
+.law > button .ls { flex: none; font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-2); }
+.law > button:hover .ln { color: var(--accent); }
+.law.cur > button .ln { color: var(--accent); }
+.law .lbody { padding: 0 0 8px; font-size: 12.5px; line-height: 1.45; }
+.law .lbody p { margin: 0 0 6px; }
+.law .lbody .lq { color: var(--ink-2); }
+.law .lbody .lk { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); display: block; margin-top: 6px; }
+.lawlist { list-style: none; margin: 0; padding: 0; }
+.lawlist li { padding: 5px 0; border-top: 1px solid var(--rule); font-size: 12.5px; line-height: 1.4; }
+.lawlist li:first-child { border-top: 0; }
+.lawlist .linkish { font-weight: 600; text-align: left; }
+.lawlist .lq { display: block; color: var(--ink-2); margin-top: 2px; }
 .rec-head { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; padding: 58px 16px 10px; }
 .rec-head > div:first-child { max-width: 640px; font-size: 12.5px; color: var(--ink-2); }
 .rec-head b { display: block; font: 650 15px var(--f-display); color: var(--ink); margin-bottom: 2px; }
@@ -1034,7 +1052,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 .tgroup + .tgroup { padding-left: 10px; border-left: 1px solid var(--rule); }
 .app.netmode .tgroup.vsm-only + .tgroup { padding-left: 0; border-left: 0; }
 @media (max-width: 1440px) { .brand-sub { display: none; } .topbar { gap: 10px; } .tools { gap: 6px; } .tgroup + .tgroup { padding-left: 6px; } }
-@media (max-width: 1340px) { #dNet .dlong { display: none; } #dNet .dshort { display: inline !important; } #btnFlows .t, #btnNested .t { display: none; } }
+@media (max-width: 1340px) { #dNet .dlong { display: none; } #dNet .dshort { display: inline !important; } #btnFlows .t, #btnNested .t, #btnLaws .t { display: none; } }
 @media (max-width: 860px) { .tgroup + .tgroup { padding-left: 0; border-left: 0; } #btnPresent { display: none; } }
 
 /* ---------- Settings: advanced conventions folded away ---------- */
@@ -1050,6 +1068,7 @@ details.adv > .block + .block { margin-top: 20px; }
 .modal-card h3 { margin: 16px 0 6px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2); font-weight: 500; }
 .modal-card p { margin: 0 0 8px; font-size: 13.5px; line-height: 1.55; color: var(--ink); }
 .modal-card .lead { color: var(--ink-2); }
+.modal-card .lead2 { margin: 4px 0 0; font-weight: 600; }
 .modal-card a { color: var(--accent); }
 .modal-x { position: absolute; top: 14px; right: 14px; }
 .choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
@@ -1075,7 +1094,7 @@ details.adv > .block + .block { margin-top: 20px; }
 /* ---------- Presentation mode ---------- */
 .app.presenting { grid-template-rows: minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); grid-template-areas: "stage"; }
 .app.presenting .topbar, .app.presenting .foot, .app.presenting .side, .app.presenting .insp, .app.presenting .scrim,
-.app.presenting #methodCard, .app.presenting #netCard, .app.presenting .net-bar, .app.presenting .rec-head,
+.app.presenting #methodCard, .app.presenting #lawsCard, .app.presenting #netCard, .app.presenting .net-bar, .app.presenting .rec-head,
 .app.presenting .hint, .app.presenting .depth, .app.presenting .recentre, .app.presenting .overlay-tl { display: none !important; }
 .app.presenting .rec { right: 0; }
 .app.presenting .rec-scroll { padding-top: 40px; }
@@ -1142,6 +1161,10 @@ details.adv > .block + .block { margin-top: 20px; }
         <button class="tool vsm-only" id="btnNested" type="button" aria-pressed="false" title="Show the viable system nested inside each operation">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.3"/><circle cx="8" cy="9.2" r="2.2"/><path d="M8 3.6l1.6 1.8L8 7.2 6.4 5.4z"/></svg>
           <span class="t">Nested</span>
+        </button>
+        <button class="tool vsm-only" id="btnLaws" type="button" aria-pressed="false" title="Beer's laws of viable systems, and where each acts in the model (key L)">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v12M4.5 14h7"/><path d="M3 4.5h10"/><path d="M3 4.5L1.3 9h3.4zM13 4.5L11.3 9h3.4z"/></svg>
+          <span class="t">Laws</span>
         </button>
       </div>
       <div class="tgroup" role="group" aria-label="Present">
@@ -1384,6 +1407,7 @@ details.adv > .block + .block { margin-top: 20px; }
       <div class="net-card" id="netCard" aria-live="polite"></div>
     </div>
     <div class="net-card method-card" id="methodCard" hidden></div>
+    <div class="net-card method-card laws-card" id="lawsCard" role="region" aria-label="Laws" hidden></div>
     <div class="rec" id="rec" hidden>
       <div class="rec-head">
         <div><b>Recursion</b><span>Recursion runs only through System One: every operation contains a whole viable system. Click a level to make it the System-in-Focus; a dashed operation has no lower level yet. Level 0 is the main System-in-Focus: add levels above it, or set another level as 0, from ⋯ or right-click.</span></div>
@@ -1422,7 +1446,8 @@ details.adv > .block + .block { margin-top: 20px; }
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
       </button>
       <h2 id="welcomeTitle">Viable System Explorer</h2>
-      <p class="lead">Stafford Beer's Viable System Model, drawn in 2D and 3D. How would you like to start?</p>
+      <p class="lead">Welcome. This is a working tool for diagnosing real organizations with Stafford Beer's Viable System Model, not only a way to learn it. Map an organization's operations and management, flag what is missing or weak, and see which of Beer's laws apply where.</p>
+      <p class="lead2">How would you like to start?</p>
       <div class="choices">
         <button class="choice primary" type="button" id="wExplore"><b>Explore the model</b>Start from Beer's diagram. Click any element to read what it does, or press 1 to 5 to focus each system.</button>
         <button class="choice" type="button" id="wMap"><b>Map your organization</b>Name it, state its purpose and its operations, then follow the four steps of the method.</button>
@@ -1447,6 +1472,7 @@ details.adv > .block + .block { margin-top: 20px; }
             <kbd>E</kbd><span>Focus the environment; again for the future environment</span>
             <kbd>M</kbd><span>Focus the metasystem</span>
             <kbd>A</kbd><span>Focus the algedonic channel</span>
+            <kbd>L</kbd><span>Show or hide Beer's laws</span>
             <kbd>0</kbd><span>Show everything</span>
             <kbd>PageDown</kbd><span>Tour: environment, One to Five, then the whole</span>
             <kbd>PageUp</kbd><span>Tour: the step before</span>
@@ -1531,6 +1557,7 @@ details.adv > .block + .block { margin-top: 20px; }
       </div>
       <p class="summary" id="iSummary"></p>
       <div class="isec" id="iDiagSec"><h4>Diagnosis</h4><div id="iDiag"></div></div>
+      <div class="isec" id="iLawsSec" hidden><h4>Laws that apply here</h4><ul class="lawlist" id="iLaws"></ul></div>
       <div class="isec" id="iFlowSec"><h4>Data flows</h4><div id="iFlows"></div></div>
       <div class="isec" id="iNetSec" hidden><h4>In the value network</h4><div id="iNet"></div></div>
       <div class="isec" id="iIOSec"><h4>Information in and out</h4><ul class="io" id="iIO"></ul></div>
@@ -3208,8 +3235,9 @@ function setCam(s) {
    below. Framing keeps the model in the free part, so nothing it needs is drawn under a card. */
 function stageCover() {
   const w = stage.clientWidth || 800, narrow = matchMedia('(max-width: 860px)').matches;
-  const card = $('#methodCard'), present = $('#app').classList.contains('presenting');
-  const right = !narrow && !present && card && !card.hidden && w > 760 ? card.offsetWidth + 24 : 0;
+  const present = $('#app').classList.contains('presenting');
+  const card = ['#methodCard', '#lawsCard'].map(s => $(s)).find(c => c && !c.hidden && c.offsetWidth);
+  const right = !narrow && !present && card && w > 760 ? card.offsetWidth + 24 : 0;
   const top = narrow ? 0 : present ? 16 : 56;
   const hint = $('#hint'), bottom = narrow ? 0 : present ? 112 : hint && !hint.classList.contains('gone') ? 40 : 12;
   return { right, top, bottom };
@@ -4389,6 +4417,7 @@ function renderInspector() {
   renderLinks();
   renderRecursion();
   renderInspectorNet();
+  if (typeof renderInspectorLaws === 'function') renderInspectorLaws();
   if (wasHidden) $('.insp-body').scrollTop = 0;
 }
 /* A local environment or operation, seen from the value network: its actors and what they exchange */
@@ -5144,6 +5173,7 @@ window.addEventListener('keydown', e => {
     return;
   }
   if (systemKey(e)) { e.preventDefault(); return; }
+  if (e.key === 'l' || e.key === 'L') { setLaws(!prefs.laws); return; }
   if (e.key === 'h' || e.key === 'H') setView('hemi');
   else if (e.key === 'd' || e.key === 'D') setView(prefs.view === '2d' ? '3d' : '2d');
   else if (e.key === 'c' || e.key === 'C') recentre();
@@ -5500,8 +5530,9 @@ function renderMethod() {
   $('#btnMethod').setAttribute('aria-pressed', String(on));
   app.classList.toggle('method-on', on && view === 'rec');
   const card = $('#methodCard');
-  card.hidden = !on || view === 'net';
+  card.hidden = !on || view === 'net' || (view === 'vsm' && !!prefs.laws);
   if (!card.hidden && !card.contains(document.activeElement)) { card.innerHTML = methodHTML(view); wireMethod(card, view); }
+  if (typeof renderLaws === 'function') renderLaws();
 }
 function setMethod(on) { prefs.method = on; save(); renderMethod(); if (prefs.diagram === 'net') { renderNetCard(); netView = null; renderNet(); } }
 
@@ -5971,7 +6002,7 @@ function applyCafe(lv) {
    shortcut sheet, About, focus keys for each system, the tour and
    presentation mode
    ===================================================================== */
-const APP_VERSION = '1.0 (November 2026)';
+const APP_VERSION = '1.1 (November 2026)';
 const CITE_YEAR = 2026;
 const modals = ['welcome', 'keysSheet', 'about'];
 let modalReturn = null;
@@ -6126,7 +6157,10 @@ function renderCaption() {
   if (!isPresenting()) { c.innerHTML = ''; return; }
   const lv = level();
   let k = '', n = '', d = '';
-  if (sysAt && focusMode) {
+  if (lawAt && focusMode) {
+    const law = lawById(lawAt);
+    k = 'Law · ' + law.src; n = law.name; d = law.text;
+  } else if (sysAt && focusMode) {
     const spec = SYSTEM_KEYS[sysAt](), lab = labelOf(lv, spec.primary);
     k = spec.title; n = lab && lab !== spec.title ? lab : spec.title; d = spec.what;
   } else if (selected) {
@@ -6137,6 +6171,147 @@ function renderCaption() {
   }
   const step = sysAt && focusMode && tourAt >= 0 ? '<span class="cs">' + (tourAt + 1) + ' / ' + TOUR.length + '</span>' : '';
   c.innerHTML = step + '<div class="ck">' + esc(k) + '</div><div class="cn">' + esc(n) + '</div><div class="cd">' + esc(d) + '</div>';
+}
+
+/* =====================================================================
+   Laws: the laws Beer built the model on, and where each acts in it.
+   Statements are paraphrased; sources are given with each. Choosing a
+   law focuses the elements and channels it governs.
+   ===================================================================== */
+const LAWS = [
+  { id: 'rv', name: 'Law of Requisite Variety', src: 'Ashby, 1956',
+    text: 'Only variety can absorb variety. A regulator can hold a system steady only if it has at least as much variety as the disturbances it has to deal with.',
+    where: 'Across every boundary in the model: between each operation and its environment, between local management and its operation, and between the metasystem and System One. Variety is matched by attenuating what comes in and amplifying what goes out.',
+    q: 'Where does the variety facing a unit exceed what it can absorb, and what attenuates or amplifies it?',
+    match: [/^(e|o|m)\d+$/, /^(eo|om)\d+$/, /^(env|s3|rb|ci)$/] },
+  { id: 'p1', name: 'First principle of organization', src: 'Beer, The Heart of Enterprise, 1979',
+    text: 'Managerial, operational and environmental varieties, diffusing through an institutional system, tend to equate. They should be designed to do so with minimum damage to people and to cost.',
+    where: 'Each environment, operation and local management in System One, and the loops that join them.',
+    q: 'Is the balance between environment, operation and management designed, or left to settle at a cost to people?',
+    match: [/^(e|o|m)\d+$/, /^(eo|om)\d+$/] },
+  { id: 'p2', name: 'Second principle of organization', src: 'Beer, The Heart of Enterprise, 1979',
+    text: 'The four directional channels carrying information between the management unit, the operation and the environment must each have a higher capacity to transmit information relevant to selecting variety than the originating subsystem has to generate it in the same time.',
+    where: 'The channels between each environment and its operation, and between each operation and its local management, in both directions.',
+    q: 'Can each channel carry what its source generates, in time, or does information pile up and get lost?',
+    match: [/^(eo|om)\d+$/] },
+  { id: 'p3', name: 'Third principle of organization', src: 'Beer, The Heart of Enterprise, 1979',
+    text: 'Wherever information carried on a channel crosses a boundary, it undergoes transduction, and the variety of the transducer must be at least equivalent to the variety of the channel.',
+    where: 'Every channel that crosses a boundary: from the environments into the operations, from the operations into the metasystem, and from the future environment into System Four.',
+    q: 'Who or what translates information at this boundary, and does the translation strip out what matters?',
+    match: [/^eo\d+$/, /^(c4f|rb|ci|aud|alg|s14)$/] },
+  { id: 'p4', name: 'Fourth principle of organization', src: 'Beer, The Heart of Enterprise, 1979',
+    text: 'The operation of the first three principles must be cyclically maintained through time, without hiatus or lags.',
+    where: 'Every channel: the loops must keep running, and keep pace with what they regulate.',
+    q: 'Which loops run only at the annual plan or the monthly meeting, and what happens between them?',
+    match: [/^(eo|om|ms|oo)\d+$/, /^(c2|c23|ci|rb|aud|h34|c45|s5h|c4f|s4cmd|s14|alg)$/] },
+  { id: 'a1', name: 'First axiom of management', src: 'Beer, The Heart of Enterprise, 1979',
+    text: 'The sum of horizontal variety disposed by the operational elements equals the sum of vertical variety disposed on the six vertical components of corporate cohesion.',
+    where: 'The operations and their local managements on one side; on the other, the six vertical channels: the Resource Bargain, Corporate Intervention, System Two, Three-Star audit, the operational linkages and the environmental intersects.',
+    q: 'Do the vertical channels together carry enough variety to hold the operations together, or does cohesion depend on one of them?',
+    match: [/^(o|m|a)\d+$/, /^(oo|ms)\d+$/, /^(s2|s3|s3s|c2|c23|rb|ci|aud)$/] },
+  { id: 'a2', name: 'Second axiom of management', src: 'Beer, The Heart of Enterprise, 1979',
+    text: 'The variety disposed by System Three, resulting from the first axiom, equals the variety disposed by System Four.',
+    where: 'System Three, System Four and the homeostat between them.',
+    q: 'Which side of the Three–Four homeostat usually prevails, and is that by design?',
+    match: [/^(s3|s4|h34)$/] },
+  { id: 'a3', name: 'Third axiom of management', src: 'Beer, The Heart of Enterprise, 1979',
+    text: 'The variety disposed by System Five equals the residual variety generated by the second axiom.',
+    where: 'System Five, monitoring the Three–Four homeostat and linked to System Four.',
+    q: 'Does System Five absorb only what Three and Four cannot settle between them, or does it reach further down?',
+    match: [/^(s5|s5h|h34|c45)$/] },
+  { id: 'lc', name: 'Law of cohesion for multiple recursions', src: 'Beer, The Heart of Enterprise, 1979',
+    text: 'The System One variety accessible to System Three of one recursion equals the variety disposed by the sum of the metasystems of the recursion below, for every recursive pair.',
+    where: 'System Three and the local managements, which are the metasystems of the next recursion down, with the channels between them.',
+    q: 'Does System Three see as much of System One as the local managements below manage, or is it guessing?',
+    match: [/^m\d+$/, /^(s3|s3s|rb|ci|aud|c2|c23)$/] },
+  { id: 'rs', name: 'Recursive system theorem', src: 'Beer, The Heart of Enterprise, 1979',
+    text: 'In a recursive organizational structure, any viable system contains, and is contained in, a viable system.',
+    where: 'Each operation with its local management is a viable system one level down; the whole is an operation one level up. Turn on Nested, or open the Recursion view, to see it.',
+    q: 'Which viable system contains this one, and which viable systems does it contain?',
+    match: [/^(o|m)\d+$/, /^(sys1|meta)$/] },
+  { id: 'gr', name: 'Good regulator theorem', src: 'Conant and Ashby, 1970',
+    text: 'Every good regulator of a system must be a model of that system.',
+    where: 'System Four, which must hold a model of the system and its environment, and System Three, which regulates the operations from the inside.',
+    q: 'What model of the organization does management actually work from, and how up to date is it?',
+    match: [/^(s3|s4|h34|c4f)$/] }
+];
+const lawById = id => LAWS.find(l => l.id === id);
+function lawIds(law) {
+  if (!L) return [];
+  const all = L.els.map(e => e.id).concat(L.chans.map(c => c.id));
+  return all.filter(id => law.match.some(re => re.test(id)));
+}
+const lawsFor = id => LAWS.filter(l => l.match.some(re => re.test(id)));
+let lawAt = null;
+const lawsOn = () => !!prefs.laws && !['net', 'rec'].includes(prefs.diagram);
+function lawsHTML() {
+  const lv = level();
+  return '<div class="mhead"><div class="eyebrow" style="margin:0">Laws · ' + esc(levelName(lv)) + '</div><button class="icon-btn" type="button" data-lclose aria-label="Hide the laws" style="width:26px;height:26px">×</button></div>' +
+    '<p class="src lintro">The laws Beer built the model on, paraphrased. Choose one to see where it acts in this model.</p>' +
+    LAWS.map(l => {
+      const cur = l.id === lawAt;
+      return '<div class="law' + (cur ? ' cur' : '') + '"><button type="button" data-law="' + l.id + '" aria-expanded="' + cur + '"><span class="ln">' + esc(l.name) + '</span><span class="ls">' + esc(l.src.replace(/^.*, (\d{4})$/, '$1')) + '</span></button>' +
+        (cur ? '<div class="lbody"><p>' + esc(l.text) + '</p><span class="lk">Where it acts</span><p>' + esc(l.where) + '</p><span class="lk">Ask</span><p class="lq">' + esc(l.q) + '</p><p class="src" style="margin:0">' + esc(l.src) + '</p></div>' : '') + '</div>';
+    }).join('');
+}
+function renderLaws() {
+  const card = $('#lawsCard'), on = lawsOn();
+  $('#btnLaws').setAttribute('aria-pressed', String(!!prefs.laws));
+  card.hidden = !on;
+  if (!on) return;
+  card.innerHTML = lawsHTML();
+  card.querySelector('[data-lclose]').addEventListener('click', () => setLaws(false));
+  card.querySelectorAll('[data-law]').forEach(b => b.addEventListener('click', () => { if (lawAt === b.dataset.law) clearLaw(); else showLaw(b.dataset.law); }));
+}
+function setLaws(on) {
+  prefs.laws = on; save();
+  if (!on && lawAt) clearLaw(true);
+  renderMethod();
+  if (!focusMode) camTween(fitState(), 500);
+}
+/* focus the elements and channels a law governs, with what they connect as context */
+function showLaw(id) {
+  const law = lawById(id); if (!law || busy) return;
+  if (prefs.diagram !== 'vsm') setDiagram('vsm');
+  if (!prefs.laws) { prefs.laws = true; save(); }
+  const ids = lawIds(law);
+  if (!ids.length) return;
+  sysAt = null; lawAt = id;
+  selSet = new Set(); selected = null;
+  focusSet = new Set(ids);
+  ids.forEach(x => { const c = L.chanById[x]; if (c) c.ends.forEach(e => focusSet.add(e)); });
+  focusMode = true; tip.hidden = true;
+  renderFocusBar(); refreshVisuals(); renderInspector(); renderMethod(); renderCaption();
+  requestAnimationFrame(frameFocus);
+}
+function clearLaw(quiet) {
+  lawAt = null;
+  if (focusMode) exitFocus();
+  if (!quiet) renderMethod();
+}
+// a law's focus ends when something else is chosen
+const _selectL = select;
+select = function (id, opts) { const had = lawAt; lawAt = null; _selectL(id, opts); if (had) renderLaws(); };
+const _exitFocusL = exitFocus;
+exitFocus = function () { const had = lawAt; lawAt = null; _exitFocusL(); if (had) renderLaws(); };
+const _focusSystemL = focusSystem;
+focusSystem = function (k) { const had = lawAt; lawAt = null; _focusSystemL(k); if (had) renderLaws(); };
+$('#btnLaws').addEventListener('click', () => setLaws(!prefs.laws));
+// while a law is shown, the focus bar names it
+const _renderFocusBarL = renderFocusBar;
+renderFocusBar = function () {
+  if (!(lawAt && focusMode)) { _renderFocusBarL(); return; }
+  const bar = $('#focusBar'); bar.hidden = false;
+  bar.innerHTML = '<span class="fx">Where <b>' + esc(lawById(lawAt).name) + '</b> acts</span><button type="button" class="go" id="fExit" title="Show everything again (Esc)">Show all</button>';
+  $('#fExit').onclick = exitFocus;
+};
+// the details pane lists the laws that act on the selected element or channel
+function renderInspectorLaws() {
+  const id = selected, sec = $('#iLawsSec');
+  const ls = id ? lawsFor(id) : [];
+  sec.hidden = !ls.length;
+  $('#iLaws').innerHTML = ls.map(l => '<li><button class="linkish" type="button" data-law="' + l.id + '">' + esc(l.name) + '</button><span class="lq">' + esc(l.q) + '</span></li>').join('');
+  $('#iLaws').querySelectorAll('[data-law]').forEach(b => b.addEventListener('click', () => showLaw(b.dataset.law)));
 }
 
 /* ---------- the hint bar fades once the model has been used ---------- */

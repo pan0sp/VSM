@@ -36,6 +36,7 @@ An interactive explorer for Stafford Beer's Viable System Model (VSM). The user,
 - Examples are complete models under the Model menu; each replacement of the model offers Undo.
 - Licence (decided Nov 2026): code AGPL-3.0-or-later (`LICENSE`), own text and examples CC BY-SA 4.0, name and logo reserved. No sign-in gate. About dialog holds version (`APP_VERSION`), licences and citation; bump the version there when releasing.
 - First visit opens in 2D with panels closed and the welcome card (three entry choices). Keys: `1`–`5`, `*`, `E` (twice: future), `M`, `A`, `0` focus systems; `D` toggles 2D/3D (no longer `2`/`3`); `PageUp`/`PageDown` tour; `P` presentation mode (dark, full screen, caption, larger labels); `?` shortcut sheet. Toolbar groups: views, layers, present plus a ⋯ menu (theme, shortcuts, start screen, about).
+- Laws are paraphrased, each with its source; do not add a law without a source. Welcome card states the positioning: a tool to diagnose real organizations, not only to learn the VSM.
 - Framing (`fitState`, `hemiFit`) keeps the model clear of the Method card, level chip, hint bar and caption via `stageCover()`.
 
 ## Checks
@@ -58,7 +59,7 @@ Look at screenshots after visual changes: most regressions here are visual.
 
 Agreed next steps, in order:
 1. Hemispheres step 2: continuous zoom-through recursion. Then step 3, diagnosis silhouettes and the homeostat balance; step 4, live channels and algedonic latency; step 5, operations-room cameras; step 6, printable export.
-2. From the November 2026 review (steps 1 and 2, licence, fixes, presentation mode and shortcuts, are done): step 3 a Laws layer, step 4 a Variety layer, step 5 Measures (the triple index in System One; check *Brain of the Firm* pp. 163-166). Other review ideas not yet built: "Laws that apply here" in the details pane, a privacy-light visit counter and own-domain hosting.
+2. From the November 2026 review (steps 1 and 2, licence, fixes, presentation mode and shortcuts, are done): step 3 the Laws layer (done Nov 18: `LAWS` in the "Laws" section before Boot, key `L`, Laws card shares the Method card's slot, "Laws that apply here" in the details pane), step 4 a Variety layer, step 5 Measures (the triple index in System One; check *Brain of the Firm* pp. 163-166). Other review ideas not yet built: a privacy-light visit counter and own-domain hosting.
 3. App foundations, as proposed (Panos has not yet picked one): a library of several models in the browser; splitting `index.html` into modules with a build that still emits one file; running `npm test` in GitHub Actions; PNG/SVG export of the current view.
 
 Open questions and known issues:

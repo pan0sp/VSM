@@ -22,12 +22,16 @@ Labels, colours, notes, levels and view settings are saved in the browser's loca
 
 ## Starting, presenting and shortcuts
 
-- **First visit.** The app opens in 2D with the panels closed and offers three ways in: explore the model, map your organization (opens Settings and the Method), or open one of the examples. Later visits return to where you left off. **Start screen** in the **⋯** menu brings the choices back.
+- **First visit.** A welcome card says what the app is for (diagnosing real organizations with the VSM, not only learning it). The app opens in 2D with the panels closed and offers three ways in: explore the model, map your organization (opens Settings and the Method), or open one of the examples. Later visits return to where you left off. **Start screen** in the **⋯** menu brings the choices back.
 - **Focus keys.** `1` to `5` focus Systems One to Five, `*` System Three-Star, `E` the environment (press again for the future environment), `M` the metasystem, `A` the algedonic channel, and `0` shows everything again. `D` switches 2D and 3D, `H` opens the Hemispheres view.
 - **Tour.** `PageDown` and `PageUp` step through the environment, Systems One to Five with Three-Star, and the whole model, so a presenter's clicker drives it.
 - **Presentation mode** (`P`, or **Present** in the toolbar) hides the toolbar and panels, goes full screen and dark, enlarges labels for a projector at 1280×720, and shows a caption with the name and a one-line description of whatever is in focus. `Esc` leaves focus, then presentation mode.
 - **Shortcut sheet.** `?` lists every key. The hint bar at the bottom of the model fades after first use.
 - The toolbar is grouped as views, layers and presenting; the theme, the shortcut sheet and **About** sit in the **⋯** menu. Settings lead with the name, purpose and operations; the drawing conventions are folded under **Advanced**.
+
+## Laws
+
+**Laws** in the toolbar (key `L`) lists the laws Beer built the model on, paraphrased, with their sources: Ashby's Law of Requisite Variety; the four principles of organization, the three axioms of management, the law of cohesion for multiple recursions and the recursive system theorem from *The Heart of Enterprise* (1979); and Conant and Ashby's good regulator theorem. Choosing a law focuses the elements and channels it governs and gives a diagnostic question. The details pane of any element or channel lists the laws that apply there.
 
 ## Licence
 

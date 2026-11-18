@@ -10,7 +10,7 @@ Open `index.html` in a recent browser. Everything is in that one file; it loads 
 
 | Requirement | How the explorer handles it |
 | --- | --- |
-| Toggle 2D and 3D | The **2D / 3D** switch (or keys `2` and `3`) morphs one scene between the flat canonical diagram and the 3D model, with the camera swinging from face-on to an angled view. |
+| Toggle 2D and 3D | The **2D / 3D** switch (or key `D`) morphs one scene between the flat canonical diagram and the 3D model, with the camera swinging from face-on to an angled view. |
 | 3D navigation | Drag to rotate, right-drag or Shift-drag to pan, scroll or pinch to zoom. Scrolling zooms about the point under the pointer, which stays put. **Recentre** (bottom-right of the model, the toolbar, or `C`) brings the model back to dead centre, face-on as in 2D; in 3D the depth stays so you can rotate into it again. Click an element to select it, Shift-click to add more, then **Focus** (or `F`) to show only the selection and what connects directly to it; **Show all** or `Esc` brings everything back. Focusing folds the details pane away; closing the pane keeps the selection and focus, and **Show details** in the right-click menu reopens it. While focused, a small chip beside the level chip reads *Focused on …* with **Show all**; there is no other floating bar. In 2D, dragging pans. |
 | Element interaction | Every system, environment and channel is clickable. Hovering shows a tooltip; clicking opens the inspector with Beer's definition, examples, diagnostic questions, common pathologies and the element's connections, and dims everything not connected to it. |
 | Custom labels | Rename anything in the inspector or in the **Settings** tab's element list. Each element also takes free-text notes. |
@@ -19,6 +19,25 @@ Open `index.html` in a recent browser. Everything is in that one file; it loads 
 | Data flows | The **Flows** tab names what travels on each channel and in which direction; the moving dots follow those directions, and a coverage bar shows which channels carry nothing. Load the model company, fill gaps with standard flows, or (in the Claude artifact) describe any organization and let Claude map it. |
 
 Labels, colours, notes, levels and view settings are saved in the browser's local storage.
+
+## Starting, presenting and shortcuts
+
+- **First visit.** The app opens in 2D with the panels closed and offers three ways in: explore the model, map your organization (opens Settings and the Method), or open one of the examples. Later visits return to where you left off. **Start screen** in the **⋯** menu brings the choices back.
+- **Focus keys.** `1` to `5` focus Systems One to Five, `*` System Three-Star, `E` the environment (press again for the future environment), `M` the metasystem, `A` the algedonic channel, and `0` shows everything again. `D` switches 2D and 3D, `H` opens the Hemispheres view.
+- **Tour.** `PageDown` and `PageUp` step through the environment, Systems One to Five with Three-Star, and the whole model, so a presenter's clicker drives it.
+- **Presentation mode** (`P`, or **Present** in the toolbar) hides the toolbar and panels, goes full screen and dark, enlarges labels for a projector at 1280×720, and shows a caption with the name and a one-line description of whatever is in focus. `Esc` leaves focus, then presentation mode.
+- **Shortcut sheet.** `?` lists every key. The hint bar at the bottom of the model fades after first use.
+- The toolbar is grouped as views, layers and presenting; the theme, the shortcut sheet and **About** sit in the **⋯** menu. Settings lead with the name, purpose and operations; the drawing conventions are folded under **Advanced**.
+
+## Licence
+
+- **Code:** [GNU Affero General Public License v3.0 or later](LICENSE). Anyone may use, study, change and share it; anyone who offers a changed version to others, including as a hosted web page, must share the changed source under the same licence.
+- **Text, examples and documentation** (the knowledge base, guide, examples and this README): [Creative Commons Attribution-ShareAlike 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Quotations from Stafford Beer's books remain under their own copyright.
+- **Name and logo:** the name *Viable System Explorer* and the Close the Loop logo are not covered by either licence.
+
+**About and licence** in the footer (also in the **⋯** menu) shows the version, both licences and how to cite the app:
+
+> Panagiotakopoulos, P. (2026). *Viable System Explorer* (Version 1.0) [Computer software]. Close the Loop.
 
 ## Models: new, open, save and examples
 

@@ -1,0 +1,75 @@
+// The first visit, the fixes from the November review, the focus keys and presentation mode.
+const { chromium } = require('playwright'); const fs = require('fs'); const { DEP, PAGE } = require('./lib');
+const ok = (c, m) => console.log((c ? 'ok   ' : 'FAIL ') + m);
+const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => { const u = new URL(r.request().url()); r.fulfill({ body: fs.readFileSync(DEP + u.pathname.replace('/npm/three@0.128.0', '')), contentType: 'application/javascript' }); }); await cx.route('https://fonts.**/**', r => r.abort()); };
+(async () => {
+  const b = await chromium.launch(); const errs = [];
+  const cx = await b.newContext({ viewport: { width: 1280, height: 720 } }); await route(cx);
+  const pg = await cx.newPage(); pg.on('pageerror', e => errs.push(e.stack));
+  await pg.goto(PAGE); await pg.waitForTimeout(2200);
+  const st = () => pg.evaluate(() => ({ cls: document.getElementById('app').className, v2: document.getElementById('v2d').getAttribute('aria-pressed') }));
+  ok(await pg.isVisible('#welcome'), 'first visit shows the welcome choices');
+  let s = await st();
+  ok(s.v2 === 'true' && /side-closed/.test(s.cls) && await pg.isHidden('#methodCard'), 'opens in 2D with the panels closed');
+  const tb = await pg.evaluate(() => { const r = [...document.querySelectorAll('.topbar > *')].filter(e => e.offsetParent).map(e => e.getBoundingClientRect()); return Math.max(...r.map(x => x.bottom)) - Math.min(...r.map(x => x.top)); });
+  ok(tb < 44, 'toolbar fits one row at 1280x720 (' + Math.round(tb) + 'px)');
+  await pg.click('#wExamples [data-ex="cafe"]'); await pg.waitForTimeout(1200);
+  ok(await pg.isHidden('#welcome'), 'an example closes the welcome');
+  await pg.click('#toast button:last-child').catch(() => {});
+  // review bugs
+  await pg.click('#btnSide'); await pg.waitForTimeout(300);
+  const plus = await pg.evaluate(() => { const p = document.getElementById('opPlus').getBoundingClientRect(), side = document.getElementById('side').getBoundingClientRect(); return p.width > 20 && p.right <= side.right - 4; });
+  ok(plus, 'operations stepper: + is whole and inside the panel');
+  ok(await pg.isVisible('#levelPurpose'), 'Settings lead with name, purpose and operations');
+  const names = await pg.evaluate(() => [...document.querySelectorAll('#labels .lbl')].filter(d => /^1[A-F]$/.test((d.querySelector('.code') || {}).textContent)).every(d => d.querySelector('.nm').style.display !== 'none'));
+  ok(names, '2D café: every operation keeps its name');
+  const inStage = await pg.evaluate(() => { const st = document.getElementById('stage').getBoundingClientRect(); const l = [...document.querySelectorAll('#labels .lbl')].find(d => /System One/.test(d.textContent)); const r = l.getBoundingClientRect(), h = document.getElementById('hint').getBoundingClientRect(); return r.bottom <= st.bottom && (r.bottom <= h.top || r.right < h.left || r.left > h.right); });
+  ok(inStage, '2D café: System One label clear of the stage edge and the hint bar');
+  await pg.click('#btnMethod'); await pg.click('#dNet'); await pg.waitForTimeout(600);
+  const steps = await pg.evaluate(() => [...document.querySelectorAll('#netCard .mstep h4')].map(h => getComputedStyle(h).display + '|' + h.textContent));
+  ok(steps.length === 4 && steps.every(x => x.startsWith('flex')) && !steps.some(x => /RecursionRecursion|VSMVSM/.test(x)), 'value network: Method card steps are laid out, no doubled labels');
+  await pg.click('#dRec'); await pg.waitForTimeout(600);
+  const rec = await pg.evaluate(() => { const c = document.getElementById('methodCard').getBoundingClientRect(), sc = document.querySelector('.rec-scroll').getBoundingClientRect(); return sc.right <= c.left + 2; });
+  ok(rec, 'recursion: the tree scrolls beside the Method card, not under it');
+  await pg.click('#dVsm'); await pg.waitForTimeout(800); await pg.click('#btnMethod'); await pg.click('#btnSide'); await pg.waitForTimeout(400);
+  // keys
+  await pg.keyboard.press('3'); await pg.waitForTimeout(900);
+  ok(await pg.evaluate(() => /Shift manager/.test(document.getElementById('focusBar').textContent)), 'key 3 focuses System Three');
+  ok((await st()).v2 === 'true', 'key 3 no longer switches to 3D');
+  await pg.keyboard.press('e'); await pg.waitForTimeout(700); await pg.keyboard.press('e'); await pg.waitForTimeout(700);
+  ok(await pg.evaluate(() => /EF/.test(document.getElementById('focusBar').textContent)), 'E twice focuses the future environment');
+  await pg.keyboard.press('0'); await pg.waitForTimeout(700);
+  ok(await pg.isHidden('#focusBar'), '0 shows everything');
+  await pg.keyboard.press('d'); await pg.waitForTimeout(1500);
+  ok((await st()).v2 === 'false', 'D switches to 3D');
+  const fs3 = await pg.evaluate(() => Math.min(...[...document.querySelectorAll('#labels .lbl .code')].filter(c => c.offsetParent && getComputedStyle(c.closest('.lbl')).visibility !== 'hidden').map(c => parseFloat(getComputedStyle(c).fontSize))));
+  ok(fs3 >= 11, '3D labels at least 11px (' + fs3 + ')');
+  await pg.keyboard.press('?'); await pg.waitForTimeout(300);
+  ok(await pg.isVisible('#keysSheet'), '? opens the shortcut sheet');
+  await pg.keyboard.press('Escape'); await pg.waitForTimeout(200);
+  ok(await pg.isHidden('#keysSheet'), 'Esc closes it');
+  // presenting
+  await pg.keyboard.press('p'); await pg.waitForTimeout(900);
+  s = await st();
+  ok(/presenting/.test(s.cls) && await pg.isHidden('.topbar') && await pg.isVisible('#caption'), 'P presents: toolbar hidden, caption shown');
+  ok(await pg.evaluate(() => document.documentElement.getAttribute('data-theme') === 'dark'), 'presentation mode is dark');
+  await pg.keyboard.press('PageDown'); await pg.waitForTimeout(900);
+  ok(/environment/i.test(await pg.textContent('#caption')), 'PageDown starts the tour at the environment');
+  await pg.keyboard.press('PageDown'); await pg.waitForTimeout(900);
+  ok(/System One/.test(await pg.textContent('#caption')), 'PageDown steps to System One');
+  const big = await pg.evaluate(() => Math.min(...[...document.querySelectorAll('#labels .lbl .code')].filter(c => c.offsetParent).map(c => parseFloat(getComputedStyle(c).fontSize))));
+  ok(big >= 14, 'presentation labels are larger (' + big + ')');
+  await pg.screenshot({ path: process.env.SP + '/shots/present-1280.png' });
+  await pg.keyboard.press('Escape'); await pg.waitForTimeout(700); await pg.keyboard.press('Escape'); await pg.waitForTimeout(700);
+  ok(!/presenting/.test((await st()).cls) && await pg.isVisible('.topbar'), 'Esc leaves focus, then presentation mode');
+  // about and the hint
+  await pg.click('#footAbout'); await pg.waitForTimeout(300);
+  ok(/AGPL/.test(await pg.textContent('#about')) && /CC|Creative Commons/.test(await pg.textContent('#about')), 'About names both licences');
+  await pg.keyboard.press('Escape');
+  await pg.mouse.click(640, 300); await pg.waitForTimeout(5800);
+  ok(await pg.evaluate(() => document.getElementById('hint').classList.contains('gone')), 'the hint bar fades after first use');
+  await pg.reload(); await pg.waitForTimeout(2000);
+  ok(await pg.isHidden('#welcome') && await pg.evaluate(() => document.getElementById('hint').classList.contains('gone')), 'a return visit skips the welcome and the hint');
+  console.log('errors', errs);
+  await b.close();
+})();

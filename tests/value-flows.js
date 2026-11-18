@@ -1,15 +1,15 @@
-const { chromium } = require('playwright'); const fs = require('fs'); const { DEP, PAGE } = require('./lib');
+const { chromium } = require('playwright'); const fs = require('fs'); const { DEP, PAGE } = require('./lib'); const { settingsOpen } = require('./lib');
 const ok = (c, m) => console.log((c ? 'ok   ' : 'FAIL ') + m);
 (async () => {
   const b = await chromium.launch(); const cx = await b.newContext({ viewport: { width: 1440, height: 900 } });
   await cx.route('https://cdn.jsdelivr.net/**', r => { const u = new URL(r.request().url()); r.fulfill({ body: fs.readFileSync(DEP + u.pathname.replace('/npm/three@0.128.0', '')), contentType: 'application/javascript' }); });
   await cx.route('https://fonts.**/**', r => r.abort());
   const pg = await cx.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.stack));
-  await pg.goto(PAGE); await pg.waitForTimeout(2500);
+  await pg.goto(PAGE); await pg.waitForTimeout(2500); await settingsOpen(pg);
   await pg.click('#btnModel'); await pg.click('#ctx button:has-text("Café")'); await pg.waitForTimeout(800);
   await pg.click('#toast button:last-child').catch(() => {});
   if (await pg.$eval('#btnMethod', e => e.getAttribute('aria-pressed') === 'true')) await pg.click('#btnMethod');
-  await pg.keyboard.press('2'); await pg.waitForTimeout(1500);
+  await pg.click('#v2d'); await pg.waitForTimeout(1500);
   await pg.screenshot({ path: process.env.SP + '/shots/v-2d.png', clip: { x: 640, y: 500, width: 460, height: 360 } });
   await pg.click('#vHemi'); await pg.waitForTimeout(1600);
   await pg.screenshot({ path: process.env.SP + '/shots/v-hemi.png' });
@@ -19,7 +19,7 @@ const ok = (c, m) => console.log((c ? 'ok   ' : 'FAIL ') + m);
   await pg.click('#vfLine'); await pg.waitForTimeout(900);
   ok(await pg.$eval('#vfLine', e => e.getAttribute('aria-pressed') === 'true'), 'Lines toggle pressed');
   await pg.screenshot({ path: process.env.SP + '/shots/v-hemi-lines.png' });
-  await pg.keyboard.press('2'); await pg.waitForTimeout(1500);
+  await pg.click('#v2d'); await pg.waitForTimeout(1500);
   await pg.screenshot({ path: process.env.SP + '/shots/v-2d-lines.png', clip: { x: 640, y: 500, width: 460, height: 360 } });
   await pg.click('text=Value network'); await pg.waitForTimeout(900);
   ok(await pg.$eval('#netSvg', e => e.classList.contains('lines')).catch(() => 'nosvg'), 'net in lines mode');

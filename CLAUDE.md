@@ -18,8 +18,8 @@ An interactive explorer for Stafford Beer's Viable System Model (VSM). The user,
 
 ## Shape of the code
 
-- The app is one file, `index.html` (about 5,800 lines): CSS, markup, then one classic `<script>`. three.js r128 and OrbitControls load from cdn.jsdelivr; nothing else is external. No build step.
-- The script is split by banner comments (`/* ===== … */`). In order: Helpers; Knowledge base (`KB`, what each element and channel is, after Beer); Canonical layout (`buildLayout`, 2D world units reused by 3D); Model data (`db`, levels, `load`/`save`/`normaliseDb`); Data flows (standard flows, the model company `EXAMPLE`, `PRESETS`); Theme; 3D scene (`buildScene`, `updateGeometry`, `refreshVisuals`); Labels overlay; Camera and view transitions (`setView`, `camTween`, `fitState`); Hemispheres (`buildHemi`, `hemiRefresh`, `HG` geometry constants); Picking; Recursion (`dive`, `goToLevel`, zoom-through); Panels; Wiring (event listeners, the Model menu, Claude mapping); Value network (SVG); Boot.
+- The app is one file, `index.html` (about 6,100 lines): CSS, markup, then one classic `<script>`. three.js r128 and OrbitControls load from cdn.jsdelivr; nothing else is external. No build step.
+- The script is split by banner comments (`/* ===== … */`). In order: Helpers; Knowledge base (`KB`, what each element and channel is, after Beer); Canonical layout (`buildLayout`, 2D world units reused by 3D); Model data (`db`, levels, `load`/`save`/`normaliseDb`); Data flows (standard flows, the model company `EXAMPLE`, `PRESETS`); Theme; 3D scene (`buildScene`, `updateGeometry`, `refreshVisuals`); Labels overlay; Camera and view transitions (`setView`, `camTween`, `fitState`); Hemispheres (`buildHemi`, `hemiRefresh`, `HG` geometry constants); Picking; Recursion (`dive`, `goToLevel`, zoom-through); Panels; Wiring (event listeners, the Model menu, Claude mapping); Value network (SVG); Start, presenting and shortcuts (welcome, About, focus keys, tour, presentation mode); Boot.
 - State: `db = { seq, rootId, currentId, scheme, levels }`. Each level has `opCount`, `labels`, `colors`, `groupColors`, `notes`, `flows`, `diag`, `children` (keyed by operation id `o0`…), optional `net` (value network) and `purpose`. Element ids: `o0…` operations, `m0…` local managements, `a0…` local System Two units, `e0…` local environments, `s2 s3 s3s s4 s5`, `env`, `fut`, `meta`, `sys1`. Channel ids are in `buildLayout`.
 - `prefs` (view, diagram, theme, conventions) and `db` are saved together in localStorage under `vsm-explorer:v1`. Saved files (`*.vsm.json`, format `viable-system-explorer` v1) carry `model` plus `conventions` (style, s2mode, localS2, extS4cmd, extS14, valueFlows). Old storage must keep loading: add migrations in `load`/`normaliseDb`, never break the format.
 - Views: `prefs.diagram` is `vsm | net | rec`; within VSM, `prefs.view` is `2d | 3d | hemi`. Hemispheres has its own scene (`hscene`/`hroot`) built from clones of the classic elements.
@@ -34,6 +34,9 @@ An interactive explorer for Stafford Beer's Viable System Model (VSM). The user,
 - Nested models show only when Nested is on.
 - Recursion runs only through System One. Level numbers are relative to the level set as L0 (`db.refId`).
 - Examples are complete models under the Model menu; each replacement of the model offers Undo.
+- Licence (decided Nov 2026): code AGPL-3.0-or-later (`LICENSE`), own text and examples CC BY-SA 4.0, name and logo reserved. No sign-in gate. About dialog holds version (`APP_VERSION`), licences and citation; bump the version there when releasing.
+- First visit opens in 2D with panels closed and the welcome card (three entry choices). Keys: `1`–`5`, `*`, `E` (twice: future), `M`, `A`, `0` focus systems; `D` toggles 2D/3D (no longer `2`/`3`); `PageUp`/`PageDown` tour; `P` presentation mode (dark, full screen, caption, larger labels); `?` shortcut sheet. Toolbar groups: views, layers, present plus a ⋯ menu (theme, shortcuts, start screen, about).
+- Framing (`fitState`, `hemiFit`) keeps the model clear of the Method card, level chip, hint bar and caption via `stageCover()`.
 
 ## Checks
 
@@ -55,9 +58,11 @@ Look at screenshots after visual changes: most regressions here are visual.
 
 Agreed next steps, in order:
 1. Hemispheres step 2: continuous zoom-through recursion. Then step 3, diagnosis silhouettes and the homeostat balance; step 4, live channels and algedonic latency; step 5, operations-room cameras; step 6, printable export.
-2. App foundations, as proposed (Panos has not yet picked one): a library of several models in the browser; splitting `index.html` into modules with a build that still emits one file; running `npm test` in GitHub Actions; PNG/SVG export of the current view.
+2. From the November 2026 review (steps 1 and 2, licence, fixes, presentation mode and shortcuts, are done): step 3 a Laws layer, step 4 a Variety layer, step 5 Measures (the triple index in System One; check *Brain of the Firm* pp. 163-166). Other review ideas not yet built: "Laws that apply here" in the details pane, a privacy-light visit counter and own-domain hosting.
+3. App foundations, as proposed (Panos has not yet picked one): a library of several models in the browser; splitting `index.html` into modules with a build that still emits one file; running `npm test` in GitHub Actions; PNG/SVG export of the current view.
 
 Open questions and known issues:
+- The GitHub repository is private, so About points to the page itself as its source rather than to GitHub. If the repository goes public, add its link to About.
 - Overlapping local environments: operations are spaced evenly round the ring, which will not fit overlaps. One idea is to order operations by shared actors. Undecided.
 - Against the skills and lecture notes: lecture slide 10 labels conflict with the skills; recursion numbering differs; the two extension channels are on by default; Beer's archetypes are missing.
 - The code `EF` is used both for the future environment and for the sixth local environment.

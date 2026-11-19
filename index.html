@@ -5129,24 +5129,7 @@ function fileText() {
 }
 const fileSlug = () => (modelName().normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'model') + '.vsm.json';
 const downloadsCap = window.claude && typeof window.claude.use === 'function' ? Promise.resolve(window.claude.use('downloads')).catch(() => null) : Promise.resolve(null);
-async function saveToFile() {
-  const text = fileText(), filename = fileSlug();
-  const dl = await Promise.race([downloadsCap, new Promise(r => setTimeout(() => r(null), 1500))]);
-  if (dl) {
-    try { await dl.save({ filename, data: text }); showToast('Saved ' + filename + '.'); }
-    catch (err) {
-      const code = err && err.code;
-      if (code === 'declined') return;
-      showToast(code === 'rate_limited' ? 'A save is already waiting for an answer.' : 'Saving a file is not available here.', null, null, 5000);
-    }
-    return;
-  }
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
-  a.download = filename; document.body.appendChild(a); a.click();
-  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
-  showToast('Saved ' + filename + ' to your downloads.');
-}
+async function saveToFile() { await offerFile(fileSlug(), fileText(), 'application/json'); }
 // accepts a saved file, this browser's own storage format, or a bare model
 function parseModelFile(text) {
   let data;
@@ -5181,6 +5164,11 @@ function openModelMenu() {
     { ic: '＋', text: 'New blank model', fn: newModel },
     { ic: '↥', text: 'Open from file…', fn: openPicker, kbd: 'Ctrl O' },
     { ic: '↧', text: 'Save to file', fn: saveToFile, kbd: 'Ctrl S' },
+    { sep: true }, { sub: 'Export' },
+    { ic: '▣', text: 'Image of this view (PNG)', fn: () => exportView('png') },
+    { ic: '▣', text: 'Image of this view (SVG)', fn: () => exportView('svg') },
+    { ic: '▤', text: 'Findings table (CSV)', fn: () => exportFindings('csv') },
+    { ic: '▤', text: 'Findings report (HTML)', fn: () => exportFindings('html') },
     { sep: true }, { sub: 'Examples' }
   ].concat(Object.keys(EXAMPLES).map(k => ({ ic: '◇', text: EXAMPLES[k].name, fn: () => loadModel(k) })));
   showCtxMenu(b.left, b.bottom + 6, head, items, null);
@@ -6098,11 +6086,253 @@ function applyCafe(lv) {
 }
 
 /* =====================================================================
+   Export: the view in focus as an image (PNG, or SVG with live text),
+   and the findings of every level as a table (CSV) or a printable report
+   ===================================================================== */
+const EXPORT_CREDIT = 'Made with the Viable System Explorer · vsm.closetheloop.gr';
+// offer a file: through Claude's save prompt inside claude.ai, as a browser download elsewhere
+async function offerFile(filename, data, mime) {
+  const dl = await Promise.race([downloadsCap, new Promise(r => setTimeout(() => r(null), 1500))]);
+  if (dl) {
+    try { await dl.save({ filename, data }); showToast('Saved ' + filename + '.'); return true; }
+    catch (err) {
+      const code = err && err.code;
+      if (code !== 'declined') showToast(code === 'rate_limited' ? 'A save is already waiting for an answer.' : 'Saving a file is not available here.', null, null, 5000);
+      return false;
+    }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(data instanceof Blob ? data : new Blob([data], { type: mime }));
+  a.download = filename; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  showToast('Saved ' + filename + ' to your downloads.');
+  return true;
+}
+const exportSlug = () => fileSlug().replace(/\.vsm\.json$/, '');
+const viewSlug = () => prefs.diagram === 'net' ? 'network' : prefs.view === 'hemi' ? 'hemispheres' : prefs.view;
+const viewTitle = () => levelName(level()) + ' · Level ' + levelNo(level()) + ' · ' + (prefs.diagram === 'net' ? (netBlack() ? 'Value network, black box' : 'Value network') : prefs.view === 'hemi' ? 'Hemispheres' : prefs.view === '3d' ? 'VSM in 3D' : 'VSM');
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// the WebGL picture, rendered once more at a higher pixel ratio
+function glSnapshot(scale) {
+  const pr = renderer.getPixelRatio(), w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setPixelRatio(scale); renderer.setSize(w, h, false);
+  renderer.render(isHemi() ? hscene : scene, camera);
+  const url = canvas.toDataURL('image/png');
+  renderer.setPixelRatio(pr); renderer.setSize(w, h, false); dirty = true;
+  return url;
+}
+// the label overlay as boxes and words, in stage coordinates, so both PNG and SVG can draw it
+function labelPieces(root) {
+  const o = stage.getBoundingClientRect(), halo = cssVar('--halo') || '#ffffff';
+  const boxes = [], words = [];
+  const opacityOf = el => { let a = 1; for (let e = el; e && e !== stage; e = e.parentElement) a *= +getComputedStyle(e).opacity; return a; };
+  const clipOf = el => { for (let e = el; e && e !== root; e = e.parentElement) if (getComputedStyle(e).overflow === 'hidden') return e.getBoundingClientRect(); return null; };
+  root.querySelectorAll('*').forEach(el => {
+    if (!el.getClientRects().length) return;
+    const cs = getComputedStyle(el), bg = cs.backgroundColor;
+    if (!bg || bg === 'transparent' || /rgba\(.*,\s*0\)$/.test(bg)) return;
+    const r = el.getBoundingClientRect(), op = opacityOf(el);
+    if (op < 0.02 || !r.width) return;
+    boxes.push({ x: r.left - o.left, y: r.top - o.top, w: r.width, h: r.height, r: Math.min(parseFloat(cs.borderTopLeftRadius) || 0, r.height / 2), fill: bg, op });
+  });
+  const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let n;
+  while ((n = tw.nextNode())) {
+    const el = n.parentElement;
+    if (!n.textContent.trim() || !el || !el.getClientRects().length) continue;
+    const cs = getComputedStyle(el); if (cs.visibility === 'hidden') continue;
+    const op = opacityOf(el); if (op < 0.02) continue;
+    const clip = clipOf(el), re = /\S+/g;
+    const font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+    const strike = /line-through/.test(cs.textDecorationLine || cs.textDecoration);
+    const glow = cs.textShadow && cs.textShadow !== 'none';
+    let m, cut = false;
+    const first = words.length;
+    while ((m = re.exec(n.textContent))) {
+      const rg = document.createRange(); rg.setStart(n, m.index); rg.setEnd(n, m.index + m[0].length);
+      const b = rg.getClientRects()[0]; if (!b || !b.width) continue;
+      if (clip && (b.bottom > clip.bottom + 1 || b.top < clip.top - 1 || b.right > clip.right + 2)) { cut = true; continue; }
+      words.push({ t: m[0], x: b.left - o.left, y: b.top - o.top, w: b.width, h: b.height, font, size: parseFloat(cs.fontSize), family: cs.fontFamily, weight: cs.fontWeight, style: cs.fontStyle, color: cs.color, op, strike, halo: glow ? halo : null });
+    }
+    // a name cut short on screen ends in an ellipsis, as it does there
+    if (cut && words.length > first) words[words.length - 1].t += '…';
+  }
+  return { boxes, words };
+}
+const visibleLabelRoot = () => isHemi() ? $('#hlabels') : $('#labels');
+function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+const FOOT = 30;   // the strip under the picture: what it shows, and the credit the licence asks for
+function drawFooter(ctx, w, h) {
+  ctx.fillStyle = cssVar('--surface') || '#ffffff'; ctx.fillRect(0, h, w, FOOT);
+  ctx.fillStyle = cssVar('--rule') || '#dddddd'; ctx.fillRect(0, h, w, 1);
+  ctx.fillStyle = cssVar('--ink-2') || '#555555'; ctx.font = '600 12px ' + (cssVar('--f-body') || 'sans-serif'); ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left'; ctx.fillText(viewTitle(), 12, h + FOOT / 2);
+  ctx.textAlign = 'right'; ctx.font = '12px ' + (cssVar('--f-body') || 'sans-serif'); ctx.fillText(EXPORT_CREDIT, w - 12, h + FOOT / 2);
+  ctx.textAlign = 'left';
+}
+const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+
+// the value network: its SVG, standalone, with the page's styles written onto each element
+const SVG_PROPS = ['fill', 'fill-opacity', 'stroke', 'stroke-width', 'stroke-opacity', 'stroke-dasharray', 'stroke-linecap', 'stroke-linejoin', 'opacity', 'font-family', 'font-size', 'font-weight', 'font-style', 'letter-spacing', 'text-anchor', 'dominant-baseline', 'paint-order', 'display', 'visibility', 'marker-start', 'marker-end', 'text-transform'];
+function netSvgText(withFooter) {
+  const src = netSvg, r = src.getBoundingClientRect(), w = Math.round(r.width), h = Math.round(r.height);
+  const clone = src.cloneNode(true), a = src.querySelectorAll('*'), b = clone.querySelectorAll('*');
+  a.forEach((el, i) => {
+    const cs = getComputedStyle(el), st = SVG_PROPS.map(p => { const v = cs.getPropertyValue(p); return v ? p + ':' + v : ''; }).filter(Boolean).join(';');
+    b[i].setAttribute('style', st); b[i].removeAttribute('class');
+  });
+  // the selection and the editing handles are not part of the picture
+  clone.querySelectorAll('[data-handle], .nhandle, .handle').forEach(x => x.remove());
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clone.setAttribute('width', w); clone.setAttribute('height', h + (withFooter ? FOOT : 0));
+  const vb = src.getAttribute('viewBox');
+  if (vb) { const v = vb.split(/[\s,]+/).map(Number); clone.setAttribute('viewBox', v[0] + ' ' + v[1] + ' ' + v[2] + ' ' + (v[3] * (h + (withFooter ? FOOT : 0)) / h)); }
+  else clone.setAttribute('viewBox', '0 0 ' + w + ' ' + (h + (withFooter ? FOOT : 0)));
+  clone.removeAttribute('role');
+  const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  const box = vb ? vb.split(/[\s,]+/).map(Number) : [0, 0, w, h];
+  bg.setAttribute('x', box[0]); bg.setAttribute('y', box[1]); bg.setAttribute('width', box[2]); bg.setAttribute('height', box[3] * (h + FOOT) / h);
+  bg.setAttribute('fill', cssVar('--stage') || '#f4f2ee');
+  clone.insertBefore(bg, clone.firstChild);
+  if (withFooter) {
+    const k = vb ? box[2] / w : 1, y0 = box[1] + box[3];
+    clone.insertAdjacentHTML('beforeend', footerSvg(box[0], y0, box[2], k));
+  }
+  return { text: '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(clone), w, h };
+}
+function footerSvg(x0, y0, w, k) {
+  const f = (cssVar('--f-body') || 'sans-serif').replace(/"/g, "'");
+  return '<g><rect x="' + x0 + '" y="' + y0 + '" width="' + w + '" height="' + FOOT * k + '" fill="' + (cssVar('--surface') || '#fff') + '"/>' +
+    '<rect x="' + x0 + '" y="' + y0 + '" width="' + w + '" height="' + k + '" fill="' + (cssVar('--rule') || '#ddd') + '"/>' +
+    '<text x="' + (x0 + 12 * k) + '" y="' + (y0 + FOOT * k / 2) + '" dominant-baseline="central" style="font:600 ' + 12 * k + 'px ' + f + ';fill:' + (cssVar('--ink-2') || '#555') + '">' + esc(viewTitle()) + '</text>' +
+    '<text x="' + (x0 + w - 12 * k) + '" y="' + (y0 + FOOT * k / 2) + '" text-anchor="end" dominant-baseline="central" style="font:' + 12 * k + 'px ' + f + ';fill:' + (cssVar('--ink-2') || '#555') + '">' + esc(EXPORT_CREDIT) + '</text></g>';
+}
+
+async function viewPng(scale) {
+  scale = scale || 2;
+  const w = stage.clientWidth, h = stage.clientHeight;
+  const cv = document.createElement('canvas'); cv.width = Math.round(w * scale); cv.height = Math.round((h + FOOT) * scale);
+  const ctx = cv.getContext('2d'); ctx.scale(scale, scale);
+  if (prefs.diagram === 'net') {
+    const s = netSvgText(true);
+    const img = await loadImg('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s.text));
+    ctx.drawImage(img, 0, 0, w, h + FOOT);
+    return cv;
+  }
+  ctx.fillStyle = cssVar('--stage') || '#f4f2ee'; ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(await loadImg(glSnapshot(scale)), 0, 0, w, h);
+  const p = labelPieces(visibleLabelRoot());
+  p.boxes.forEach(bx => { ctx.globalAlpha = bx.op; ctx.fillStyle = bx.fill; roundRect(ctx, bx.x, bx.y, bx.w, bx.h, bx.r); ctx.fill(); });
+  ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  p.words.forEach(t => {
+    ctx.globalAlpha = t.op; ctx.font = t.font;
+    const y = t.y + t.h / 2;
+    if (t.halo) { ctx.strokeStyle = t.halo; ctx.lineWidth = 3.5; ctx.strokeText(t.t, t.x, y); }
+    ctx.fillStyle = t.color; ctx.fillText(t.t, t.x, y);
+    if (t.strike) ctx.fillRect(t.x, y, t.w, 1);
+  });
+  ctx.globalAlpha = 1;
+  drawFooter(ctx, w, h);
+  return cv;
+}
+function viewSvg() {
+  if (prefs.diagram === 'net') return netSvgText(true).text;
+  const w = stage.clientWidth, h = stage.clientHeight, p = labelPieces(visibleLabelRoot());
+  const a = (v, n) => n + '="' + String(v).replace(/"/g, "'") + '"';
+  const parts = ['<?xml version="1.0" encoding="UTF-8"?>',
+    '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="' + w + '" height="' + (h + FOOT) + '" viewBox="0 0 ' + w + ' ' + (h + FOOT) + '">',
+    '<title>' + esc(viewTitle()) + '</title>',
+    '<rect width="' + w + '" height="' + h + '" fill="' + (cssVar('--stage') || '#f4f2ee') + '"/>',
+    // the shapes and channels are a picture; every label above them stays text
+    '<image width="' + w + '" height="' + h + '" href="' + glSnapshot(2) + '"/>'];
+  p.boxes.forEach(b => parts.push('<rect ' + [a(b.x.toFixed(1), 'x'), a(b.y.toFixed(1), 'y'), a(b.w.toFixed(1), 'width'), a(b.h.toFixed(1), 'height'), a(b.r, 'rx'), a(b.fill, 'fill'), a(b.op.toFixed(2), 'opacity')].join(' ') + '/>'));
+  p.words.forEach(t => {
+    const st = 'font-family:' + t.family.replace(/"/g, "'") + ';font-size:' + t.size + 'px;font-weight:' + t.weight + ';font-style:' + t.style + ';fill:' + t.color +
+      (t.halo ? ';stroke:' + t.halo + ';stroke-width:3.5px;stroke-linejoin:round;paint-order:stroke' : '') + (t.strike ? ';text-decoration:line-through' : '');
+    parts.push('<text ' + [a(t.x.toFixed(1), 'x'), a((t.y + t.h / 2).toFixed(1), 'y'), a('central', 'dominant-baseline'), a(t.op.toFixed(2), 'opacity'), a(st, 'style')].join(' ') + '>' + esc(t.t) + '</text>');
+  });
+  parts.push(footerSvg(0, h, w, 1), '</svg>');
+  return parts.join('\n');
+}
+const canExportView = () => prefs.diagram !== 'rec';
+async function exportView(kind) {
+  if (!canExportView()) { showToast('Images can be taken of the VSM and the value network. Switch to one of them first.'); return; }
+  const name = exportSlug() + '-l' + String(levelNo(level())).replace('−', 'm') + '-' + viewSlug();
+  try {
+    if (kind === 'svg') { await offerFile(name + '.svg', viewSvg(), 'image/svg+xml'); return; }
+    const cv = await viewPng(2);
+    const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+    await offerFile(name + '.png', blob, 'image/png');
+  } catch (err) {
+    showToast('The image could not be made here.' + (err && err.message ? ' (' + err.message + ')' : ''), null, null, 6000);
+  }
+}
+
+// findings: every flagged element and channel, level by level, from the top of the hierarchy down
+function levelsInOrder() {
+  const out = [], walk = lv => { if (!lv) return; out.push(lv); Object.keys(lv.children || {}).sort((a, b) => opIdx(a) - opIdx(b)).forEach(k => walk(db.levels[lv.children[k]])); };
+  walk(db.levels[db.rootId]);
+  Object.values(db.levels).forEach(lv => { if (!out.includes(lv)) out.push(lv); });
+  return out;
+}
+const FINDING_COLS = [
+  ['level', 'Level'], ['system', 'System in focus'], ['code', 'Code'], ['element', 'Element'], ['kind', 'Kind'], ['finding', 'Finding'], ['evidence', 'Evidence']
+];
+function findingsRows() {
+  const rows = [];
+  levelsInOrder().forEach(lv => {
+    const LL = buildLayout(lv.opCount, FULL_OPTS);
+    Object.keys(lv.diag || {}).forEach(id => {
+      const d = lv.diag[id]; if (!d || !DIAG[d.s] || !(LL.byId[id] || LL.chanById[id])) return;
+      const isCh = !!LL.chanById[id], kb = KB[typeOfId(LL, id)] || {};
+      rows.push({ level: levelNo(lv), system: levelName(lv), code: codeOf(lv, id), element: labelOf(lv, id), kind: kb.kind || (isCh ? 'Channel' : ''), finding: diagName(d.s, isCh), evidence: d.note || '', _s: d.s, _lv: lv });
+    });
+  });
+  return rows;
+}
+const csvCell = v => { const s = String(v == null ? '' : v); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+function findingsCsv() {
+  const rows = findingsRows();
+  return '﻿' + [FINDING_COLS.map(c => c[1])].concat(rows.map(r => FINDING_COLS.map(c => r[c[0]]))).map(r => r.map(csvCell).join(',')).join('\r\n') + '\r\n';
+}
+async function findingsReport() {
+  const rows = findingsRows(), when = new Date();
+  let img = '';
+  if (canExportView()) { try { img = (await viewPng(2)).toDataURL('image/png'); } catch (e) { img = ''; } }
+  const byLevel = new Map(); rows.forEach(r => { if (!byLevel.has(r._lv)) byLevel.set(r._lv, []); byLevel.get(r._lv).push(r); });
+  const sections = Array.from(byLevel.entries()).map(([lv, rs]) =>
+    '<h2>Level ' + esc(levelNo(lv)) + ' · ' + esc(levelName(lv)) + '</h2>' + (lv.purpose ? '<p class="purpose">' + esc(lv.purpose) + '</p>' : '') +
+    '<table><thead><tr><th>Code</th><th>Element</th><th>Finding</th><th>Evidence</th></tr></thead><tbody>' +
+    rs.map(r => '<tr><td class="code">' + esc(r.code) + '</td><td>' + esc(r.element) + '<small>' + esc(r.kind) + '</small></td><td><span class="dg" style="background:' + DIAG[r._s].color + '">' + DIAG[r._s].glyph + '</span>' + esc(r.finding) + '</td><td>' + (r.evidence ? esc(r.evidence) : '<span class="none">No evidence recorded</span>') + '</td></tr>').join('') +
+    '</tbody></table>').join('');
+  const html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + esc(modelName()) + ': findings</title>' +
+    '<style>:root{--navy:#141b38;--gold:#a07a0e;--ink:#1d2333;--ink2:#5a6072;--rule:#d9d6cf}' +
+    'body{margin:0;background:#fbfaf7;color:var(--ink);font:14px/1.5 "Open Sans",system-ui,sans-serif}main{max-width:980px;margin:0 auto;padding:32px 20px 48px}' +
+    'h1{font:700 26px/1.2 Raleway,system-ui,sans-serif;color:var(--navy);margin:0 0 4px}h2{font:700 17px/1.3 Raleway,system-ui,sans-serif;color:var(--navy);margin:28px 0 6px}' +
+    '.meta{color:var(--ink2);margin:0 0 18px}.purpose{color:var(--ink2);margin:0 0 8px;font-style:italic}img{max-width:100%;border:1px solid var(--rule);border-radius:6px}' +
+    'table{width:100%;border-collapse:collapse;margin-top:6px}th,td{text-align:left;vertical-align:top;padding:7px 8px;border-bottom:1px solid var(--rule)}th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink2)}' +
+    'td small{display:block;color:var(--ink2);font-size:12px}.code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:600;white-space:nowrap}' +
+    '.dg{display:inline-grid;place-items:center;min-width:1.5em;height:1.5em;border-radius:99px;color:#fff;font:700 11px ui-monospace,monospace;margin-right:6px}.none{color:var(--ink2);font-style:italic}' +
+    'footer{margin-top:32px;color:var(--ink2);font-size:12px;border-top:1px solid var(--rule);padding-top:10px}@media print{body{background:#fff}main{padding:0}h2{break-after:avoid}tr{break-inside:avoid}}</style></head><body><main>' +
+    '<h1>' + esc(modelName()) + ': diagnosis findings</h1><p class="meta">' + rows.length + (rows.length === 1 ? ' finding' : ' findings') + ' across ' + byLevel.size + (byLevel.size === 1 ? ' level' : ' levels') + ' · ' + esc(when.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })) + '</p>' +
+    (img ? '<figure style="margin:0"><img src="' + img + '" alt="' + esc(viewTitle()) + '"><figcaption class="meta" style="margin-top:6px">' + esc(viewTitle()) + '</figcaption></figure>' : '') +
+    (sections || '<p>Nothing has been flagged yet.</p>') +
+    '<footer>' + esc(EXPORT_CREDIT) + '. Findings are the judgements of the people who recorded them, against Stafford Beer\'s Viable System Model.</footer></main></body></html>';
+  return html;
+}
+async function exportFindings(kind) {
+  if (!findingsRows().length) { showToast('Nothing is flagged yet, so there are no findings to export. Right-click an element to flag it.', null, null, 6000); return; }
+  if (kind === 'csv') await offerFile(exportSlug() + '-findings.csv', findingsCsv(), 'text/csv');
+  else await offerFile(exportSlug() + '-findings.html', await findingsReport(), 'text/html');
+}
+
+/* =====================================================================
    Start, presenting and shortcuts: the welcome choices, the keyboard
    shortcut sheet, About, focus keys for each system, the tour and
    presentation mode
    ===================================================================== */
-const APP_VERSION = '1.2.1 (November 2026)';
+const APP_VERSION = '1.2.2 (November 2026)';
 const CITE_YEAR = 2026;
 const modals = ['welcome', 'keysSheet', 'about'];
 let modalReturn = null;

@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  Viable System Explorer, version 1.0
+  Viable System Explorer, version 1.2
   Copyright (C) 2026 Panagiotis Panagiotakopoulos, Close the Loop
 
   The code is free software under the GNU Affero General Public License, version 3 or (at your
@@ -16,26 +16,30 @@
 <meta name="description" content="Interactive 2D and 3D explorer for Stafford Beer's Viable System Model, with recursion, custom labels and colours.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;600;700;800&family=Comfortaa:wght@500;600&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
 /* Layout: top bar with recursion trail; docked model panel (left), WebGL stage (centre), element inspector (right).
    On phones the panels become a drawer and a bottom sheet over a full-bleed stage. */
 :root {
-  --bg: #e9eeec;
-  --stage: #edf2f0;
-  --stage-hi: #f7faf9;
-  --surface: #f8faf9;
-  --surface-2: #e3eae7;
-  --ink: #12201e;
-  --ink-2: #4f605c;
-  --rule: #d0dad6;
-  --accent: #d6501a;
+  /* Close the Loop brand: navy #141b38, gold #eeba2b (gold text on light is #a07a0e), off-white #f5f4f0 */
+  --bg: #eeede8;
+  --stage: #f5f4f0;
+  --stage-hi: #fbfaf7;
+  --surface: #ffffff;
+  --surface-2: #f2f3f8;
+  --ink: #141b38;
+  --ink-2: #565f75;
+  --rule: #dcdfe9;
+  --accent: #a07a0e;
   --accent-ink: #ffffff;
-  --accent-soft: rgba(214, 80, 26, 0.12);
-  --halo: rgba(240, 245, 243, 0.94);
-  --shadow: 0 1px 2px rgba(18, 32, 30, 0.06), 0 10px 30px rgba(18, 32, 30, 0.10);
-  --f-display: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
-  --f-body: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --accent-soft: rgba(238, 186, 43, 0.16);
+  --halo: rgba(245, 244, 240, 0.94);
+  --shadow: 0 1px 2px rgba(20, 27, 56, 0.06), 0 10px 30px rgba(20, 27, 56, 0.10);
+  --gold: #eeba2b;
+  --eom-e: #c8cedf; --eom-o: #3d4f80; --eom-m: #eeba2b;
+  --f-display: 'Raleway', 'Helvetica Neue', Arial, sans-serif;
+  --f-body: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
+  --f-brand: 'Comfortaa', 'Helvetica Neue', Arial, sans-serif;
   --f-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
   --left: 304px;
   --right: 0px;
@@ -43,36 +47,38 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0b1417;
-    --stage: #0e1a1e;
-    --stage-hi: #142429;
-    --surface: #111e22;
-    --surface-2: #1a2b31;
-    --ink: #e1ebe8;
-    --ink-2: #8fa49f;
-    --rule: #22363c;
-    --accent: #f2773c;
-    --accent-ink: #1b0c05;
-    --accent-soft: rgba(242, 119, 60, 0.16);
-    --halo: rgba(14, 26, 30, 0.92);
+    --bg: #0d1226;
+    --stage: #111833;
+    --stage-hi: #182246;
+    --surface: #141b38;
+    --surface-2: #1e2a52;
+    --ink: #f5f4f0;
+    --ink-2: #9aa5c8;
+    --rule: #2a3560;
+    --accent: #eeba2b;
+    --accent-ink: #141b38;
+    --accent-soft: rgba(238, 186, 43, 0.16);
+    --halo: rgba(17, 24, 51, 0.92);
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.35);
+    --eom-e: #2a3560; --eom-o: #6575a8; --eom-m: #eeba2b;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0b1417;
-  --stage: #0e1a1e;
-  --stage-hi: #142429;
-  --surface: #111e22;
-  --surface-2: #1a2b31;
-  --ink: #e1ebe8;
-  --ink-2: #8fa49f;
-  --rule: #22363c;
-  --accent: #f2773c;
-  --accent-ink: #1b0c05;
-  --accent-soft: rgba(242, 119, 60, 0.16);
-  --halo: rgba(14, 26, 30, 0.92);
+  --bg: #0d1226;
+  --stage: #111833;
+  --stage-hi: #182246;
+  --surface: #141b38;
+  --surface-2: #1e2a52;
+  --ink: #f5f4f0;
+  --ink-2: #9aa5c8;
+  --rule: #2a3560;
+  --accent: #eeba2b;
+  --accent-ink: #141b38;
+  --accent-soft: rgba(238, 186, 43, 0.16);
+  --halo: rgba(17, 24, 51, 0.92);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.35);
+  --eom-e: #2a3560; --eom-o: #6575a8; --eom-m: #eeba2b;
   color-scheme: dark;
 }
 
@@ -199,11 +205,12 @@ button { cursor: pointer; }
 }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; flex: none; }
 .brand svg { width: 30px; height: 30px; flex: none; color: var(--ink); }
+.eom .e { fill: var(--eom-e); } .eom .o { fill: var(--eom-o); } .eom .m { fill: var(--eom-m); }
 .brand-text { display: flex; flex-direction: column; line-height: 1.05; }
 .brand-name {
   font-family: var(--f-display);
   font-stretch: 118%;
-  font-weight: 750;
+  font-weight: 700;
   font-size: 15px;
   letter-spacing: 0.01em;
   white-space: nowrap;
@@ -1086,6 +1093,47 @@ details.adv > .block + .block { margin-top: 20px; }
 @media (max-width: 640px) { .ksheet { grid-template-columns: minmax(0, 1fr); } }
 .cite { font-family: var(--f-mono); font-size: 12px; background: var(--surface-2); border-radius: 7px; padding: 10px 12px; line-height: 1.5; user-select: all; }
 .about-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--ink-2); margin: 2px 0 10px; }
+/* About: a navy hero in every theme (Close the Loop's dark surface), the explorer's E-O-M mark
+   opening out beside Close the Loop's mark and wordmark, then the licence text */
+.modal.about-modal { background: rgba(13, 18, 38, .6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.modal-card.about-card { width: min(680px, 100%); padding: 0; border: 0; border-radius: 8px; overflow: auto; box-shadow: 0 30px 80px rgba(13, 18, 38, .5), 0 2px 6px rgba(13, 18, 38, .2); animation: aboutIn .5s cubic-bezier(.2, .8, .2, 1) both; }
+.about-hero { position: relative; overflow: hidden; padding: 46px 28px 28px; text-align: center; color: #f5f4f0; background: #141b38; border-bottom: 3px solid #eeba2b; }
+.about-marks { position: relative; display: flex; align-items: center; justify-content: center; gap: 30px; margin-bottom: 24px; }
+.about-mark { width: 104px; height: 104px; flex: none; overflow: visible; }
+.about-mark .e { fill: #2a3560; } .about-mark .o { fill: #6575a8; } .about-mark .m { fill: #eeba2b; }
+.about-mark .e, .about-mark .o, .about-mark .m { animation: 1.4s cubic-bezier(.65, 0, .35, 1) .55s both; }
+.about-mark .e { transform: translate(7px, 10.5px); animation-name: eomE; }
+.about-mark .o { transform: translate(17px, 25px) scale(5.5); animation-name: eomO; }
+.about-mark .m { transform: translate(25px, 7.5px) scale(8); animation-name: eomM; }
+@keyframes eomE { from { transform: translate(16px, 16px) scale(3, 2.1); } }
+@keyframes eomO { from { transform: translate(16px, 16.8px) scale(9.4); } }
+@keyframes eomM { from { transform: translate(16px, 16.8px) scale(10.4); } }
+.about-mark .ln { fill: none; stroke: #c8cedf; stroke-width: .8; stroke-dasharray: 1 2; stroke-dashoffset: 1; animation: aboutDraw .7s ease-out 1.75s forwards; }
+.about-mark .hd { fill: #c8cedf; opacity: 0; animation: aboutFade .3s ease 2.35s forwards; }
+.about-sep { width: 1px; height: 72px; background: rgba(255, 255, 255, .14); flex: none; }
+.about-ctl { display: flex; align-items: center; gap: 12px; color: #ffffff; text-decoration: none !important; }
+.about-ctl svg { width: 46px; height: 46px; flex: none; }
+.about-ctl .arc, .about-ctl .arc-c { fill: none; stroke: #ffffff; stroke-linecap: round; }
+.about-ctl .arc { stroke-width: 29; stroke-dasharray: 325.6 34.4; stroke-dashoffset: 325.6; animation: aboutDraw 1.6s cubic-bezier(.6, 0, .2, 1) .2s forwards; }
+.about-ctl .arc-c { stroke-width: 37.4; stroke-dasharray: 304.7 55.3; stroke-dashoffset: 304.7; animation: aboutDraw 1.6s cubic-bezier(.6, 0, .2, 1) .45s forwards; }
+.about-ctl .dot { fill: #eeba2b; opacity: 0; animation: aboutFade .5s ease 1.7s forwards; }
+.about-ctl .wm { font: 500 23px/1 var(--f-brand); letter-spacing: .02em; white-space: nowrap; color: #ffffff; }
+.modal-card .about-hero h2 { margin: 0; font: 700 34px/1.1 var(--f-display); letter-spacing: -.01em; color: #ffffff; }
+.about-tag { position: relative; margin: 8px auto 18px !important; max-width: 470px; font-size: 14px !important; line-height: 1.5 !important; color: #c8cedf !important; }
+.about-hero .about-meta { position: relative; justify-content: center; align-items: center; margin: 0; color: #9aa5c8; }
+.about-hero .about-meta a { color: #ffffff; }
+.about-pill { font-family: var(--f-mono); font-size: 11px; letter-spacing: .06em; color: #eeba2b; border: 1px solid rgba(238, 186, 43, .55); border-radius: 4px; padding: 2px 9px; }
+.about-hero .modal-x { color: #c8cedf; background: transparent; border-color: rgba(255, 255, 255, .14); }
+.about-hero .modal-x:hover { color: #ffffff; background: rgba(255, 255, 255, .08); }
+.about-body { padding: 20px 26px 22px; }
+@keyframes aboutIn { from { opacity: 0; transform: translateY(14px) scale(.965); } to { opacity: 1; transform: none; } }
+@keyframes aboutDraw { to { stroke-dashoffset: 0; } }
+@keyframes aboutFade { to { opacity: 1; } }
+@media (max-width: 560px) { .about-hero { padding: 42px 18px 22px; } .about-mark { width: 72px; height: 72px; } .about-ctl svg { width: 34px; height: 34px; } .about-ctl .wm { font-size: 17px; } .about-marks { gap: 16px; } .modal-card .about-hero h2 { font-size: 26px; } .about-body { padding: 16px 18px 18px; } }
+@media (prefers-reduced-motion: reduce) {
+  .modal-card.about-card, .about-mark *, .about-ctl * { animation: none !important; }
+  .about-mark .ln, .about-ctl .arc, .about-ctl .arc-c { stroke-dashoffset: 0; } .about-mark .hd, .about-ctl .dot { opacity: 1; }
+}
 
 /* ---------- Hint bar: fades after first use ---------- */
 .hint { transition: opacity .6s ease; }
@@ -1122,11 +1170,10 @@ details.adv > .block + .block { margin-top: 20px; }
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 4h11M2.5 8h11M2.5 12h11"/></svg>
     </button>
     <div class="brand">
-      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-        <path d="M5.5 9.5c-2-3 1-7 4-5.5 2 1 1.5 4 1 6.5s1 6-1 8.5c-2 2.6-6 1-5.6-2.4.3-2.6 3.4-4 1.6-7.1z" opacity=".75"/>
-        <circle cx="16" cy="22" r="5"/>
-        <path d="M23 3.5l5.5 7-5.5 7-5.5-7z"/>
-        <path d="M19.6 18.6l2.6-2.9M10.6 21.5h.4" stroke-linecap="round"/>
+      <svg class="eom" viewBox="0 0 32 32" aria-hidden="true"><!-- Environment, Operations, Management, nested -->
+        <path class="e" d="M-1.8-6.4C.6-7.2 3.4-6.2 3.6-4.2 3.8-2.6 3-1.8 3.9-.6 4.9.8 4.8 3 4.1 4.6 3.2 6.6.8 6.9-1 6.3-2.4 5.8-2.6 4.6-3.8 4-5 3.4-4.9 1.4-4 .2-3.2-.8-4.3-1.8-4.4-3.2-4.6-4.9-3.4-5.9-1.8-6.4z" transform="translate(16 16) scale(3 2.1)"/>
+        <circle class="o" r="9.4" cx="16" cy="16.8"/>
+        <rect class="m" x="10.8" y="11.6" width="10.4" height="10.4" rx=".8"/>
       </svg>
       <div class="brand-text">
         <span class="brand-name">Viable System Explorer</span>
@@ -1516,13 +1563,31 @@ details.adv > .block + .block { margin-top: 20px; }
     </div>
   </div>
 
-  <div class="modal" id="about" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" hidden>
-    <div class="modal-card">
-      <button class="icon-btn modal-x" type="button" data-close aria-label="Close">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
-      </button>
-      <h2 id="aboutTitle">About Viable System Explorer</h2>
-      <div class="about-meta"><span>Version <b id="aboutVersion"></b></span><span>Made by <a href="https://www.linkedin.com/in/panagio" target="_blank" rel="noopener">Panagiotis Panagiotakopoulos</a>, <a href="https://closetheloop.gr" target="_blank" rel="noopener">Close the Loop</a></span></div>
+  <div class="modal about-modal" id="about" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" hidden>
+    <div class="modal-card about-card">
+      <div class="about-hero">
+        <button class="icon-btn modal-x" type="button" data-close aria-label="Close">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+        </button>
+        <div class="about-marks">
+          <svg class="about-mark" id="aboutMark" viewBox="0 0 32 32" aria-hidden="true"><!-- E-O-M: nested, then opened out with a double arrow between each pair -->
+            <path class="e" d="M-1.8-6.4C.6-7.2 3.4-6.2 3.6-4.2 3.8-2.6 3-1.8 3.9-.6 4.9.8 4.8 3 4.1 4.6 3.2 6.6.8 6.9-1 6.3-2.4 5.8-2.6 4.6-3.8 4-5 3.4-4.9 1.4-4 .2-3.2-.8-4.3-1.8-4.4-3.2-4.6-4.9-3.4-5.9-1.8-6.4z"/>
+            <circle class="o" r="1"/>
+            <rect class="m" x="-.5" y="-.5" width="1" height="1" rx=".08"/>
+            <path class="ln" pathLength="1" d="M14.45 7.59C15.93 6.83 17.52 6.55 19.01 6.77"/><path class="ln" pathLength="1" d="M24.8 13.77C24.66 15.95 23.84 17.92 22.49 19.61"/><path class="ln" pathLength="1" d="M9.95 23.73C8.39 22.88 7.29 21.21 6.82 19.21"/>
+            <g class="hd"><path d="M13.3 8.3L14.45 6.49L15.45 8.22Z"/><path d="M20.3 7.1L18.24 7.7L18.64 5.74Z"/><path d="M24.8 12.4L25.75 14.33L23.75 14.27Z"/><path d="M21.6 20.6L22.07 18.51L23.59 19.8Z"/><path d="M11.2 24.2L9.06 24.34L9.87 22.51Z"/><path d="M6.6 17.9L7.95 19.57L5.99 19.96Z"/></g>
+          </svg>
+          <span class="about-sep" aria-hidden="true"></span>
+          <a class="about-ctl" id="aboutCtl" href="https://closetheloop.gr" target="_blank" rel="noopener" aria-label="close the loop">
+            <svg viewBox="0 0 800 800" aria-hidden="true"><circle class="arc" cx="400" cy="400" r="297" pathLength="360" transform="rotate(-36 400 400)"/><circle class="arc-c" cx="395" cy="399" r="75.6" pathLength="360" transform="rotate(25.4 395 399)"/><circle class="dot" cx="573" cy="168" r="16"/></svg>
+            <span class="wm">close the loop</span>
+          </a>
+        </div>
+        <h2 id="aboutTitle">Viable System Explorer</h2>
+        <p class="about-tag">Stafford Beer's Viable System Model, to learn it and to diagnose real organizations with it.</p>
+        <div class="about-meta"><span class="about-pill">Version <b id="aboutVersion"></b></span><span>Made by <a href="https://www.linkedin.com/in/panagio" target="_blank" rel="noopener">Panagiotis Panagiotakopoulos</a>, <a href="https://closetheloop.gr" target="_blank" rel="noopener">Close the Loop</a></span></div>
+      </div>
+      <div class="about-body">
       <p>An interactive explorer for Stafford Beer's Viable System Model: the canonical diagram in 2D, a 3D model and the Hemispheres view, with the value network of System One, recursion through every level, data flows and diagnosis.</p>
       <h3>Licence</h3>
       <p><b>Code:</b> GNU Affero General Public License, version 3 or later (<a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener">AGPL-3.0</a>). You may use, study, change and share it. If you change it and offer it to others, including as a hosted web page, you must share your changed source under the same licence.</p>
@@ -1533,6 +1598,7 @@ details.adv > .block + .block { margin-top: 20px; }
       <div class="cite" id="aboutCite"></div>
       <h3>Feedback</h3>
       <p>Questions, corrections and ideas are welcome: write to Panagiotis on <a href="https://www.linkedin.com/in/panagio" target="_blank" rel="noopener">LinkedIn</a>.</p>
+      </div>
     </div>
   </div>
   <div class="ctx" id="ctx" role="menu" hidden></div>
@@ -2160,7 +2226,7 @@ function schemeColors(key) {
 }
 
 let db = null; // { seq, rootId, currentId, levels: {} }
-let prefs = { view: '2d', flows: !reduceMotion, nested: false, spread: 1, side: false, diagShow: true, autoLevels: false, lpHint: false, s2mode: 'inside', extS4cmd: true, extS14: true, style: 'square', theme: 'auto' };
+let prefs = { view: '2d', flows: !reduceMotion, nested: false, spread: 1, side: false, diagShow: true, autoLevels: false, lpHint: false, s2mode: 'inside', extS4cmd: true, extS14: true, style: 'square', theme: 'light' };
 function layoutOpts() { return { s2: prefs.s2mode === 'bridge' ? 'bridge' : 'inside', s4cmd: prefs.extS4cmd !== false, s14: prefs.extS14 !== false, style: prefs.style === 'diamond' ? 'diamond' : 'square', localS2: prefs.localS2 !== false }; }
 
 function newLevel(parent, elId) {
@@ -2288,6 +2354,8 @@ function load() {
         db = normaliseDb(data.db);
         Object.assign(prefs, data.prefs || {});
         if (prefs.style === 'hemi') { prefs.style = 'square'; prefs.view = 'hemi'; }
+        // until 1.1 the theme defaulted to 'auto' (follow the system); light is now the default unless chosen
+        if (!prefs.themeChosen) prefs.theme = 'light';
         return true;
       }
     }
@@ -4947,7 +5015,7 @@ function setStyle(st) {
 $('#stSquare').addEventListener('click', () => setStyle('square'));
 $('#stDiamond').addEventListener('click', () => setStyle('diamond'));
 
-// theme: follow the system (or the host page), or force light or dark
+// theme: light by default; or follow the system (or the host page), or force dark
 const hostTheme = document.documentElement.getAttribute('data-theme');
 function applyThemePref() {
   const r = document.documentElement, t = prefs.theme;
@@ -4957,7 +5025,7 @@ function applyThemePref() {
   // presentation mode is always dark: it reads best on a projector and in a darkened room
   if ($('#app').classList.contains('presenting')) r.setAttribute('data-theme', 'dark');
 }
-function setThemePref(t) { prefs.theme = t; save(); applyThemePref(); }
+function setThemePref(t) { prefs.theme = t; prefs.themeChosen = true; save(); applyThemePref(); }
 $('#s2Inside').addEventListener('click', () => { if (prefs.s2mode !== 'inside') { prefs.s2mode = 'inside'; save(); relayout(); } });
 $('#s2Bridge').addEventListener('click', () => { if (prefs.s2mode !== 'bridge') { prefs.s2mode = 'bridge'; save(); relayout(); } });
 const setValueFlows = v => { if ((prefs.valueFlows || 'ribbon') === v) return; prefs.valueFlows = v; save(); syncDiagramControls(); relayout(); if (typeof renderNet === 'function') renderNet(); };
@@ -6002,7 +6070,7 @@ function applyCafe(lv) {
    shortcut sheet, About, focus keys for each system, the tour and
    presentation mode
    ===================================================================== */
-const APP_VERSION = '1.1 (November 2026)';
+const APP_VERSION = '1.2 (November 2026)';
 const CITE_YEAR = 2026;
 const modals = ['welcome', 'keysSheet', 'about'];
 let modalReturn = null;
@@ -6054,7 +6122,7 @@ $('#wMap').addEventListener('click', () => {
 // More menu: theme, shortcuts, about, start again
 $('#btnMore').addEventListener('click', () => {
   if (!ctx.hidden && ctxAt && ctxAt.more) { closeCtx(); return; }
-  const b = $('#btnMore').getBoundingClientRect(), t = prefs.theme || 'auto';
+  const b = $('#btnMore').getBoundingClientRect(), t = prefs.theme || 'light';
   showCtxMenu(Math.max(8, b.right - 240), b.bottom + 6, '', [
     { sub: 'Theme' },
     { ic: '◐', text: 'Automatic', checked: t === 'auto', fn: () => setThemePref('auto') },

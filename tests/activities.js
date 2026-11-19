@@ -15,7 +15,7 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   ok(r.opCount === 3 && r.labels.o0 === 'Dine-in' && r.labels.o2 === 'Catering', 'the café by service has Dine-in, Takeaway and Catering as System One');
   ok(r.net.actors.filter(a => a.kind === 'act').length === 11 && Object.keys(r.children).length === 0, 'the stations are activities, and no lower level was made from them');
   await pg.click('#dNet'); await pg.waitForTimeout(1000);
-  ok(await pg.locator('#netSvg circle.hull').count() === 3, 'each service is drawn as a circle round its activities');
+  ok(await pg.locator('#netSvg .nn.act.big').count() === 3, 'each service is its own circle, enlarged to hold its activities');
   ok(await pg.locator('#netSvg .nn.actv').count() === 11, 'activities are drawn as small boxes');
   await pg.screenshot({ path: OUT + '/shots/activities-net.png' });
   // the VSM sees an activity's flows as its operation's: Guests become Dine-in's environment
@@ -27,6 +27,8 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   ok(/Where to draw System One \(optional\)/.test(card), 'the boundary prompts are offered, folded, in the operation card');
   // add an activity, then promote it
   await pg.click('#nAddAct'); await pg.waitForTimeout(400);
+  ok(/Activity/.test(await pg.textContent('#netCard')) && !/\bActor\b/.test(await pg.textContent('#netCard')), 'a new activity is called an activity, not an actor');
+  ok(/Activity/.test(await pg.textContent('#netSvg')), 'an unnamed activity reads "Activity" in the network');
   await pg.fill('#nName', 'Drive-through window'); await pg.press('#nName', 'Tab'); await pg.waitForTimeout(300);
   r = await stored();
   const added = r.net.actors.find(a => a.name === 'Drive-through window');

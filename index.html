@@ -153,7 +153,7 @@ button { cursor: pointer; }
 .net .nl { font: 600 12.5px var(--f-body); fill: var(--ink); }
 .net .nl.big { font-size: 16px; }
 .net .nl.sm { font-size: 11.5px; font-weight: 560; }
-.net .hull { fill-opacity: .07; stroke-width: 1.6; stroke-opacity: .75; pointer-events: none; }
+.net .nn.act.big > circle { fill-opacity: .09; }
 .net .nn.actv rect { fill: var(--surface); fill-opacity: 1; stroke-width: 1.4; }
 .net .nc { font: 600 11px var(--f-mono); fill: var(--ink-2); }
 .net .fl { cursor: pointer; color: var(--fc, var(--vflow, var(--ink-2))); }
@@ -4592,7 +4592,7 @@ function renderInspectorNet() {
   } else {
     box.innerHTML = '<ul class="io">' + xs.map(x => {
       const a = actorById(lv, x), fl = vsmFlows(lv).filter(f => (f.from === x && f.to === 'o' + k) || (f.to === x && f.from === 'o' + k));
-      return '<li><span class="ar">◌</span><span><button class="linkish" type="button" data-actor="' + x + '">' + esc(netName(lv, x)) + '</button> <span class="via">' + esc(NET_KINDS[a.kind] || 'Actor') + '</span>' +
+      return '<li><span class="ar">◌</span><span><button class="linkish" type="button" data-actor="' + x + '">' + esc(netName(lv, x)) + '</button> <span class="via">' + esc(kindName(a)) + '</span>' +
         fl.map(f => '<span class="via">' + (f.from === x ? 'sends ' : 'receives ') + esc(flowName(f)) + '</span>').join('') + '</span></li>';
     }).join('') + '</ul><div class="btn-row"><button class="btn" type="button" id="iNetGo">Edit in the value network</button></div>';
   }
@@ -5414,7 +5414,9 @@ new ResizeObserver(resize).observe(stage);
    the operational linkages and the environment–operation channels.
    ===================================================================== */
 const NET_KINDS = { customer: 'Customer', supplier: 'Supplier', other: 'Other actor' };
-const NET_DEFAULT_NAMES = { customer: 'Customers', supplier: 'Suppliers', other: 'Partner' };
+const NET_DEFAULT_NAMES = { customer: 'Customers', supplier: 'Suppliers', other: 'Partner', act: 'Activity' };
+// what a node of the network is called: an activity inside an operation, or the kind of actor outside
+const kindName = a => isAct(a) ? 'Activity' : NET_KINDS[(a || {}).kind] || 'Actor';
 const EMPTY_NET = { actors: [], flows: [], pos: {} };
 const netOf = lv => lv.net || EMPTY_NET;
 function ensureNet(lv) {
@@ -5551,7 +5553,7 @@ function netAutoLayout(lv, all) {
 function netRadius(id, dx, dy) {
   const l = Math.hypot(dx, dy) || 1, c = dx / l, s = dy / l;
   if (id === 'sif') return Math.min(SIF_W / Math.max(Math.abs(c), 1e-6), SIF_H / Math.max(Math.abs(s), 1e-6));
-  if (opIdx(id) >= 0) return NET_R;
+  if (opIdx(id) >= 0) return netBig[id] ? netBig[id][2] : NET_R;
   if (isAct(actorById(level(), id))) return Math.min(ACT_W / Math.max(Math.abs(c), 1e-6), ACT_H / Math.max(Math.abs(s), 1e-6));
   return 1 / Math.sqrt((c / NET_RX) ** 2 + (s / NET_RY) ** 2);
 }
@@ -5652,21 +5654,25 @@ function renderNet() {
 // the circle round an operation and its activities: [cx, cy, r], or null when it has none
 function netHull(lv, id) {
   const net = ensureNet(lv), as = actsOf(lv, id).filter(a => net.pos[a.id]);
-  if (!as.length || !net.pos[id]) return null;
-  const pts = [net.pos[id]].concat(as.map(a => net.pos[a.id])), cx = pts.reduce((t, p) => t + p[0], 0) / pts.length, cy = pts.reduce((t, p) => t + p[1], 0) / pts.length;
-  const r = Math.max(NET_R + Math.hypot(net.pos[id][0] - cx, net.pos[id][1] - cy), ...as.map(a => Math.hypot(net.pos[a.id][0] - cx, net.pos[a.id][1] - cy) + ACT_W + 4)) + 14;
-  return [cx, cy, r];
+  if (!as.length) return null;
+  const pts = as.map(a => net.pos[a.id]), cx = pts.reduce((t, p) => t + p[0], 0) / pts.length, cy = pts.reduce((t, p) => t + p[1], 0) / pts.length;
+  // room for the activities, plus a band at the top for the operation's code and name
+  const r = Math.max(NET_R + 20, ...pts.map(p => Math.hypot(p[0] - cx, p[1] - cy) + ACT_W + 4)) + 40;
+  return [cx, cy - 18, r];
 }
+// operations drawn enlarged round their activities in the last render: id -> [cx, cy, r]
+let netBig = {};
 const netHandle = (id, x) => '<g class="hd" data-handle="' + id + '" transform="translate(' + x + ' 0)"><circle r="9"/><path d="M-4 0H4M0 -4V4"/></g>';
 function renderNetSvg() {
   const lv = level(), net = ensureNet(lv), r = netSvg.getBoundingClientRect();
   if (!r.width) return;
   const vw = r.width / netView.s, vh = r.height / netView.s, vx = netView.cx - vw / 2, vy = netView.cy - vh / 2;
   netSvg.setAttribute('viewBox', [vx, vy, vw, vh].map(v => v.toFixed(1)).join(' '));
-  const black = netBlack(), out = [], hullAt = {};
+  const black = netBlack(), out = [];
   const opsCol = lv.groupColors.ops || DEFAULT_GROUP_COLORS.ops;
   const isSel = (t, id) => netSel && netSel.t === t && netSel.id === id;
-  const posOf = id => id === 'sif' ? sifPos(lv) : net.pos[id];
+  netBig = {};
+  const posOf = id => id === 'sif' ? sifPos(lv) : netBig[id] ? netBig[id].slice(0, 2) : net.pos[id];
   netSvg.classList.toggle('lines', !valueRibbons());
   netSvg.style.setProperty('--vflow', lv.groupColors.ops || DEFAULT_GROUP_COLORS.ops);
   out.push('<rect class="bg" x="' + vx + '" y="' + vy + '" width="' + vw + '" height="' + vh + '"/>');
@@ -5680,7 +5686,7 @@ function renderNetSvg() {
       (lv.purpose ? '<text class="np" y="' + (SIF_H - 30) + '">' + tspans(wrapText(lv.purpose, 40, 2), 13) + '</text>' : '') + '</g>');
   } else {
     // each operation with activities is Beer's circle drawn round them; the box holds the circles
-    const ps = Array.from({ length: lv.opCount }, (_, k) => { const h = netHull(lv, 'o' + k); if (h) hullAt['o' + k] = h; return h || net.pos['o' + k].concat(NET_R); });
+    const ps = Array.from({ length: lv.opCount }, (_, k) => { const h = netHull(lv, 'o' + k); if (h) netBig['o' + k] = h; return h || net.pos['o' + k].concat(NET_R); });
     const x0 = Math.min(...ps.map(p => p[0] - p[2])) - 34, x1 = Math.max(...ps.map(p => p[0] + p[2])) + 34;
     const pl = lv.purpose ? wrapText(lv.purpose, Math.max(30, Math.floor((x1 - x0 - 28) / 5.9)), 3) : [];
     const y0 = Math.min(...ps.map(p => p[1] - p[2])) - 56, y1 = Math.max(...ps.map(p => p[1] + p[2])) + 30 + pl.length * 15;
@@ -5720,10 +5726,6 @@ function renderNetSvg() {
       '<text class="ft' + (f.unnamed ? ' un' : '') + '" x="' + f.at[0].toFixed(1) + '" y="' + (f.at[1] - 7).toFixed(1) + '">' + tspans(f.lines, 12, f.at[0].toFixed(1)) + '</text></g>');
   });
   // nodes
-  Object.keys(hullAt).forEach(id => {
-    const [cx, cy, r] = hullAt[id], col = colorOf(lv, id, L);
-    out.splice(hullIdx, 0, '<circle class="hull" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) + '" style="stroke:' + col + ';fill:' + col + '"/>');
-  });
   if (!black) net.actors.filter(isAct).forEach(a => {
     const p = net.pos[a.id]; if (!p || !opOf(lv, a.id)) return;
     const col = colorOf(lv, a.op, L);
@@ -5735,6 +5737,12 @@ function renderNetSvg() {
   if (!black) for (let k = 0; k < lv.opCount; k++) {
     const id = 'o' + k, p = net.pos[id], col = colorOf(lv, id, L);
     const cls = 'nn act' + (isSel('node', id) ? ' sel' : '') + (netConnect && netConnect.from === id ? ' src' : '');
+    const big = netBig[id];
+    // an operation with activities is itself the circle that holds them, drawn under the flows
+    if (big) { out.splice(hullIdx, 0, '<g class="' + cls + ' big" data-id="' + id + '" transform="translate(' + big[0].toFixed(1) + ' ' + big[1].toFixed(1) + ')">' +
+      '<circle r="' + big[2].toFixed(1) + '" style="fill:' + col + ';stroke:' + col + '"/>' +
+      '<text class="nc" y="' + (-big[2] + 20).toFixed(1) + '">' + esc(codeOf(lv, id)) + '</text><text class="nl" y="' + (-big[2] + 37).toFixed(1) + '">' + esc(labelOf(lv, id)) + '</text>' +
+      (lv.children[id] ? '<circle class="kid" r="' + (big[2] - 5).toFixed(1) + '"/>' : '') + netHandle(id, big[2]) + '</g>'); continue; }
     out.push('<g class="' + cls + '" data-id="' + id + '" transform="translate(' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + ')">' +
       '<circle r="' + NET_R + '" style="fill:' + col + ';stroke:' + col + '"/>' +
       '<text class="nc" y="-27">' + esc(codeOf(lv, id)) + '</text><text class="nl" y="5">' + tspans(wrapText(labelOf(lv, id), 12, 3), 13) + '</text>' +
@@ -5746,7 +5754,7 @@ function renderNetSvg() {
     const cls = 'nn actor' + (isSel('node', a.id) ? ' sel' : '') + (netConnect && netConnect.from === a.id ? ' src' : '');
     out.push('<g class="' + cls + '" data-id="' + a.id + '" transform="translate(' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + ')">' +
       '<path d="' + blobD(i * 1.7 + 0.4) + '" style="fill:' + actorColor(lv, a) + ';stroke:' + actorColor(lv, a) + '"/>' +
-      '<text class="nk" y="-17">' + esc(NET_KINDS[a.kind] || 'Actor') + '</text><text class="nl" y="5">' + tspans(wrapText(netName(lv, a.id), 16, 2), 13) + '</text>' + netHandle(a.id, NET_RX) + '</g>');
+      '<text class="nk" y="-17">' + esc(kindName(a)) + '</text><text class="nl" y="5">' + tspans(wrapText(netName(lv, a.id), 16, 2), 13) + '</text>' + netHandle(a.id, NET_RX) + '</g>');
   });
   out.push('<path id="netRubber" class="rubber" d=""/>');
   netSvg.innerHTML = out.join('');
@@ -5825,7 +5833,7 @@ function renderNetCard() {
       '<div class="btn-row"><button class="btn" type="button" id="nPromote"' + (lv.opCount >= MAX_OPS ? ' disabled title="Six operations is the most per level"' : '') + '>Make it an operation</button><button class="btn warn" type="button" id="nRemove">Remove activity</button></div>';
   } else if (netSel.t === 'node') {
     const a = actorById(lv, netSel.id), ks = opsOfActor(lv, a.id);
-    h = '<div class="nhead"><span class="code-chip" style="background:' + actorColor(lv, a) + '">E</span><span class="insp-kind"><span class="k">Environment</span><span class="r">' + esc(NET_KINDS[a.kind] || 'Actor') + '</span></span></div>' +
+    h = '<div class="nhead"><span class="code-chip" style="background:' + actorColor(lv, a) + '">E</span><span class="insp-kind"><span class="k">Environment</span><span class="r">' + esc(kindName(a)) + '</span></span></div>' +
       '<label class="fld"><span>Name</span><input type="text" id="nName" value="' + esc(a.name || '') + '" placeholder="' + esc(NET_DEFAULT_NAMES[a.kind] || '') + '"></label>' +
       netColorRow(actorColor(lv, a), !!a.color, 'environment') +
       '<label class="fld"><span>Kind</span><select class="inp" id="nKind">' + Object.keys(NET_KINDS).map(k => '<option value="' + k + '"' + (k === a.kind ? ' selected' : '') + '>' + NET_KINDS[k] + '</option>').join('') + '</select></label>' +
@@ -6179,7 +6187,7 @@ function openNetCtx(cx, cy, t) {
     it('▢', 'Open the white box', () => setNetBox('white'));
   } else if (id) {
     const isOp = opIdx(id) >= 0;
-    head = '<div class="ch"><span class="k">' + (isOp ? 'Primary activity · ' + esc(codeOf(lv, id)) : esc(NET_KINDS[(actorById(lv, id) || {}).kind] || 'Actor')) + '</span><b>' + esc(netName(lv, id)) + '</b></div>';
+    head = '<div class="ch"><span class="k">' + (isOp ? 'Primary activity · ' + esc(codeOf(lv, id)) : esc(kindName(actorById(lv, id)))) + '</span><b>' + esc(netName(lv, id)) + '</b></div>';
     it('ⓘ', 'Show details', () => netSelect({ t: 'node', id }));
     it('✎', 'Rename', () => { netSelect({ t: 'node', id }); focusNetName(); });
     it('⇝', 'Draw a flow from here', () => netStartConnect(id));
@@ -6606,7 +6614,7 @@ async function exportFindings(kind) {
    shortcut sheet, About, focus keys for each system, the tour and
    presentation mode
    ===================================================================== */
-const APP_VERSION = '1.5 (November 2026)';
+const APP_VERSION = '1.5.1 (November 2026)';
 const CITE_YEAR = 2026;
 const modals = ['welcome', 'keysSheet', 'about'];
 let modalReturn = null;

@@ -4,7 +4,7 @@ An interactive 2D and 3D explorer for Stafford Beer's Viable System Model (VSM).
 
 Made by [Panagiotis Panagiotakopoulos](https://www.linkedin.com/in/panagio) of [Close the Loop](https://closetheloop.gr). The footer of the app carries the same credit, with the Close the Loop logo from its design system.
 
-Open `index.html` in a recent browser. Everything is in that one file; it loads three.js 0.128 and its OrbitControls from jsDelivr and the Archivo and IBM Plex Mono fonts from Google Fonts. Hosting the repository with GitHub Pages works as is.
+Open `index.html` in a recent browser. Everything is in that one file except three.js 0.128 and its OrbitControls, which load from `vendor/three/` beside the page (so the app works offline and on locked-down networks) and from jsDelivr when that folder is missing. The fonts come from Google Fonts; without them the system fonts take over. Hosting the repository with GitHub Pages works as is.
 
 ## What it does
 
@@ -89,10 +89,10 @@ A 3D alternative beside 2D and 3D in the toolbar (key `H`), after the author's c
 ### Options in the Settings tab
 
 - **System 2 centre: Inside / Bridge.** Bridge draws the centre on the metasystem boundary and, in 3D, puts all of System 2 on its own plane between operations and metasystem. It is an interpretive option, prompted by a Stanford Medicine study (*Nature Neuroscience*, September 2026) reporting that the forebrain and midbrain arise from one progenitor lineage and the hindbrain from another.
-- **S4 to command channel** (extension, on by default): System 4 feeds the command channel, reading the resource bargain as anticipatory.
-- **S1 ↔ S4 direct** (extension, on by default): the operations and System 4 exchange front-line signals and trials.
+- **S4 to command channel** (extension, off by default since 1.5.3): System 4 feeds the command channel, reading the resource bargain as anticipatory.
+- **S1 ↔ S4 direct** (extension, off by default since 1.5.3): the operations and System 4 exchange front-line signals and trials.
 
-Neither extension is part of the commonly reproduced diagram; switch both off for the canonical form.
+Neither extension is part of the commonly reproduced diagram, so a first visit shows the canonical form; switch them on in Settings › Advanced. Browsers that saved a setting before 1.5.3 keep it.
 
 The 3D model keeps every x and y position and adds one dimension. The environment sits at the back, the operations in the middle and the metasystem in front, so channels that cross between domains show up as slopes. Each solid is chosen so that seen face-on it is exactly Beer's symbol: spheres for circles, cubes for squares, prisms for triangles, an octahedron for the rhombus and pillowed extrusions for the amoebas. The **Layer depth** slider changes the separation.
 
@@ -131,7 +131,7 @@ Each channel has two sides, A and B, and every flow runs A to B, B to A, or both
 
 - **Load model company** (also under **Model › Examples**) replaces the model with Larchmere Cycles, a bicycle maker with three divisions. Level 0 flows are mapped by hand; its divisions (and one product line below them) are generated as recursions with standard flows.
 - **Fill gaps with standard flows** gives any level a neutral starting point per channel type, marked as suggested until confirmed.
-- **Map this level** (Claude artifact only) sends the description you type to Claude, which proposes operations, labels, flows for every channel and sub-operations one level down. Each operation's inspector also offers **Map it with Claude** for its own level, using the flows and names above it as context. Copies of the page opened outside claude.ai hide these buttons.
+- **Map this level** (Claude artifact only) sends the description you type to Claude, which proposes operations, labels, flows for every channel and sub-operations one level down. Each operation's inspector also offers **Map it with Claude** for its own level, using the flows and names above it as context. Copies of the page opened outside claude.ai hide these buttons and offer **Map an organization with an AI assistant** instead: describe the organization, copy the same prompt into Claude or any other assistant, paste its JSON answer back and map the level. The page sends nothing.
 
 ## Recursion notes
 
@@ -139,7 +139,7 @@ Beer's recursion runs only through System One: every operational element contain
 
 ## Map it with Claude, and hosting elsewhere
 
-The **Map** buttons call Claude through the claude.ai artifact runtime (`window.claude.use('sample')`). Each call runs on the viewer's own Claude account after they consent, and the page never holds an API key. A copy served anywhere else (GitHub Pages, a file on disk) has no `window.claude`, so the buttons hide themselves and the model company and standard flows remain. Making mapping work on a public site needs a small server-side proxy that holds an Anthropic API key and forwards the same prompt.
+The **Map** buttons call Claude through the claude.ai artifact runtime (`window.claude.use('sample')`). Each call runs on the viewer's own Claude account after they consent, and the page never holds an API key. A copy served anywhere else (GitHub Pages, a file on disk) has no `window.claude`, so the buttons hide themselves and the copy-and-paste mapping takes their place: the same prompt, run in whatever assistant the viewer uses, with no key and no server. A proxy holding an API key was considered and set aside (Nov 2026): it puts keys and support load on a public teaching site.
 
 ## Sources
 

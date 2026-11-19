@@ -551,6 +551,10 @@ input[type="color"].sw.custom::-moz-color-swatch { box-shadow: inset 0 0 0 2px v
 .ai { border: 1px solid var(--rule); border-radius: 10px; padding: 12px; background: var(--surface-2); }
 .ai textarea { border: 1px solid var(--rule); background: var(--surface); border-radius: 7px; padding: 7px 9px; width: 100%; resize: vertical; font-size: 13px; }
 .ai textarea:focus { border-color: var(--accent); outline: none; }
+details.am > summary { cursor: pointer; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2); }
+details.am[open] > summary { margin-bottom: 8px; }
+details.am .fld { margin-top: 10px; }
+#amAnswer { font-family: var(--f-mono); font-size: 11.5px; }
 .fch { border-top: 1px solid var(--rule); }
 .fch > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 9px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 7px 0; }
 .fch > summary::-webkit-details-marker { display: none; }
@@ -1374,6 +1378,17 @@ details.adv > .block + .block { margin-top: 20px; }
         </div>
         <div class="src" id="aiStatus" aria-live="polite">Checking whether Claude is available here…</div>
       </div>
+      <details class="block ai am" id="aiManual" hidden>
+        <summary>Map an organization with an AI assistant</summary>
+        <p class="src">Copy a prompt into Claude or another assistant, then paste its answer here. This page sends nothing anywhere.</p>
+        <label class="fld"><span>1. Describe the organization: what it does, its main units, who it serves, how the parts fit together</span>
+          <textarea id="amBrief" rows="4" placeholder="A regional food co-op with three grocery stores, a bakery and a delivery service…"></textarea></label>
+        <div class="btn-row"><button class="btn" id="amCopy" type="button">2. Copy the prompt</button></div>
+        <label class="fld"><span>3. Paste the assistant's answer (the JSON it returns)</span>
+          <textarea id="amAnswer" rows="4" spellcheck="false" placeholder="{ &quot;name&quot;: …, &quot;operations&quot;: [ … ] }"></textarea></label>
+        <div class="btn-row"><button class="btn primary" id="amApply" type="button">4. Map this level</button></div>
+        <div class="src" id="amStatus" aria-live="polite">This replaces the labels and flows of the level in focus.</div>
+      </details>
       <div class="block">
         <div class="eyebrow">Channels and their flows</div>
         <div id="flowList"></div>
@@ -1669,8 +1684,13 @@ details.adv > .block + .block { margin-top: 20px; }
   </footer>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<!-- three.js r128 from beside the page (works offline and on locked-down networks); jsDelivr if that copy is missing -->
+<script src="vendor/three/three.min.js"></script>
+<script src="vendor/three/OrbitControls.js"></script>
+<script data-fallback>
+if (!window.THREE) document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>'
+  + '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"><\/script>');
+</script>
 <script>
 (function () {
 'use strict';
@@ -2279,8 +2299,8 @@ function schemeColors(key) {
 }
 
 let db = null; // { seq, rootId, currentId, levels: {} }
-let prefs = { view: '2d', flows: !reduceMotion, nested: false, spread: 1, side: false, diagShow: true, autoLevels: false, lpHint: false, s2mode: 'inside', extS4cmd: true, extS14: true, style: 'square', theme: 'light' };
-function layoutOpts() { return { s2: prefs.s2mode === 'bridge' ? 'bridge' : 'inside', s4cmd: prefs.extS4cmd !== false, s14: prefs.extS14 !== false, style: prefs.style === 'diamond' ? 'diamond' : 'square', localS2: prefs.localS2 !== false }; }
+let prefs = { view: '2d', flows: !reduceMotion, nested: false, spread: 1, side: false, diagShow: true, autoLevels: false, lpHint: false, s2mode: 'inside', extS4cmd: false, extS14: false, style: 'square', theme: 'light' };
+function layoutOpts() { return { s2: prefs.s2mode === 'bridge' ? 'bridge' : 'inside', s4cmd: prefs.extS4cmd === true, s14: prefs.extS14 === true, style: prefs.style === 'diamond' ? 'diamond' : 'square', localS2: prefs.localS2 !== false }; }
 
 function newLevel(parent, elId) {
   db.seq += 1;
@@ -4979,6 +4999,24 @@ function applyMapping(lv, r) {
     })
   });
 }
+// redraw after a mapping (from Claude or a pasted answer) and say what it holds
+function afterMapping(target, brief) {
+  if (brief && !target.parent) target.brief = brief;
+  save();
+  if (target.id === db.currentId) {
+    selected = null; focusSet = null;
+    const cam = camState(); buildScene(); setCam(cam); camTween(fitState(), 600);
+  }
+  renderAllPanels();
+  const nFlows = Object.values(target.flows).reduce((a, f) => a + f.length, 0);
+  return 'Mapped ' + levelName(target) + ': ' + target.opCount + ' operations and ' + nFlows + ' flows. Sub-operations were added one level down; see the Recursion view.';
+}
+// the JSON object inside an assistant's reply, which may wrap it in prose or a code fence
+function answerJson(text) {
+  const t = String(text || ''), i = t.indexOf('{'), j = t.lastIndexOf('}');
+  if (i < 0 || j <= i) throw { code: 'invalid_json' };
+  try { return JSON.parse(t.slice(i, j + 1)); } catch (e) { throw { code: 'invalid_json' }; }
+}
 const AI_OFF = ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'];
 function aiErrorText(e) {
   const c = e && e.code;
@@ -4991,11 +5029,13 @@ function aiErrorText(e) {
   if (AI_OFF.includes(c)) return 'Claude is not available for this page, so mapping is switched off. The model company and standard flows still work.';
   return 'Claude could not be reached. Try again.';
 }
-let aiTried = false;
+let aiTried = false, aiChecked = false;
 function renderAIState(msg) {
   const st = $('#aiStatus');
   // only where Claude can map (a Claude artifact); elsewhere the block stays out of the way
   $('#aiBlock').hidden = !sampleFn && !aiTried;
+  // elsewhere (the live site, a file on disk) the same mapping goes through any assistant by copy and paste
+  $('#aiManual').hidden = !!sampleFn || aiTried || !aiChecked;
   $('#aiRun').disabled = !sampleFn || aiBusy;
   $('#aiStop').hidden = !aiBusy;
   if (msg) { st.textContent = msg; return; }
@@ -5018,16 +5058,8 @@ async function runMapping(target, brief, source) {
       onText: ({ text }) => say('Writing the mapping… ' + text.length.toLocaleString() + ' characters so far.')
     });
     applyMapping(target, r);
-    if (brief && !target.parent) target.brief = brief;
-    save();
     aiBusy = false;
-    if (target.id === db.currentId) {
-      selected = null; focusSet = null;
-      const cam = camState(); buildScene(); setCam(cam); camTween(fitState(), 600);
-    }
-    renderAllPanels();
-    const nFlows = Object.values(target.flows).reduce((a, f) => a + f.length, 0);
-    say('Mapped ' + levelName(target) + ': ' + target.opCount + ' operations and ' + nFlows + ' flows. Sub-operations were added one level down; see the Recursion view.');
+    say(afterMapping(target, brief));
   } catch (e) {
     aiBusy = false;
     if (AI_OFF.includes(e && e.code)) sampleFn = null;
@@ -5040,7 +5072,7 @@ async function runMapping(target, brief, source) {
   }
 }
 (window.claude && typeof window.claude.use === 'function' ? Promise.resolve(window.claude.use('sample')).catch(() => null) : Promise.resolve(null))
-  .then(fn => { sampleFn = fn || null; if (!aiBusy) renderAIState(); if (selected) renderRecursion(); });
+  .then(fn => { sampleFn = fn || null; aiChecked = true; if (!aiBusy) renderAIState(); if (selected) renderRecursion(); });
 
 
 /* =====================================================================
@@ -5140,8 +5172,8 @@ function syncDiagramControls() {
   $('#s2Bridge').setAttribute('aria-pressed', String(bridge));
   $('#vfRibbon').setAttribute('aria-pressed', String(valueRibbons()));
   $('#vfLine').setAttribute('aria-pressed', String(!valueRibbons()));
-  $('#extS4cmd').checked = prefs.extS4cmd !== false;
-  $('#extS14').checked = prefs.extS14 !== false;
+  $('#extS4cmd').checked = prefs.extS4cmd === true;
+  $('#extS14').checked = prefs.extS14 === true;
   $('#localS2').checked = prefs.localS2 !== false;
 }
 function relayout() {
@@ -5203,7 +5235,7 @@ const FILE_FORMAT = 'viable-system-explorer', FILE_VERSION = 1;
 const CONVENTIONS = ['style', 's2mode', 'localS2', 'extS4cmd', 'extS14', 'valueFlows'];
 const pickConventions = src => { const o = {}; CONVENTIONS.forEach(k => { if (src && src[k] !== undefined) o[k] = src[k]; }); return o; };
 const EXAMPLES = {
-  example: { name: 'Model company, with data flows', build: root => { applySpec(root, EXAMPLE); $('#aiBrief').value = EXAMPLE.brief; } },
+  example: { name: 'Model company, with data flows', build: root => { applySpec(root, EXAMPLE); $('#aiBrief').value = $('#amBrief').value = EXAMPLE.brief; } },
   hospital: { name: 'Regional hospital', build: root => applyPreset(root, PRESETS.hospital) },
   software: { name: 'Software company', build: root => applyPreset(root, PRESETS.software) },
   cafe: { name: 'Café, with its value network', build: root => applyCafe(root) },
@@ -5330,6 +5362,24 @@ $('#aiRun').addEventListener('click', () => {
   runMapping(lv, brief, 'pane');
 });
 $('#aiStop').addEventListener('click', () => { if (aiCtl) aiCtl.abort(); });
+$('#amCopy').addEventListener('click', () => {
+  const brief = $('#amBrief').value.trim(), lv = level(), note = $('#amStatus');
+  if (!brief && !lv.parent) { note.textContent = 'Describe the organization first, in a few sentences.'; $('#amBrief').focus(); return; }
+  const text = mappingPrompt(lv, brief);
+  const fallback = () => {
+    const a = $('#amAnswer'); a.value = text; a.focus(); a.select();
+    note.textContent = 'The prompt is in the answer box, selected: copy it (Ctrl+C or ⌘C), then replace it with the answer.';
+  };
+  (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject())
+    .then(() => { note.textContent = 'Prompt copied for ' + levelName(lv) + '. Paste it into the assistant, then paste its answer below.'; }, fallback);
+});
+$('#amApply').addEventListener('click', () => {
+  const lv = level(), note = $('#amStatus'), brief = $('#amBrief').value.trim();
+  try {
+    applyMapping(lv, answerJson($('#amAnswer').value));
+    note.textContent = afterMapping(lv, brief);
+  } catch (e) { note.textContent = aiErrorText(e && e.code ? e : { code: 'invalid_shape' }); }
+});
 
 // tabs
 const tabs = ['model', 'flows', 'guide'];
@@ -6614,7 +6664,7 @@ async function exportFindings(kind) {
    shortcut sheet, About, focus keys for each system, the tour and
    presentation mode
    ===================================================================== */
-const APP_VERSION = '1.5.2 (November 2026)';
+const APP_VERSION = '1.5.3 (November 2026)';
 const CITE_YEAR = 2026;
 const modals = ['welcome', 'keysSheet', 'about'];
 let modalReturn = null;

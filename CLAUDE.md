@@ -8,7 +8,7 @@ An interactive explorer for Stafford Beer's Viable System Model (VSM). The user,
 - After finishing a task, add a short **Forks** section (at most three one-line items) only when one of these happened: you chose between approaches that give meaningfully different results (name the one discarded); you assumed something not stated; something contradicted the request's framing; you noticed something worth doing that was out of scope. Otherwise write nothing.
 - Use Beer's own terms. Do not invent labels such as "internal environment" for value-network actors; Panos asked to avoid that unless it has a source.
 - Panos often gives feedback as comments on the published artifact. Reply in the comment thread, keep the session message to a line or two, and do not resolve threads unless asked.
-- Every change so far has been committed and pushed straight to `main` (and to the working branch `ccr-e2cc510a-v04red` used by the cloud sessions). Ask before force-pushing or rewriting history.
+- Changes are committed and pushed straight to `main`, the default branch. The repository is public (since Nov 19 2026), so delete working branches once merged. Ask before force-pushing or rewriting history.
 
 ## Reference material (outside this repo)
 
@@ -52,7 +52,8 @@ Look at screenshots after visual changes: most regressions here are visual.
 
 ## Publishing
 
-- GitHub: `pan0sp/vsm`, branch `main`.
+- GitHub: `pan0sp/VSM` (public), branch `main`. About links to it.
+- Cloudflare Workers Builds deploys `main` as the Worker `vsm`, as static assets (`wrangler.jsonc`, with `.assetsignore` keeping tests, docs and `node_modules` out). Without `wrangler.jsonc` the build fails and every branch shows a red check.
 - Claude artifact: https://claude.ai/artifact/U5ejpELi2QeGq4FzHMDKLx. It is updated by publishing a copy of `index.html` from a Claude session that has the Artifact tool (Claude Code on the web does). Declare the capabilities `{ "sample": {}, "downloads": true }`: `sample` powers "Map this level with Claude", `downloads` lets Save to file work inside claude.ai. Outside claude.ai the Claude buttons hide themselves and saving uses a normal browser download.
 
 ## Open work

@@ -1,0 +1,7 @@
+// Cloudflare Workers Builds deploys the app as static assets: index.html and nothing else that matters.
+// .assetsignore keeps the tests, docs and node_modules out of the upload.
+{
+  "name": "vsm",
+  "compatibility_date": "2026-11-01",
+  "assets": { "directory": "." }
+}

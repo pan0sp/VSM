@@ -36,8 +36,8 @@ An interactive explorer for Stafford Beer's Viable System Model (VSM). The user,
 - Examples are complete models under the Model menu; each replacement of the model offers Undo.
 - Licence (decided Nov 2026): code AGPL-3.0-or-later (`LICENSE`), own text and examples CC BY-SA 4.0, name and logo reserved. No sign-in gate. About dialog holds version (`APP_VERSION`), licences and citation; bump the version there when releasing.
 - **Brand (Nov 19 2026):** the app wears Close the Loop's brand (skill `close-the-loop-design` in `pan0sp/skills`): navy `#141b38`, gold `#eeba2b` (gold text on light is `#a07a0e`), off-white; Raleway display, Open Sans body, Comfortaa only for the wordmark (Panos agreed: too wide for small UI text); IBM Plex Mono stays for codes. Light is the default theme when none was chosen (`prefs.themeChosen`). The app mark is E-O-M (Environment, Operations, Management): nested in the toolbar, opening out with double arrows in the About pop-up beside the vector Close the Loop C mark. No gradient backgrounds (brand rule).
-- First visit opens in 2D with panels closed and the welcome card (three entry choices). Keys: `1`–`5`, `*`, `E` (twice: future), `M`, `A`, `0` focus systems; `D` toggles 2D/3D (no longer `2`/`3`); `PageUp`/`PageDown` tour; `P` presentation mode (dark, full screen, caption, larger labels); `?` shortcut sheet. Toolbar groups: views, layers, present plus a ⋯ menu (theme, shortcuts, start screen, about).
-- Laws are paraphrased, each with its source; do not add a law without a source. Welcome card states the positioning: a tool to diagnose real organizations, not only to learn the VSM.
+- First visit opens in 2D with panels closed and the welcome card (three entry choices). Keys: `1`–`5`, `*`, `E` (twice: future), `M`, `A`, `0` focus systems; `D` toggles 2D/3D (no longer `2`/`3`); `PageUp`/`PageDown` tour; `P` presentation mode (dark, full screen, caption, larger labels; Esc leaves at once); `?` shortcut sheet. Toolbar groups: views, layers, present plus a ⋯ menu (theme, shortcuts, start screen, about).
+- Laws are paraphrased, each with its source; do not add a law without a source. Welcome card states the positioning: a tool for the facilitated diagnosis of real organizations, not only to learn the VSM (Astra, Nov 19: keep "facilitated" until the evidence workflow is strong).
 - Framing (`fitState`, `hemiFit`) keeps the model clear of the Method card, level chip, hint bar and caption via `stageCover()`.
 
 ## Checks
@@ -59,13 +59,18 @@ Look at screenshots after visual changes: most regressions here are visual.
 
 ## Open work
 
-Agreed next steps, in order:
-1. Hemispheres step 2: continuous zoom-through recursion. Then step 3, diagnosis silhouettes and the homeostat balance; step 4, live channels and algedonic latency; step 5, operations-room cameras; step 6, printable export.
-2. From the November 2026 review (steps 1 and 2, licence, fixes, presentation mode and shortcuts, are done): step 3 the Laws layer (done Nov 18: `LAWS` in the "Laws" section before Boot, key `L`, Laws card shares the Method card's slot, "Laws that apply here" in the details pane), step 4 a Variety layer, step 5 Measures (the triple index in System One; check *Brain of the Firm* pp. 163-166). Other review ideas not yet built: a privacy-light visit counter and own-domain hosting.
-3. App foundations, as proposed (Panos has not yet picked one): a library of several models in the browser; splitting `index.html` into modules with a build that still emits one file; running `npm test` in GitHub Actions; PNG/SVG export of the current view.
+Agreed next steps, in order (Panos chose on Nov 19 2026 to put the response to Astra's external review ahead of Variety; context in the project file `research/explorer-strategy-notes.md`):
+1. Astra's review, step 1, quick fixes (done Nov 19, v1.2.1): future environment coded `FE` (local environments keep `EA`…); closing the details pane clears the selection outside focus, and model or level changes reset it; Esc leaves presentation mode in one press; a note explains the six-operation limit; the Claude mapping block shows only where Claude can map; welcome says "facilitated diagnosis"; the model company (Larchmere) has a value network, and its value-flow channels take their flows from it.
+2. Astra's step 2: export the current view as PNG/SVG, plus a findings table.
+3. Astra's step 3: diagnosis as evidence: each mark gets evidence, confidence, consequence and status; "not assessed" distinct from "assessed, fine"; flows marked suggested or observed. Older files must still load.
+4. Astra's step 4: System One boundary check (four questions: what outcome, for whom; what it decides without escalating; how it regulates and adapts itself; why this is the useful recursion boundary). Panos decided: re-cut the café's System One into dine-in, takeaway and catering, keep the stations as activities in the value network; the Network view works at every recursion level; a visual language tells System Ones from activities (mock up for his approval first).
+5. Then the Variety layer, then Measures (the triple index in System One; check *Brain of the Firm* pp. 163-166).
+6. Hemispheres step 2: continuous zoom-through recursion. Then step 3, diagnosis silhouettes and the homeostat balance; step 4, live channels and algedonic latency; step 5, operations-room cameras; step 6, printable export.
+7. App foundations, as proposed (Panos has not yet picked one): a library of several models in the browser; splitting `index.html` into modules with a build that still emits one file; running `npm test` in GitHub Actions. Other review ideas not yet built: a privacy-light visit counter. Not adopted from Astra: full mobile editing (read-only review at most); a worked diagnostic case needs a real anonymized case from Panos, never an invented one.
+
+Done from the November 2026 review: licence, fixes, presentation mode and shortcuts, the Laws layer (`LAWS` in the "Laws" section before Boot, key `L`).
 
 Open questions and known issues:
 - Overlapping local environments: operations are spaced evenly round the ring, which will not fit overlaps. One idea is to order operations by shared actors. Undecided.
-- Against the skills and lecture notes: lecture slide 10 labels conflict with the skills; recursion numbering differs; the two extension channels are on by default; Beer's archetypes are missing.
-- The code `EF` is used both for the future environment and for the sixth local environment.
+- Against the skills and lecture notes: lecture slide 10 labels conflict with the skills; recursion numbering differs; the two extension channels are on by default; Beer's archetypes are missing. The `vsm-display` skill's spec still codes the future environment `EF`.
 - The "dive to L1" timing in some checks can be flaky.

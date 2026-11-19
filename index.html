@@ -424,6 +424,7 @@ button { cursor: pointer; }
 .row.wrap { flex-wrap: wrap; }
 .row.wrap .seg { flex: 1 1 auto; }
 .row.wrap .seg button { flex: 1; }
+.opmax { margin: 8px 0 0; font-size: 12px; line-height: 1.45; color: var(--ink-2); border-left: 2px solid var(--accent); padding-left: 8px; }
 #hlabels .lbl.far { opacity: .45; }
 #hlabels .lbl { pointer-events: auto; cursor: pointer; }
 @media (max-width: 1560px) { #vHemi .dlong { display: none; } #vHemi .dshort { display: inline !important; } }
@@ -1253,6 +1254,7 @@ details.adv > .block + .block { margin-top: 20px; }
             <button id="opPlus" type="button" aria-label="Add an operation">+</button>
           </div>
         </div>
+        <p class="opmax" id="opMax" hidden>Six operations is the most this explorer draws on one level. With more, group them into fewer, larger units that could each stand on their own, or open one and map what it contains on the level below.</p>
       </div>
 
       <div class="block">
@@ -1340,7 +1342,7 @@ details.adv > .block + .block { margin-top: 20px; }
         </div>
         <div class="src" id="flowsNote">Each channel can carry named flows. Their direction drives the moving dots in the model.</div>
       </div>
-      <div class="block ai" id="aiBlock">
+      <div class="block ai" id="aiBlock" hidden>
         <div class="eyebrow">Map an organization with Claude</div>
         <label class="fld"><span>Describe the organization: what it does, its main units, who it serves, how the parts fit together</span>
           <textarea id="aiBrief" rows="5" placeholder="A regional food co-op with three grocery stores, a bakery and a delivery service…"></textarea></label>
@@ -1493,7 +1495,7 @@ details.adv > .block + .block { margin-top: 20px; }
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
       </button>
       <h2 id="welcomeTitle">Viable System Explorer</h2>
-      <p class="lead">Welcome. This is a working tool for diagnosing real organizations with Stafford Beer's Viable System Model, not only a way to learn it. Map an organization's operations and management, flag what is missing or weak, and see which of Beer's laws apply where.</p>
+      <p class="lead">Welcome. This is a working tool for the facilitated diagnosis of real organizations with Stafford Beer's Viable System Model, not only a way to learn it. Map an organization's operations and management with the people who run it, flag what is missing or weak, and see which of Beer's laws apply where.</p>
       <p class="lead2">How would you like to start?</p>
       <div class="choices">
         <button class="choice primary" type="button" id="wExplore"><b>Explore the model</b>Start from Beer's diagram. Click any element to read what it does, or press 1 to 5 to focus each system.</button>
@@ -1584,7 +1586,7 @@ details.adv > .block + .block { margin-top: 20px; }
           </a>
         </div>
         <h2 id="aboutTitle">Viable System Explorer</h2>
-        <p class="about-tag">Stafford Beer's Viable System Model, to learn it and to diagnose real organizations with it.</p>
+        <p class="about-tag">Stafford Beer's Viable System Model, to learn it and to diagnose real organizations with it, in facilitated sessions.</p>
         <div class="about-meta"><span class="about-pill">Version <b id="aboutVersion"></b></span><span>Made by <a href="https://www.linkedin.com/in/panagio" target="_blank" rel="noopener">Panagiotis Panagiotakopoulos</a>, <a href="https://closetheloop.gr" target="_blank" rel="noopener">Close the Loop</a></span></div>
       </div>
       <div class="about-body">
@@ -2266,7 +2268,7 @@ function codeOf(lv, id) {
   if ((m = /^m(\d+)$/.exec(id))) return tg('1', +m[1]) + '·M';
   if ((m = /^a(\d+)$/.exec(id))) return tg('2', +m[1]);
   if ((m = /^e(\d+)$/.exec(id))) return tg('E', +m[1]);
-  return ({ env: 'E', fut: 'EF', meta: 'M', s2: '2', s3: '3', s3s: '3*', s4: '4', s5: '5' })[id] || '';
+  return ({ env: 'E', fut: 'FE', meta: 'M', s2: '2', s3: '3', s3s: '3*', s4: '4', s5: '5' })[id] || '';
 }
 
 function defaultLabel(lv, id) {
@@ -2456,17 +2458,13 @@ const EXAMPLE = {
     s3s: 'Quarterly quality audits plus unannounced safety walks on every line.',
     s2: 'Keeps the master schedule and the shared parts stock in balance.'
   },
+  // value flows (environment to operation, and between operations) come from the value network below
   flows: {
-    eo0: [['Dealer orders', 'ab'], ['Delivered bikes', 'ba'], ['Warranty claims', 'ab']],
-    eo1: [['Online and dealer orders', 'ab'], ['E-bikes delivered', 'ba'], ['Ride and battery telemetry', 'ab']],
-    eo2: [['Repair bookings', 'ab'], ['Serviced bikes returned', 'ba'], ['Customer satisfaction scores', 'ab']],
     ee0: [['Shared dealer network', 'both']],
     ee1: [['E-bike riders needing service', 'ab']],
     om0: [['Daily output and defect rates', 'ab'], ['Shift plans and build priorities', 'ba']],
     om1: [['Line output and battery test results', 'ab'], ['Build priorities', 'ba']],
     om2: [['Jobs completed and backlog', 'ab'], ['Technician rota', 'ba']],
-    oo0: [['Shared frames and paint shop', 'both']],
-    oo1: [['Spare parts and diagnostic know-how', 'ab']],
     ms0: [['Line capacity and slot requests', 'ab'], ['Confirmed frame schedule', 'ba']],
     ms1: [['Battery and motor needs', 'ab'], ['Allocated components', 'ba']],
     ms2: [['Workshop capacity', 'ab'], ['Booked jobs', 'ba']],
@@ -2482,6 +2480,25 @@ const EXAMPLE = {
     s4cmd: [['Next-quarter demand forecast for budgets', 'ab']],
     s14: [['Dealer and rider field insights', 'ab'], ['Prototype test requests', 'ba']],
     alg: [['Safety stop and critical recall alert', 'ab']]
+  },
+  // the value network the divisions come from: who each one exchanges value with, and what passes between them
+  net: {
+    seq: 40,
+    actors: [
+      { id: 'x1', kind: 'customer', name: 'Bike shops and dealers' }, { id: 'x2', kind: 'customer', name: 'Commuters' },
+      { id: 'x3', kind: 'customer', name: 'E-bike riders' }, { id: 'x4', kind: 'customer', name: 'Riders needing repairs' },
+      { id: 'x5', kind: 'supplier', name: 'Frame and parts suppliers' }, { id: 'x6', kind: 'supplier', name: 'Battery and motor suppliers' }
+    ],
+    flows: [
+      ['x1', 'o0', 'Dealer orders'], ['o0', 'x1', 'Delivered bikes'], ['x1', 'o0', 'Warranty claims'],
+      ['x2', 'x1', 'Bike purchases'],
+      ['x1', 'o1', 'Dealer orders'], ['x3', 'o1', 'Online orders'], ['o1', 'x3', 'E-bikes delivered'], ['x3', 'o1', 'Ride and battery telemetry'],
+      ['x4', 'o2', 'Repair bookings'], ['o2', 'x4', 'Serviced bikes returned'], ['x4', 'o2', 'Customer satisfaction scores'], ['x3', 'o2', 'E-bike service requests'],
+      ['o0', 'o1', 'Shared frames and paint shop'], ['o1', 'o2', 'Spare parts and diagnostic know-how'],
+      ['x5', 'o0', 'Frames and components'], ['x5', 'o2', 'Spare parts'], ['x6', 'o1', 'Batteries and motors'],
+      ['o0', 'x5', '$'], ['o1', 'x6', '$']
+    ],
+    pos: { x5: [-320, -110], x6: [-320, 150], o0: [0, -220], o1: [0, 0], o2: [0, 220], x1: [320, -220], x2: [600, -220], x3: [320, 40], x4: [320, 260] }
   },
   children: [
     { ops: [
@@ -2532,6 +2549,7 @@ function applySpec(lv, spec) {
   Object.keys(spec.labels || {}).forEach(k => { if (spec.labels[k]) lv.labels[k] = spec.labels[k]; });
   if (!lv.parent && spec.name) lv.name = spec.name;
   if (spec.brief) lv.brief = spec.brief;
+  if (spec.net) lv.net = cafeNet(spec.net);
   lv.flows = {};
   if (spec.flows === 'standard') buildLayout(lv.opCount, FULL_OPTS).chans.forEach(ch => { lv.flows[ch.id] = standardFlows(lv, ch); });
   else if (spec.flows) Object.keys(spec.flows).forEach(k => { lv.flows[k] = spec.flows[k].map(f => ({ name: f[0], dir: f[1] })); });
@@ -3741,6 +3759,7 @@ function select(id, opts) {
   } else {
     selSet = new Set(id ? [id] : []);
   }
+  if ((id || null) !== selected && !focusMode) inspDismissed = false;
   selected = id || null;
   focusSet = computeFocusAll();
   if (focusMode && !selSet.size) focusMode = false;
@@ -4117,7 +4136,7 @@ async function goToLevel(id) {
   labelsEl.style.opacity = 0;
   await wait(reduceMotion ? 0 : 170);
   db.currentId = id; save();
-  selected = null; focusSet = null;
+  selected = null; selSet = new Set(); inspDismissed = false; focusSet = null;
   buildScene();
   renderAllPanels();
   const fit = fitState();
@@ -4292,6 +4311,8 @@ function renderModelPane() {
   $('#opCount').textContent = lv.opCount;
   $('#opMinus').disabled = lv.opCount <= MIN_OPS;
   $('#opPlus').disabled = lv.opCount >= MAX_OPS;
+  $('#opPlus').title = lv.opCount >= MAX_OPS ? 'Six operations is the most per level' : 'Add an operation';
+  $('#opMax').hidden = lv.opCount < MAX_OPS;
 
   const counts = { env: 0, ops: 0, meta: 0, chan: L.chans.length };
   L.els.forEach(e => counts[e.group]++);
@@ -4856,8 +4877,11 @@ function aiErrorText(e) {
   if (AI_OFF.includes(c)) return 'Claude is not available for this page, so mapping is switched off. The model company and standard flows still work.';
   return 'Claude could not be reached. Try again.';
 }
+let aiTried = false;
 function renderAIState(msg) {
   const st = $('#aiStatus');
+  // only where Claude can map (a Claude artifact); elsewhere the block stays out of the way
+  $('#aiBlock').hidden = !sampleFn && !aiTried;
   $('#aiRun').disabled = !sampleFn || aiBusy;
   $('#aiStop').hidden = !aiBusy;
   if (msg) { st.textContent = msg; return; }
@@ -4868,7 +4892,7 @@ function renderAIState(msg) {
 }
 async function runMapping(target, brief, source) {
   if (!sampleFn || aiBusy) return;
-  aiBusy = true;
+  aiBusy = true; aiTried = true;
   aiCtl = new AbortController();
   let last = '';
   const say = t => { last = t; if (source === 'insp') { aiInspectorNote = t; const n = $('#iAiStatus'); if (n) n.textContent = t; } renderAIState(t); };
@@ -4933,7 +4957,8 @@ function recentre() {
 }
 $('#btnRecentre').addEventListener('click', recentre);
 $('#upBtn').addEventListener('click', () => exitToParent());
-$('#iClose').addEventListener('click', () => { inspDismissed = true; renderInspector(); renderFocusBar(); });
+// closing the details pane outside focus also clears the selection, so a stale selection never brings it back later
+$('#iClose').addEventListener('click', () => { if (focusMode) { inspDismissed = true; renderInspector(); renderFocusBar(); } else select(null); });
 $('#iName').addEventListener('input', e => renameElement(selected, e.target.value, 'insp'));
 $('#iColor').addEventListener('input', e => recolorElement(selected, e.target.value, 'insp'));
 $('#iColorReset').addEventListener('click', () => recolorElement(selected, null, 'insp'));
@@ -5086,7 +5111,7 @@ function replaceModel(next, msg, conventions) {
   return true;
 }
 function afterModelChange() {
-  selected = null; focusSet = null; netSel = null; netView = null;
+  selected = null; selSet = new Set(); inspDismissed = false; focusSet = null; netSel = null; netView = null;
   if (focusMode) exitFocus();
   save(); syncDiagramControls();
   buildScene(); renderAllPanels(); camTween(fitState(), 600);
@@ -5225,7 +5250,7 @@ window.addEventListener('keydown', e => {
   if (openModal()) { if (e.key === 'Escape') { e.preventDefault(); closeModal(); } return; }
   if (e.key === '?') { e.preventDefault(); openModalById('keysSheet'); return; }
   if (e.key === 'p' || e.key === 'P') { setPresenting(!isPresenting()); return; }
-  if (e.key === 'Escape' && isPresenting() && !focusMode && ctx.hidden) { setPresenting(false); return; }
+  if (e.key === 'Escape' && isPresenting() && ctx.hidden) { setPresenting(false); return; }
   if (e.key === 'n' || e.key === 'N') { setDiagram(prefs.diagram === 'net' ? 'vsm' : 'net'); return; }
   if (e.key === 'r' || e.key === 'R') { setDiagram(prefs.diagram === 'rec' ? 'vsm' : 'rec'); return; }
   if (prefs.diagram === 'rec') { if (e.key === 'Escape' && !ctx.hidden) closeCtx(); return; }
@@ -5473,11 +5498,18 @@ function netPt(e) {
   const r = netSvg.getBoundingClientRect();
   return [netView.cx + (e.clientX - r.left - r.width / 2) / netView.s, netView.cy + (e.clientY - r.top - r.height / 2) / netView.s];
 }
+// the tools start to the right of the level chip, so a long system name never covers them
+function placeNetBar() {
+  const bar = netEl.querySelector('.net-bar'), chip = $('#levelChip');
+  const c = chip && chip.offsetParent ? chip.getBoundingClientRect() : null, n = netEl.getBoundingClientRect();
+  bar.style.left = c && c.width ? Math.max(12, Math.round(c.right - n.left + 10)) + 'px' : '';
+}
 function renderNet() {
   if (prefs.diagram !== 'net') return;
   const lv = level(), net = ensureNet(lv);
   if (netNodesOf(lv).some(id => !net.pos[id])) netAutoLayout(lv, false);
   if (netSel && (netSel.t === 'node' ? !netNodeOk(lv, netSel.id) : !net.flows.some(f => f.id === netSel.id))) netSel = null;
+  placeNetBar();
   renderNetCard();
   syncNetBar();
   if (!netView) netFit();
@@ -5710,7 +5742,7 @@ function freePos(lv, near) {
 }
 function netAddActivity() {
   const lv = level();
-  if (lv.opCount >= MAX_OPS) { showToast('This explorer allows up to ' + MAX_OPS + ' operations per level. Group activities, or open one and map its lower level.'); return; }
+  if (lv.opCount >= MAX_OPS) { showToast('Six operations is the most this explorer draws on one level. Group activities into fewer units, or open one and map it on the level below.'); return; }
   const net = ensureNet(lv), ps = Array.from({ length: lv.opCount }, (_, k) => net.pos['o' + k]).filter(Boolean);
   const near = ps.length ? [ps.reduce((a, p) => a + p[0], 0) / ps.length, Math.max(...ps.map(p => p[1])) + 130] : [0, 0];
   const id = 'o' + lv.opCount;
@@ -6070,7 +6102,7 @@ function applyCafe(lv) {
    shortcut sheet, About, focus keys for each system, the tour and
    presentation mode
    ===================================================================== */
-const APP_VERSION = '1.2 (November 2026)';
+const APP_VERSION = '1.2.1 (November 2026)';
 const CITE_YEAR = 2026;
 const modals = ['welcome', 'keysSheet', 'about'];
 let modalReturn = null;

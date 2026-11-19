@@ -7,7 +7,7 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   const cx = await b.newContext({ viewport: { width: 1280, height: 720 } }); await route(cx);
   const pg = await cx.newPage(); pg.on('pageerror', e => errs.push(e.stack));
   await pg.goto(PAGE); await pg.waitForTimeout(2000);
-  ok(/diagnosing real organizations/.test(await pg.textContent('#welcome .lead')), 'welcome says it is for diagnosing real organizations');
+  ok(/facilitated diagnosis of real organizations/.test(await pg.textContent('#welcome .lead')), 'welcome says it is for the facilitated diagnosis of real organizations');
   await pg.screenshot({ path: process.env.SP + '/shots/laws-welcome.png' });
   await pg.click('#wExamples [data-ex="example"]'); await pg.waitForTimeout(1200);
   await pg.click('#toast button:last-child').catch(() => {});

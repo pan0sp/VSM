@@ -37,7 +37,7 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   ok(await pg.evaluate(() => /Shift manager/.test(document.getElementById('focusBar').textContent)), 'key 3 focuses System Three');
   ok((await st()).v2 === 'true', 'key 3 no longer switches to 3D');
   await pg.keyboard.press('e'); await pg.waitForTimeout(700); await pg.keyboard.press('e'); await pg.waitForTimeout(700);
-  ok(await pg.evaluate(() => /EF/.test(document.getElementById('focusBar').textContent)), 'E twice focuses the future environment');
+  ok(await pg.evaluate(() => /FE/.test(document.getElementById('focusBar').textContent)), 'E twice focuses the future environment');
   await pg.keyboard.press('0'); await pg.waitForTimeout(700);
   ok(await pg.isHidden('#focusBar'), '0 shows everything');
   await pg.keyboard.press('d'); await pg.waitForTimeout(1500);
@@ -60,8 +60,8 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   const big = await pg.evaluate(() => Math.min(...[...document.querySelectorAll('#labels .lbl .code')].filter(c => c.offsetParent).map(c => parseFloat(getComputedStyle(c).fontSize))));
   ok(big >= 14, 'presentation labels are larger (' + big + ')');
   await pg.screenshot({ path: process.env.SP + '/shots/present-1280.png' });
-  await pg.keyboard.press('Escape'); await pg.waitForTimeout(700); await pg.keyboard.press('Escape'); await pg.waitForTimeout(700);
-  ok(!/presenting/.test((await st()).cls) && await pg.isVisible('.topbar'), 'Esc leaves focus, then presentation mode');
+  await pg.keyboard.press('Escape'); await pg.waitForTimeout(700);
+  ok(!/presenting/.test((await st()).cls) && await pg.isVisible('.topbar'), 'Esc leaves presentation mode during the tour');
   // about and the hint
   await pg.click('#footAbout'); await pg.waitForTimeout(300);
   ok(/AGPL/.test(await pg.textContent('#about')) && /CC|Creative Commons/.test(await pg.textContent('#about')), 'About names both licences');

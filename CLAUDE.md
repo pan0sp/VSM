@@ -54,7 +54,7 @@ Look at screenshots after visual changes: most regressions here are visual.
 ## Publishing
 
 - GitHub: `pan0sp/VSM` (public), branch `main`. About links to it.
-- Cloudflare Workers Builds deploys `main` as the Worker `vsm`, as static assets (`wrangler.jsonc`, with `.assetsignore` keeping tests, docs and `node_modules` out). Without `wrangler.jsonc` the build fails and every branch shows a red check.
+- Cloudflare Workers Builds deploys `main` as the Worker `vsm` (its production branch must be `main`: until Nov 19 2026 it pointed at a deleted working branch, so pushes built previews only and the live site stayed at 1.1; changing the branch takes effect from the next push), as static assets (`wrangler.jsonc`, with `.assetsignore` keeping tests, docs and `node_modules` out). Without `wrangler.jsonc` the build fails and every branch shows a red check.
 - Claude artifact: https://claude.ai/artifact/U5ejpELi2QeGq4FzHMDKLx. It is updated by publishing a copy of `index.html` from a Claude session that has the Artifact tool (Claude Code on the web does). Declare the capabilities `{ "sample": {}, "downloads": true }`: `sample` powers "Map this level with Claude", `downloads` lets Save to file work inside claude.ai. Outside claude.ai the Claude buttons hide themselves and saving uses a normal browser download.
 
 ## Open work

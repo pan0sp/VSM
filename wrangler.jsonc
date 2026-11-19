@@ -3,5 +3,7 @@
 {
   "name": "vsm",
   "compatibility_date": "2026-11-01",
-  "assets": { "directory": "." }
+  "assets": { "directory": "." },
+  // the connected build runs `wrangler preview`, which needs this block, even empty
+  "previews": {}
 }

@@ -991,6 +991,12 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 }
 .isec ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
 .isec ul.links { list-style: none; padding: 0; gap: 2px; }
+.isx { display: flex; flex-direction: column; gap: 10px; }
+.isx-row { display: grid; gap: 5px; font-size: 13px; }
+.isx-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.isx-head b { font-weight: 600; }
+.isx-row .src { margin: 0; }
+.isx-row input { border: 1px solid var(--rule); background: var(--surface); border-radius: 7px; padding: 5px 8px; font-size: 12.5px; width: 100%; }
 .links button {
   display: flex;
   align-items: center;
@@ -1334,9 +1340,9 @@ details.adv > .block + .block { margin-top: 20px; }
               <button id="vfLine" type="button" aria-pressed="false" title="Thin lines, the same as every other channel">Lines</button>
             </div>
           </div>
-          <label class="chk"><input type="checkbox" id="extS4cmd"><span>System Four into the Resource Bargain<small>Extension: reads the command axis as anticipatory</small></span></label>
+          <label class="chk"><input type="checkbox" id="extS4cmd"><span>System Four into the Resource Bargain<small>Not in Beer's diagram: reads the command axis as anticipatory</small></span></label>
           <label class="chk"><input type="checkbox" id="localS2"><span>Local regulatory centres<small>System Two's centre beside each local management; some diagrams omit them</small></span></label>
-          <label class="chk"><input type="checkbox" id="extS14"><span>System One ↔ System Four<small>Extension: operations and System Four exchange signals directly</small></span></label>
+          <label class="chk"><input type="checkbox" id="extS14"><span>System One ↔ System Four<small>Not in Beer's diagram: operations and System Four exchange signals directly, advisory only</small></span></label>
         </div>
 
         <div class="block">
@@ -1665,6 +1671,7 @@ details.adv > .block + .block { margin-top: 20px; }
       <div class="isec" id="iLawsSec" hidden><h4>Laws that apply here</h4><ul class="lawlist" id="iLaws"></ul></div>
       <div class="isec" id="iFlowSec"><h4>Data flows</h4><div id="iFlows"></div></div>
       <div class="isec" id="iNetSec" hidden><h4>In the value network</h4><div id="iNet"></div></div>
+      <div class="isec" id="iIsecSec" hidden><h4>Environmental intersects</h4><div id="iIsec"></div></div>
       <div class="isec" id="iIOSec"><h4>Information in and out</h4><ul class="io" id="iIO"></ul></div>
       <div id="iRecur"></div>
       <div class="isec" id="iLinksSec"><h4>Connected</h4><ul class="links" id="iLinks"></ul></div>
@@ -1829,7 +1836,7 @@ const KB = {
   },
   ee: {
     kind: 'Channel', role: 'Environmental intersect',
-    summary: 'One of the vertical channels Beer lists in Diagnosing the System: the environments of the operations intersect, so customers overlap and markets move together. These constraints arise by happenstance, not by design.',
+    summary: 'One of the vertical channels Beer lists in Diagnosing the System: the environments of the operations intersect, so customers overlap and markets move together. These constraints arise by happenstance, not by design. Shared actors in the value network suggest an intersect; set any pair by hand, with a reason, in a local environment\'s details.',
     practice: ['Shared customers, overlapping regions, linked supply chains'],
     questions: ['Which environments overlap, and does anyone track the overlap?'],
     watch: ['Operations surprised by changes that began in a neighbouring environment']
@@ -2061,9 +2068,12 @@ function buildLayout(n, opts) {
     label: { dx: 0, dy: 0, w: 24 } });
   ops.forEach(i => {
     const y = yOp(i);
-    // local environments overlap their neighbours, as in Beer's diagram: channel iv, the environmental intersects
+    // local environments overlap their neighbours, as in Beer's diagram: channel iv, the environmental intersects.
+    // Where two neighbours do not intersect (opts.isect[k] false for operations k and k+1) each stops short of the other.
+    const full = n > 1 ? 16.5 : 9.5, apart = OP_GAP / 2 - 1.6, isx = opts.isect || [];
+    const up = i > 0 && isx[i - 1] === false ? apart : full, down = i < n - 1 && isx[i] === false ? apart : full;
     add({ id: 'e' + i, type: 'envOp', group: 'env', idx: i, layer: LAYER.env, z2: -0.45 - (i % 2) * 0.04,
-      shape: { kind: 'blob', cx: -66 + ENVDX + (i % 2 ? -2.2 : 2.2), cy: y + OPDY, rx: 12, ry: n > 1 ? 16.5 : 9.5, p: 2.3, amp: 0.08, seed: 11.7 + i * 3.1 },
+      shape: { kind: 'blob', cx: -66 + ENVDX + (i % 2 ? -2.2 : 2.2), cy: y + OPDY + (up - down) / 2, rx: 12, ry: (up + down) / 2, p: 2.3, amp: 0.08, seed: 11.7 + i * 3.1 },
       label: { dx: 0, dy: 0, w: 20 } });
     add({ id: 'o' + i, type: 'op', group: 'ops', idx: i, layer: LAYER.ops, z2: 0,
       // each operation sits below and to the left of its local management, on the 45 degree diagonal
@@ -2300,7 +2310,7 @@ function schemeColors(key) {
 
 let db = null; // { seq, rootId, currentId, levels: {} }
 let prefs = { view: '2d', flows: !reduceMotion, nested: false, spread: 1, side: false, diagShow: true, autoLevels: false, lpHint: false, s2mode: 'inside', extS4cmd: false, extS14: false, style: 'square', theme: 'light' };
-function layoutOpts() { return { s2: prefs.s2mode === 'bridge' ? 'bridge' : 'inside', s4cmd: prefs.extS4cmd === true, s14: prefs.extS14 === true, style: prefs.style === 'diamond' ? 'diamond' : 'square', localS2: prefs.localS2 !== false }; }
+function layoutOpts(lv) { lv = lv || (db && level()); return { isect: lv ? isectNeighbours(lv) : null, s2: prefs.s2mode === 'bridge' ? 'bridge' : 'inside', s4cmd: prefs.extS4cmd === true, s14: prefs.extS14 === true, style: prefs.style === 'diamond' ? 'diamond' : 'square', localS2: prefs.localS2 !== false }; }
 
 function newLevel(parent, elId) {
   db.seq += 1;
@@ -2409,6 +2419,12 @@ function normaliseDb(d) {
     ['flows', 'notes', 'labels', 'diag', 'colors', 'children'].forEach(f => { l[f] = obj(l[f]); });
     // marks from any version: a known state, text fields as text; the evidence fields are optional
     if (l.unfold && (typeof l.unfold !== 'object' || !UNFOLD[l.unfold.by])) delete l.unfold;
+    if (l.isect) {
+      if (typeof l.isect !== 'object' || Array.isArray(l.isect)) delete l.isect;
+      else Object.keys(l.isect).forEach(k => { const v = l.isect[k], m = /^(\d+)-(\d+)$/.exec(k);
+        if (!m || +m[1] >= +m[2] || !v || typeof v !== 'object') delete l.isect[k];
+        else { v.on = !!v.on; if (typeof v.why !== 'string') delete v.why; } });
+    }
     if (l.unfold && typeof l.unfold.why !== 'string') delete l.unfold.why;
     Object.keys(l.diag).forEach(k => { const d = l.diag[k]; if (!d || typeof d !== 'object' || !(DIAG[d.s] || d.s === 'ok')) { delete l.diag[k]; return; } ['note', 'cons', 'src', 'conf', 'st', 'at'].forEach(f => { if (d[f] != null && typeof d[f] !== 'string') delete d[f]; }); });
     Object.keys(l.labels).forEach(k => { if (typeof l.labels[k] !== 'string') delete l.labels[k]; });
@@ -3147,7 +3163,7 @@ function buildMinis() {
   for (let i = 0; i < lv.opCount; i++) {
     const childId = lv.children['o' + i];
     const child = childId ? db.levels[childId] : null;
-    const ML = buildLayout(child ? child.opCount : 3, Object.assign({}, layoutOpts(), { localS2: false, s4cmd: false, s14: false }));
+    const ML = buildLayout(child ? child.opCount : 3, Object.assign({}, layoutOpts(child), { localS2: false, s4cmd: false, s14: false }));
     const holder = new THREE.Group();          // follows the local management
     const opsHolder = new THREE.Group();       // follows the operation
     const metaIn = new THREE.Group(), opsIn = new THREE.Group();
@@ -4117,6 +4133,15 @@ function removeOperation(lv, k) {
     else { deleteSubtree(c); delete db.levels[cid]; }
   });
   lv.children = kids;
+  if (lv.isect) {
+    const out = {};
+    Object.keys(lv.isect).forEach(key => {
+      const [i, j] = key.split('-').map(Number);
+      if (i === k || j === k) return;
+      out[isectKey(i > k ? i - 1 : i, j > k ? j - 1 : j)] = lv.isect[key];
+    });
+    lv.isect = out;
+  }
   if (lv.net) {
     const rn = id => { const i = opIdx(id); return i < 0 ? id : i === k ? null : i > k ? 'o' + (i - 1) : id; };
     const gone = lv.net.actors.filter(a => isAct(a) && !rn(a.op)).map(a => a.id);
@@ -4596,6 +4621,7 @@ function renderInspector() {
   renderLinks();
   renderRecursion();
   renderInspectorNet();
+  renderInspectorIsect();
   if (typeof renderInspectorLaws === 'function') renderInspectorLaws();
   if (wasHidden) $('.insp-body').scrollTop = 0;
 }
@@ -4619,6 +4645,38 @@ function renderInspectorNet() {
   const go = target => { setDiagram('net'); setTimeout(() => netSelect(target), 40); };
   $('#iNetGo').addEventListener('click', () => go({ t: 'node', id: 'o' + k }));
   box.querySelectorAll('[data-actor]').forEach(b => b.addEventListener('click', () => go({ t: 'node', id: b.dataset.actor })));
+}
+/* Channel iv for one local environment (every other operation) or one intersect channel (its two neighbours) */
+function renderInspectorIsect() {
+  const lv = level(), id = selected || '', sec = $('#iIsecSec'), box = $('#iIsec');
+  const me = /^e(\d+)$/.exec(id), mc = /^ee(\d+)$/.exec(id);
+  if ((!me && !mc) || lv.opCount < 2) { sec.hidden = true; return; }
+  sec.hidden = false;
+  const k = +(me || mc)[1], pairs = me ? Array.from({ length: lv.opCount }, (_, j) => j).filter(j => j !== k).map(j => [k, j]) : [[k, k + 1]];
+  const envName = j => codeOf(lv, 'e' + j) + ' · ' + labelOf(lv, 'e' + j);
+  const srcText = (x, a, b) => x.src === 'set' ? 'Set by hand.'
+    : x.src === 'actors' ? (x.on ? 'Suggested by the value network.' : 'No shared actor in the value network.')
+    : 'Drawn symbolically: neighbours overlap until the value network or you say otherwise.';
+  box.innerHTML = '<div class="isx">' + pairs.map(([a, b]) => {
+    const x = intersect(lv, a, b), far = Math.abs(a - b) > 1;
+    const seg = (v, t) => '<button type="button" data-a="' + a + '" data-b="' + b + '" data-on="' + v + '" aria-pressed="' + (v === 'auto' ? x.src !== 'set' : x.src === 'set' && String(x.on) === v) + '">' + t + '</button>';
+    return '<div class="isx-row"><div class="isx-head"><span>' + (me ? 'With <b>' + esc(envName(b)) + '</b>' : '<b>' + esc(envName(a)) + '</b> and <b>' + esc(envName(b)) + '</b>') + '</span>' +
+      '<span class="src">' + (x.on ? 'Intersect' : 'Apart') + '</span></div>' +
+      '<div class="seg small" role="group" aria-label="Intersect">' + seg('auto', 'As found') + seg('true', 'Intersect') + seg('false', 'Apart') + '</div>' +
+      '<p class="src">' + esc(srcText(x)) + (x.shared.length ? ' Shared: ' + esc(x.shared.map(s => netName(lv, s.id)).join(', ')) + '.' : '') +
+      (far && x.on ? ' Not drawn yet: the diagram overlaps neighbours only.' : '') + '</p>' +
+      (x.src === 'set' ? '<input type="text" data-why="' + a + '-' + b + '" value="' + esc(x.why) + '" placeholder="Why? For example: same regulator, shared customers, one labour market" aria-label="Why">' : '') +
+      '</div>';
+  }).join('') + '</div>';
+  box.querySelectorAll('[data-on]').forEach(btn => btn.addEventListener('click', () => {
+    const v = btn.dataset.on;
+    setIsect(lv, +btn.dataset.a, +btn.dataset.b, v === 'auto' ? null : v === 'true');
+    save(); relayout();
+  }));
+  box.querySelectorAll('[data-why]').forEach(inp => inp.addEventListener('input', () => {
+    const [a, b] = inp.dataset.why.split('-').map(Number);
+    setIsect(lv, a, b, intersect(lv, a, b).on, inp.value); save();
+  }));
 }
 const today = () => new Date().toISOString().slice(0, 10);
 function setDiag(id, key, note) {
@@ -5511,6 +5569,30 @@ function opsOfActor(lv, aid) {
   });
   return Array.from(ks).sort((a, b) => a - b);
 }
+/* Environmental intersects (Beer's channel iv). Two local environments intersect wherever they share anything:
+   customers, suppliers, regulation, a labour market, goodwill. Shared actors in the value network suggest an
+   intersect; the modeller can set any pair either way and say why (lv.isect['i-j'] = { on, why }). With no value
+   network the neighbours overlap symbolically, as in Beer's diagram. */
+const isectKey = (i, j) => Math.min(i, j) + '-' + Math.max(i, j);
+function sharedActors(lv, i, j) {
+  if (!lv.net) return [];
+  return envActors(lv).filter(a => { const ks = opsOfActor(lv, a.id); return ks.includes(i) && ks.includes(j); });
+}
+// the value network speaks for the intersects once any actor in it deals with an operation
+const netShowsIsect = lv => !!lv.net && envActors(lv).some(a => opsOfActor(lv, a.id).length > 0);
+function intersect(lv, i, j) {
+  const set = lv.isect && lv.isect[isectKey(i, j)], shared = sharedActors(lv, i, j);
+  if (set) return { on: !!set.on, why: set.why || '', src: 'set', shared };
+  if (netShowsIsect(lv)) return { on: shared.length > 0, src: 'actors', shared };
+  return { on: Math.abs(i - j) === 1, src: 'symbolic', shared };
+}
+const isectNeighbours = lv => Array.from({ length: Math.max(0, lv.opCount - 1) }, (_, k) => intersect(lv, k, k + 1).on);
+function setIsect(lv, i, j, on, why) {
+  lv.isect = lv.isect || {};
+  const key = isectKey(i, j);
+  if (on == null) delete lv.isect[key];
+  else lv.isect[key] = Object.assign({}, lv.isect[key] || {}, { on: !!on }, why != null ? { why } : {});
+}
 /* What the value network puts on a VSM channel, shown read-only beside the flows named there.
    The VSM column can only draw linkages between neighbours, so a flow between distant operations
    runs along every linkage in between. */
@@ -5534,10 +5616,7 @@ function netFlowsOn(lv, chId) {
     });
   } else if ((m = /^ee(\d+)$/.exec(chId))) {
     const i = +m[1];
-    envActors(lv).forEach(a => {
-      const ks = opsOfActor(lv, a.id);
-      if (ks.length > 1 && ks[0] <= i && ks[ks.length - 1] > i) out.push({ name: 'Shared: ' + netName(lv, a.id), dir: 'both', net: true });
-    });
+    sharedActors(lv, i, i + 1).forEach(a => out.push({ name: 'Shared: ' + netName(lv, a.id), dir: 'both', net: true }));
   }
   return out;
 }
@@ -6664,7 +6743,7 @@ async function exportFindings(kind) {
    shortcut sheet, About, focus keys for each system, the tour and
    presentation mode
    ===================================================================== */
-const APP_VERSION = '1.5.3 (November 2026)';
+const APP_VERSION = '1.6 (November 2026)';
 const CITE_YEAR = 2026;
 const modals = ['welcome', 'keysSheet', 'about'];
 let modalReturn = null;

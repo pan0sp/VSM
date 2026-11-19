@@ -1154,6 +1154,23 @@ details.adv > .block + .block { margin-top: 20px; }
 @keyframes aboutDraw { to { stroke-dashoffset: 0; } }
 @keyframes aboutFade { to { opacity: 1; } }
 @media (max-width: 560px) { .about-hero { padding: 42px 18px 22px; } .about-mark { width: 72px; height: 72px; } .about-ctl svg { width: 34px; height: 34px; } .about-ctl .wm { font-size: 17px; } .about-marks { gap: 16px; } .modal-card .about-hero h2 { font-size: 26px; } .about-body { padding: 16px 18px 18px; } }
+/* Welcome: the same navy hero as About (the first impression), then the three ways in */
+.modal-card.welcome-card { width: min(760px, 100%); }
+.welcome-hero { padding: 40px 28px 26px; }
+.welcome-hero .about-marks { margin-bottom: 20px; }
+.welcome-kicker { position: relative; font: 600 11px/1 var(--f-display); letter-spacing: .22em; text-transform: uppercase; color: #eeba2b; margin-bottom: 10px; opacity: 0; animation: aboutRise .6s ease 1.1s forwards; }
+.welcome-hero h2 { opacity: 0; animation: aboutRise .7s cubic-bezier(.2, .8, .2, 1) 1.25s forwards; }
+.welcome-hero .about-tag { margin-bottom: 0 !important; opacity: 0; animation: aboutRise .7s ease 1.45s forwards; }
+.welcome-body .lead { font-size: 14px; }
+.welcome-body .choices { margin-top: 14px; }
+.welcome-body .choice { position: relative; border-radius: 8px; padding: 16px 14px 14px; border-top: 3px solid var(--rule); opacity: 0; animation: aboutRise .55s cubic-bezier(.2, .8, .2, 1) forwards; transition: border-color .15s, background .15s, transform .15s; }
+.welcome-body .choice:nth-child(1) { animation-delay: 1.7s; } .welcome-body .choice:nth-child(2) { animation-delay: 1.82s; } .welcome-body .choice:nth-child(3) { animation-delay: 1.94s; }
+.welcome-body .choice.primary { border-color: var(--rule); border-top-color: var(--gold, #eeba2b); }
+.welcome-body button.choice:hover, .welcome-body button.choice:focus-visible { transform: translateY(-2px); border-top-color: var(--gold, #eeba2b); }
+.choice-n { font: 500 11px/1 var(--f-mono); letter-spacing: .08em; color: var(--accent); }
+@keyframes aboutRise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (max-width: 560px) { .welcome-hero { padding: 40px 18px 20px; } .welcome-body .choice { padding: 12px; } }
+@media (prefers-reduced-motion: reduce) { .welcome-kicker, .welcome-hero h2, .welcome-hero .about-tag, .welcome-body .choice { animation: none !important; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
   .modal-card.about-card, .about-mark *, .about-ctl * { animation: none !important; }
   .about-mark .ln, .about-ctl .arc, .about-ctl .arc-c { stroke-dashoffset: 0; } .about-mark .hd, .about-ctl .dot { opacity: 1; }
@@ -1526,20 +1543,40 @@ details.adv > .block + .block { margin-top: 20px; }
       <div><b>WebGL is not available in this browser.</b><br>The explorer needs WebGL to draw the model. Try a recent version of Chrome, Firefox, Safari or Edge.</div>
     </div>
   </main>
-  <div class="modal" id="welcome" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle" hidden>
-    <div class="modal-card">
-      <button class="icon-btn modal-x" type="button" data-close aria-label="Close">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
-      </button>
-      <h2 id="welcomeTitle">Viable System Explorer</h2>
-      <p class="lead">Welcome. This is a working tool for the facilitated diagnosis of real organizations with Stafford Beer's Viable System Model, not only a way to learn it. Map an organization's operations and management with the people who run it, flag what is missing or weak, and see which of Beer's laws apply where.</p>
-      <p class="lead2">How would you like to start?</p>
-      <div class="choices">
-        <button class="choice primary" type="button" id="wExplore"><b>Explore the model</b>Start from Beer's diagram. Click any element to read what it does, or press 1 to 5 to focus each system.</button>
-        <button class="choice" type="button" id="wMap"><b>Map your organization</b>Name it, state its purpose and its operations, then follow the four steps of the method.</button>
-        <div class="choice" role="group" aria-labelledby="wExTitle"><b id="wExTitle">Open an example</b>A complete model to explore and change:<div class="ex" id="wExamples"></div></div>
+  <div class="modal about-modal welcome-modal" id="welcome" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle" hidden>
+    <div class="modal-card about-card welcome-card">
+      <div class="about-hero welcome-hero">
+        <button class="icon-btn modal-x" type="button" data-close aria-label="Close">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+        </button>
+        <div class="about-marks">
+          <svg class="about-mark" viewBox="0 0 32 32" aria-hidden="true"><!-- E-O-M: nested, then opened out with a double arrow between each pair -->
+            <path class="e" d="M-1.8-6.4C.6-7.2 3.4-6.2 3.6-4.2 3.8-2.6 3-1.8 3.9-.6 4.9.8 4.8 3 4.1 4.6 3.2 6.6.8 6.9-1 6.3-2.4 5.8-2.6 4.6-3.8 4-5 3.4-4.9 1.4-4 .2-3.2-.8-4.3-1.8-4.4-3.2-4.6-4.9-3.4-5.9-1.8-6.4z"/>
+            <circle class="o" r="1"/>
+            <rect class="m" x="-.5" y="-.5" width="1" height="1" rx=".08"/>
+            <path class="ln" pathLength="1" d="M14.45 7.59C15.93 6.83 17.52 6.55 19.01 6.77"/><path class="ln" pathLength="1" d="M24.8 13.77C24.66 15.95 23.84 17.92 22.49 19.61"/><path class="ln" pathLength="1" d="M9.95 23.73C8.39 22.88 7.29 21.21 6.82 19.21"/>
+            <g class="hd"><path d="M13.3 8.3L14.45 6.49L15.45 8.22Z"/><path d="M20.3 7.1L18.24 7.7L18.64 5.74Z"/><path d="M24.8 12.4L25.75 14.33L23.75 14.27Z"/><path d="M21.6 20.6L22.07 18.51L23.59 19.8Z"/><path d="M11.2 24.2L9.06 24.34L9.87 22.51Z"/><path d="M6.6 17.9L7.95 19.57L5.99 19.96Z"/></g>
+          </svg>
+          <span class="about-sep" aria-hidden="true"></span>
+          <a class="about-ctl" href="https://closetheloop.gr" target="_blank" rel="noopener" aria-label="close the loop">
+            <svg viewBox="0 0 800 800" aria-hidden="true"><circle class="arc" cx="400" cy="400" r="297" pathLength="360" transform="rotate(-36 400 400)"/><circle class="arc-c" cx="395" cy="399" r="75.6" pathLength="360" transform="rotate(25.4 395 399)"/><circle class="dot" cx="573" cy="168" r="16"/></svg>
+            <span class="wm">close the loop</span>
+          </a>
+        </div>
+        <div class="welcome-kicker">Welcome to the</div>
+        <h2 id="welcomeTitle">Viable System Explorer</h2>
+        <p class="about-tag">A working tool for the facilitated diagnosis of real organizations with Stafford Beer's Viable System Model, not only a way to learn it.</p>
       </div>
-      <div class="welcome-foot"><span>Press <kbd>?</kbd> at any time for keyboard shortcuts.</span><button class="linkish" type="button" id="wAbout">About this app</button></div>
+      <div class="about-body welcome-body">
+        <p class="lead">Map an organization's operations and management with the people who run it, flag what is missing or weak, and see which of Beer's laws apply where.</p>
+        <p class="lead2">How would you like to start?</p>
+        <div class="choices">
+          <button class="choice primary" type="button" id="wExplore"><span class="choice-n">01</span><b>Explore the model</b>Start from Beer's diagram. Click any element to read what it does, or press 1 to 5 to focus each system.</button>
+          <button class="choice" type="button" id="wMap"><span class="choice-n">02</span><b>Map your organization</b>Name it, state its purpose and its operations, then follow the four steps of the method.</button>
+          <div class="choice" role="group" aria-labelledby="wExTitle"><span class="choice-n">03</span><b id="wExTitle">Open an example</b>A complete model to explore and change:<div class="ex" id="wExamples"></div></div>
+        </div>
+        <div class="welcome-foot"><span>Press <kbd>?</kbd> at any time for keyboard shortcuts.</span><button class="linkish" type="button" id="wAbout">About this app</button></div>
+      </div>
     </div>
   </div>
 
@@ -6664,7 +6701,7 @@ async function exportFindings(kind) {
    shortcut sheet, About, focus keys for each system, the tour and
    presentation mode
    ===================================================================== */
-const APP_VERSION = '1.5.3 (November 2026)';
+const APP_VERSION = '1.5.4 (November 2026)';
 const CITE_YEAR = 2026;
 const modals = ['welcome', 'keysSheet', 'about'];
 let modalReturn = null;

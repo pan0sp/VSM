@@ -587,6 +587,9 @@ input[type="color"].sw.custom::-moz-color-swatch { box-shadow: inset 0 0 0 2px v
 .frow input:focus, .fadd input:focus { border-color: var(--accent); outline: none; }
 .frow .x { border: 0; background: none; color: var(--ink-2); font-size: 16px; line-height: 1; padding: 0; height: 26px; }
 .frow .x:hover { color: var(--accent); }
+.frow.sug input { font-style: italic; border-style: dashed; color: var(--ink-2); }
+.frow .fsug { grid-column: 2 / 4; display: flex; gap: 8px; align-items: baseline; font-size: 11.5px; color: var(--ink-2); margin: -2px 0 2px; }
+.frow .fsug .linkish { font-size: 11.5px; }
 .frow.net .fdir { display: grid; place-items: center; height: 26px; color: var(--ink-2); font-family: var(--f-mono); }
 .frow.net .fnet { font-size: 12.5px; padding: 3px 0; grid-column: 2 / 4; }
 .frow.net .fnet small { display: block; color: var(--ink-2); font: 10px var(--f-mono); letter-spacing: .04em; text-transform: uppercase; }
@@ -832,6 +835,15 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 .dchip .dg { box-shadow: none; margin: 0; }
 .dchip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
 .dnote { margin: 6px 0 0; font-size: 12.5px; color: var(--ink-2); }
+.dmeta { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; margin-top: 8px; }
+.dmeta .fld, #iDiag .fld { margin-top: 8px; }
+.dmeta .fld { margin-top: 0; }
+#iDiag select.inp { max-width: none; width: 100%; }
+#iDiag .dat { margin: 6px 0 0; font-size: 11.5px; }
+.dcov { font-size: 12.5px; color: var(--ink-2); padding: 2px 0 6px; }
+.dcov b { color: var(--ink); }
+.dlist small.dev { font-style: italic; }
+.dg.ok { font-size: 10px; }
 .dlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
 .dlist button { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: center; width: 100%; border: 0; background: transparent; text-align: left; padding: 4px 6px; border-radius: 6px; font-size: 13px; }
 .dlist button:hover { background: var(--surface-2); }
@@ -2197,7 +2209,17 @@ const DIAG = {
     text: 'It serves its own continuation rather than the whole: "self-production turned into an end-in-itself" (Beer\'s Establishment).', notFor: ['chan', 'env'] }
 };
 const DIAG_CH_NAMES = { weak: 'Insufficient capacity', malfunction: 'Distorted or blocked' };
+/* A finding is a judgement with its grounds: evidence (kept in `note`, as before), where it came from,
+   how sure the team is, what follows if nothing changes, and how far it has been reviewed. `ok` records
+   that something was looked at and no issue found, so "not assessed" (no entry) never reads as "fine". */
+const DIAG_OK = { glyph: '✓', color: '#3f8a5a', name: 'Assessed: no issue found', short: 'No issue',
+  text: 'Looked at, and nothing found wrong for now. Record what was checked, so the team can tell this from a function nobody has assessed.' };
+const DIAG_SOURCES = { interview: 'Interview', observation: 'Observation', document: 'Document or report', data: 'Data or measures', workshop: 'Workshop', other: 'Other' };
+const DIAG_CONF = { low: 'Low', medium: 'Medium', high: 'High' };
+const DIAG_STATUS = { tentative: 'Tentative', review: 'Under review', agreed: 'Agreed', resolved: 'Resolved' };
 function diagOf(lv, id) { return (lv.diag && lv.diag[id]) || null; }
+const diagMark = d => !d ? null : DIAG[d.s] || (d.s === 'ok' ? DIAG_OK : null);
+const isFinding = d => !!(d && DIAG[d.s]);
 function diagName(key, isCh) { return (isCh && DIAG_CH_NAMES[key]) || DIAG[key].name; }
 function diagAllowed(key, id) { const g = L.chanById[id] ? 'chan' : (L.byId[id] ? L.byId[id].group : ''); return !(DIAG[key].notFor || []).includes(g); }
 
@@ -2336,6 +2358,8 @@ function normaliseDb(d) {
   d.seq = Math.max(+d.seq || 0, ...Object.keys(d.levels).map(k => +String(k).replace(/\D/g, '') || 0));
   Object.values(d.levels).forEach(l => {
     ['flows', 'notes', 'labels', 'diag', 'colors', 'children'].forEach(f => { l[f] = obj(l[f]); });
+    // marks from any version: a known state, text fields as text; the evidence fields are optional
+    Object.keys(l.diag).forEach(k => { const d = l.diag[k]; if (!d || typeof d !== 'object' || !(DIAG[d.s] || d.s === 'ok')) { delete l.diag[k]; return; } ['note', 'cons', 'src', 'conf', 'st', 'at'].forEach(f => { if (d[f] != null && typeof d[f] !== 'string') delete d[f]; }); });
     Object.keys(l.labels).forEach(k => { if (typeof l.labels[k] !== 'string') delete l.labels[k]; });
     l.opCount = clamp(Math.round(+l.opCount || 3), MIN_OPS, MAX_OPS);
     l.groupColors = Object.assign({}, DEFAULT_GROUP_COLORS, obj(l.groupColors));
@@ -2414,7 +2438,7 @@ const FULL_OPTS = { s2: 'inside', s4cmd: true, s14: true, style: 'square', local
 
 /* A neutral starting point for any level: what typically travels on each kind of channel */
 function standardFlows(lv, ch) {
-  const f = (name, dir) => ({ name, dir });
+  const f = (name, dir) => ({ name, dir, sug: true });   // suggested until someone confirms or renames it
   const A = poleName(lv, ch.poles[0]), B = poleName(lv, ch.poles[1]);
   switch (ch.type) {
     case 'eo': return [f('Demand and orders from ' + A, 'ab'), f('Products and services to ' + A, 'ba'), f('Feedback and complaints', 'ab')];
@@ -2552,7 +2576,7 @@ function applySpec(lv, spec) {
   if (spec.net) lv.net = cafeNet(spec.net);
   lv.flows = {};
   if (spec.flows === 'standard') buildLayout(lv.opCount, FULL_OPTS).chans.forEach(ch => { lv.flows[ch.id] = standardFlows(lv, ch); });
-  else if (spec.flows) Object.keys(spec.flows).forEach(k => { lv.flows[k] = spec.flows[k].map(f => ({ name: f[0], dir: f[1] })); });
+  else if (spec.flows) Object.keys(spec.flows).forEach(k => { lv.flows[k] = spec.flows[k].map(f => spec.suggested ? { name: f[0], dir: f[1], sug: true } : { name: f[0], dir: f[1] }); });
   deleteSubtree(lv);
   (spec.children || []).forEach((cs, i) => { if (cs && i < lv.opCount) applySpec(newLevel(lv, 'o' + i), cs); });
 }
@@ -3188,11 +3212,12 @@ function buildLabels() {
 }
 let chBadges = new Map();
 function setBadge(span, d, isCh) {
-  if (!d || !DIAG[d.s]) { span.textContent = ''; span.removeAttribute('title'); return; }
-  const k = DIAG[d.s];
+  const k = diagMark(d);
+  if (!k) { span.textContent = ''; span.removeAttribute('title'); span.classList.remove('ok'); return; }
   span.textContent = k.glyph;
   span.style.background = k.color;
-  span.title = diagName(d.s, isCh) + (d.note ? ': ' + d.note : '');
+  span.classList.toggle('ok', d.s === 'ok');
+  span.title = (DIAG[d.s] ? diagName(d.s, isCh) : k.name) + (d.note ? ': ' + d.note : '');
 }
 function updateDiagBadges() {
   const lv = level();
@@ -3646,7 +3671,8 @@ function hemiBadges() {
   hLabels.forEach(l => {
     const d = prefs.diagShow && diagOf(lv, l.id), b = l.d.querySelector('.dg');
     if (!b) return;
-    if (d && DIAG[d.s]) { b.textContent = DIAG[d.s].glyph; b.style.background = DIAG[d.s].color; b.style.display = ''; } else b.style.display = 'none';
+    const mk = diagMark(d);
+    if (mk) { b.textContent = mk.glyph; b.style.background = mk.color; b.style.display = ''; } else b.style.display = 'none';
     l.d.classList.toggle('unmapped', envUnmapped(lv, l.id));
   });
 }
@@ -3900,7 +3926,8 @@ function openCtx(cx, cy, id) {
     sep();
     items.push({ sub: 'Diagnosis' });
     const d = diagOf(lv, id), isCh = !!L.chanById[id];
-    it('✓', 'Not flagged', () => setDiag(id, null), { checked: !d });
+    it('○', 'Not assessed', () => setDiag(id, null), { checked: !d });
+    it(DIAG_OK.glyph, DIAG_OK.short, () => setDiag(id, 'ok'), { checked: !!d && d.s === 'ok', color: DIAG_OK.color });
     Object.keys(DIAG).filter(k => diagAllowed(k, id)).forEach(k => it(DIAG[k].glyph, diagName(k, isCh), () => setDiag(id, k), { checked: !!d && d.s === k, color: DIAG[k].color }));
   } else {
     it('✥', 'Centre here', () => centreOn(point));
@@ -4530,11 +4557,20 @@ function renderInspectorNet() {
   $('#iNetGo').addEventListener('click', () => go({ t: 'node', id: 'o' + k }));
   box.querySelectorAll('[data-actor]').forEach(b => b.addEventListener('click', () => go({ t: 'node', id: b.dataset.actor })));
 }
+const today = () => new Date().toISOString().slice(0, 10);
 function setDiag(id, key, note) {
   const lv = level();
   lv.diag = lv.diag || {};
+  const old = lv.diag[id];
   if (!key) delete lv.diag[id];
-  else lv.diag[id] = { s: key, note: note != null ? note : ((lv.diag[id] && lv.diag[id].note) || '') };
+  else {
+    // the grounds stay when the judgement changes; the date records when it was last changed
+    const d = Object.assign({}, old || {}, { s: key });
+    if (note != null) d.note = note; else if (d.note == null) d.note = '';
+    if (!old || old.s !== key) d.at = today();
+    if (DIAG[key] && !d.st) d.st = 'tentative';
+    lv.diag[id] = d;
+  }
   save();
   refreshVisuals(); updateDiagBadges(); renderDiagList(); renderTree();
   if (selected === id) renderDiagEditor();
@@ -4542,26 +4578,51 @@ function setDiag(id, key, note) {
 function renderDiagEditor() {
   const box = $('#iDiag'), lv = level(), id = selected;
   if (!id) { box.innerHTML = ''; return; }
-  const isCh = !!L.chanById[id], d = diagOf(lv, id);
+  const isCh = !!L.chanById[id], d = diagOf(lv, id), mk = diagMark(d), finding = isFinding(d);
   const keys = Object.keys(DIAG).filter(k => diagAllowed(k, id));
+  const chip = (k, m, name, title) => '<button type="button" class="dchip" data-k="' + k + '" aria-pressed="' + (k ? !!d && d.s === k : !d) + '"' + (title ? ' title="' + esc(title) + '"' : '') + '><span class="dg" style="background:' + m.color + '">' + m.glyph + '</span>' + esc(name) + '</button>';
+  const opts = (map, cur, none) => (none ? '<option value="">' + esc(none) + '</option>' : '') + Object.keys(map).map(k => '<option value="' + k + '"' + (k === cur ? ' selected' : '') + '>' + esc(map[k]) + '</option>').join('');
   box.innerHTML = '<div class="dgrid" role="group" aria-label="Diagnosis">' +
-    '<button type="button" class="dchip" data-k="" aria-pressed="' + !d + '"><span class="dg" style="background:var(--ink-2)">✓</span>Not flagged</button>' +
-    keys.map(k => '<button type="button" class="dchip" data-k="' + k + '" aria-pressed="' + (!!d && d.s === k) + '" title="' + esc(DIAG[k].text) + '"><span class="dg" style="background:' + DIAG[k].color + '">' + DIAG[k].glyph + '</span>' + esc(diagName(k, isCh)) + '</button>').join('') +
-    '</div>' + (d ? '<p class="dnote">' + esc(DIAG[d.s].text) + '</p><label class="fld" style="margin-top:8px"><span>Evidence</span><textarea id="iDiagNote" placeholder="What did you observe?">' + esc(d.note || '') + '</textarea></label>' : '');
+    chip('', { color: 'transparent', glyph: '' }, 'Not assessed', 'Nobody has assessed this yet') + chip('ok', DIAG_OK, DIAG_OK.short, DIAG_OK.text) +
+    keys.map(k => chip(k, DIAG[k], diagName(k, isCh), DIAG[k].text)).join('') + '</div>' +
+    (d ? '<p class="dnote">' + esc(mk.text) + '</p>' +
+      '<label class="fld" style="margin-top:8px"><span>Evidence</span><textarea id="iDiagNote" placeholder="' + (finding ? 'What did you observe, and where?' : 'What was checked?') + '">' + esc(d.note || '') + '</textarea></label>' +
+      '<div class="dmeta"><label class="fld"><span>Source</span><select class="inp" id="iDiagSrc">' + opts(DIAG_SOURCES, d.src, 'Not recorded') + '</select></label>' +
+      '<div class="fld"><span>Confidence</span><div class="seg small" role="group" aria-label="Confidence">' + Object.keys(DIAG_CONF).map(k => '<button type="button" data-conf="' + k + '" aria-pressed="' + (d.conf === k) + '">' + DIAG_CONF[k] + '</button>').join('') + '</div></div></div>' +
+      (finding ? '<label class="fld"><span>Consequence</span><textarea id="iDiagCons" rows="2" placeholder="What follows for the organization if this stays as it is?">' + esc(d.cons || '') + '</textarea></label>' +
+        '<label class="fld"><span>Status</span><select class="inp" id="iDiagSt">' + opts(DIAG_STATUS, d.st || 'tentative') + '</select></label>' : '') +
+      (d.at ? '<p class="src dat">Recorded ' + esc(d.at) + '</p>' : '')
+    : '<p class="dnote">Not assessed yet. Mark it once someone has looked: "No issue" if it holds up, or the finding if not.</p>');
   box.querySelectorAll('.dchip').forEach(b => b.addEventListener('click', () => setDiag(id, b.dataset.k || null)));
-  const nt = $('#iDiagNote');
-  if (nt) nt.addEventListener('input', e => { lv.diag[id].note = e.target.value; save(); updateDiagBadges(); renderDiagList(); });
+  const upd = (f, v) => { const cur = lv.diag[id]; if (!cur) return; if (v) cur[f] = v; else delete cur[f]; save(); updateDiagBadges(); renderDiagList(); };
+  const nt = $('#iDiagNote'); if (nt) nt.addEventListener('input', e => upd('note', e.target.value));
+  const cs = $('#iDiagCons'); if (cs) cs.addEventListener('input', e => upd('cons', e.target.value));
+  const sr = $('#iDiagSrc'); if (sr) sr.addEventListener('change', e => upd('src', e.target.value));
+  const st = $('#iDiagSt'); if (st) st.addEventListener('change', e => upd('st', e.target.value));
+  box.querySelectorAll('[data-conf]').forEach(b => b.addEventListener('click', () => {
+    const k = lv.diag[id] && lv.diag[id].conf === b.dataset.conf ? '' : b.dataset.conf;
+    upd('conf', k); box.querySelectorAll('[data-conf]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.conf === k)));
+  }));
 }
 function renderDiagList() {
   const lv = level(), ul = $('#diagList');
-  const ids = Object.keys(lv.diag || {}).filter(id => (L.byId[id] || L.chanById[id]) && DIAG[lv.diag[id].s]);
-  ul.innerHTML = ids.length ? ids.map(id => {
-    const d = lv.diag[id], k = DIAG[d.s];
-    return '<li><button type="button" data-id="' + id + '"><span class="dg" style="background:' + k.color + '">' + k.glyph + '</span><span>' + esc(shownName(id)) + '<small>' + esc(diagName(d.s, !!L.chanById[id])) + (d.note ? ' · ' + esc(d.note) : '') + '</small></span></button></li>';
-  }).join('') : '<li class="src" style="padding:2px 0">Nothing flagged. Right-click any element, or use Diagnosis in its details, to mark it missing, weak, malfunctioning and so on.</li>';
+  const ids = Object.keys(lv.diag || {}).filter(id => (L.byId[id] || L.chanById[id]) && isFinding(lv.diag[id]));
+  const cv = assessment(lv, L);
+  ul.innerHTML = '<li class="dcov">' + (cv.assessed ? '<b>' + cv.assessed + ' of ' + cv.total + '</b> assessed · ' + cv.findings + (cv.findings === 1 ? ' finding' : ' findings') + ' · ' + cv.ok + ' with no issue' : 'Nothing assessed yet at this level.') + '</li>' +
+    (ids.length ? ids.map(id => {
+    const d = lv.diag[id], k = DIAG[d.s], meta = [diagName(d.s, !!L.chanById[id]), DIAG_STATUS[d.st || 'tentative'], d.conf ? DIAG_CONF[d.conf] + ' confidence' : 'confidence not set'].concat(d.note ? [] : ['no evidence yet']);
+    return '<li><button type="button" data-id="' + id + '"><span class="dg" style="background:' + k.color + '">' + k.glyph + '</span><span>' + esc(shownName(id)) + '<small>' + esc(meta.join(' · ')) + '</small>' + (d.note ? '<small class="dev">' + esc(d.note) + '</small>' : '') + '</span></button></li>';
+  }).join('') : '<li class="src" style="padding:2px 0">No findings. Right-click any element, or use Diagnosis in its details, to record what you found: no issue, or missing, weak, malfunctioning and so on, with the evidence.</li>');
   ul.querySelectorAll('button').forEach(b => b.addEventListener('click', () => select(b.dataset.id)));
 }
-const levelFlags = lv => Object.keys(lv.diag || {}).length;
+const levelFlags = lv => Object.values(lv.diag || {}).filter(isFinding).length;
+// how much of a level has been looked at: every element and channel the diagram draws
+function assessment(lv, LL) {
+  const ids = LL.els.map(e => e.id).concat(LL.chans.map(c => c.id));
+  let ok = 0, findings = 0;
+  ids.forEach(id => { const d = lv.diag && lv.diag[id]; if (!d) return; if (d.s === 'ok') ok++; else if (DIAG[d.s]) findings++; });
+  return { total: ids.length, ok, findings, assessed: ok + findings, missing: ids.filter(id => !(lv.diag && lv.diag[id] && (DIAG[lv.diag[id].s] || lv.diag[id].s === 'ok'))) };
+}
 
 /* What reaches and leaves an element, read from the flows on its channels */
 function renderIO() {
@@ -4685,15 +4746,21 @@ function renderAllPanels() {
 
 /* ---------- data flows: list, editor, coverage ---------- */
 function coverage(lv) {
-  let mapped = 0, flows = 0;
-  L.chans.forEach(ch => { const n = allFlowsOf(lv, ch.id).length; if (n) mapped++; flows += n; });
-  return { mapped, total: L.chans.length, flows };
+  let mapped = 0, flows = 0, sug = 0, seen = 0;
+  L.chans.forEach(ch => {
+    const all = allFlowsOf(lv, ch.id), s = all.filter(f => f.sug).length;
+    if (all.length) mapped++; if (all.length > s) seen++;
+    flows += all.length; sug += s;
+  });
+  return { mapped, total: L.chans.length, flows, sug, seen };
 }
 function renderCoverage() {
   const lv = level(), cov = coverage(lv);
   $('#covFill').style.width = (cov.total ? cov.mapped / cov.total * 100 : 0) + '%';
   $('#covTx').innerHTML = '<b>' + cov.mapped + ' of ' + cov.total + '</b> channels carry flows' + (cov.flows ? ' · ' + cov.flows + ' flows in all' : '') +
-    (cov.mapped && cov.mapped < cov.total ? '. Channels with none are marked: a missing flow can point to a gap in the organization.' : '.');
+    (cov.sug ? ' · <b>' + cov.sug + '</b> only suggested, so ' + cov.seen + ' of ' + cov.total + ' channels have observed flows' : '') +
+    (cov.mapped && cov.mapped < cov.total ? '. Channels with none are marked: a missing flow can point to a gap in the organization.' : '.') +
+    ' Coverage counts what is documented, not whether a channel has the capacity it needs.';
 }
 function renderFlowsPane() {
   const lv = level();
@@ -4723,8 +4790,9 @@ function renderFlowEditor(box, chId) {
   const glyph = d => d === 'ab' ? '→' : d === 'ba' ? '←' : '↔';
   box.innerHTML = '<div class="fhd"><span class="a">' + esc(A) + '</span><span class="ar">→</span><span class="b">' + esc(B) + '</span></div>' +
     (flows.length ? flows.map((f, i) =>
-    '<div class="frow" data-i="' + i + '"><button class="fdir" type="button" title="' + esc(dirText(f.dir)) + '. Click to change." aria-label="Direction: ' + esc(dirText(f.dir)) + '. Click to change.">' + glyph(f.dir) + '</button>' +
-    '<input type="text" value="' + esc(f.name) + '" aria-label="Flow name"><button class="x" type="button" aria-label="Remove ' + esc(f.name) + '">×</button></div>').join('')
+    '<div class="frow' + (f.sug ? ' sug' : '') + '" data-i="' + i + '"><button class="fdir" type="button" title="' + esc(dirText(f.dir)) + '. Click to change." aria-label="Direction: ' + esc(dirText(f.dir)) + '. Click to change.">' + glyph(f.dir) + '</button>' +
+    '<input type="text" value="' + esc(f.name) + '" aria-label="Flow name"' + (f.sug ? ' title="Suggested, not yet observed"' : '') + '><button class="x" type="button" aria-label="Remove ' + esc(f.name) + '">×</button>' +
+    (f.sug ? '<div class="fsug"><span>Suggested, not yet observed</span><button type="button" class="linkish fok">Mark as observed</button></div>' : '') + '</div>').join('')
     : (netFlowsOn(lv, chId).length ? '' : '<div class="fempty">No flows mapped to this channel yet.</div>')) +
     netFlowsOn(lv, chId).map(f => '<div class="frow net" title="From the value network: edit it there"><span class="fdir">' + glyph(f.dir) + '</span><span class="fnet">' + esc(f.name) + '<small>value network</small></span></div>').join('') +
     '<form class="fadd"><input type="text" placeholder="Add a flow, e.g. Monthly KPIs" aria-label="New flow on ' + esc(labelOf(lv, chId)) + '"><button type="submit">Add</button></form>';
@@ -4739,7 +4807,10 @@ function renderFlowEditor(box, chId) {
       flowsChanged(chId, false, inInsp);
     });
     r.querySelector('input').addEventListener('input', e => { lv.flows[chId][i].name = e.target.value; save(); });
-    r.querySelector('input').addEventListener('change', () => flowsChanged(chId, false, inInsp));
+    // renaming a suggested flow to what the organization actually sends makes it observed
+    r.querySelector('input').addEventListener('change', () => { const f = lv.flows[chId][i]; const was = f.sug; delete f.sug; flowsChanged(chId, !!was, inInsp); });
+    const okb = r.querySelector('.fok');
+    if (okb) okb.addEventListener('click', () => { delete lv.flows[chId][i].sug; flowsChanged(chId, true, inInsp); });
     r.querySelector('.x').addEventListener('click', () => {
       lv.flows[chId].splice(i, 1);
       if (!lv.flows[chId].length) delete lv.flows[chId];
@@ -4858,7 +4929,7 @@ function applyMapping(lv, r) {
   applySpec(lv, {
     name: S(r.name) || null,
     ops: opsIn.map(o => ({ o: S(o.name), e: S(o.environment), m: S(o.management), a: S(o.antioscillation || o.coordination) })),
-    labels, notes, flows,
+    labels, notes, flows, suggested: true,
     children: opsIn.map(o => {
       const subs = Array.isArray(o.sub_operations) ? o.sub_operations.map(x => S(x)).filter(Boolean).slice(0, MAX_OPS) : [];
       return subs.length ? { ops: subs.map(x => ({ o: x })) } : null;
@@ -5192,9 +5263,9 @@ window.addEventListener('drop', e => {
 $('#btnSuggest').addEventListener('click', () => {
   const lv = level();
   let added = 0;
-  L.chans.forEach(ch => { if (!flowsOf(lv, ch.id).length) { lv.flows[ch.id] = standardFlows(lv, ch); added++; } });
+  L.chans.forEach(ch => { if (!allFlowsOf(lv, ch.id).length) { lv.flows[ch.id] = standardFlows(lv, ch); added++; } });
   allFlowsChanged();
-  $('#flowsNote').textContent = added ? 'Added standard flows to ' + added + (added === 1 ? ' channel' : ' channels') + '. Rename them to match the organization.' : 'Every channel already carries at least one flow.';
+  $('#flowsNote').textContent = added ? 'Added standard flows to ' + added + (added === 1 ? ' channel' : ' channels') + ', marked as suggested. Rename each to what the organization actually sends, or mark it observed, once someone has seen it.' : 'Every channel already carries at least one flow.';
 });
 armTwoStep($('#btnClearFlows'), 'Clear flows', 'Click again to clear this level', () => {
   level().flows = {};
@@ -6277,52 +6348,66 @@ function levelsInOrder() {
   return out;
 }
 const FINDING_COLS = [
-  ['level', 'Level'], ['system', 'System in focus'], ['code', 'Code'], ['element', 'Element'], ['kind', 'Kind'], ['finding', 'Finding'], ['evidence', 'Evidence']
+  ['level', 'Level'], ['system', 'System in focus'], ['code', 'Code'], ['element', 'Element'], ['kind', 'Kind'], ['finding', 'Finding'],
+  ['evidence', 'Evidence'], ['source', 'Source'], ['confidence', 'Confidence'], ['consequence', 'Consequence'], ['status', 'Status'], ['recorded', 'Recorded']
 ];
-function findingsRows() {
-  const rows = [];
-  levelsInOrder().forEach(lv => {
+// every assessed element and channel; `ok: true` rows record that something was looked at and found sound
+function findingsRows(withOk) {
+  const rows = [], order = levelsInOrder();
+  order.forEach(lv => {
     const LL = buildLayout(lv.opCount, FULL_OPTS);
     Object.keys(lv.diag || {}).forEach(id => {
-      const d = lv.diag[id]; if (!d || !DIAG[d.s] || !(LL.byId[id] || LL.chanById[id])) return;
+      const d = lv.diag[id]; if (!diagMark(d) || !(LL.byId[id] || LL.chanById[id])) return;
+      const ok = d.s === 'ok'; if (ok && !withOk) return;
       const isCh = !!LL.chanById[id], kb = KB[typeOfId(LL, id)] || {};
-      rows.push({ level: levelNo(lv), system: levelName(lv), code: codeOf(lv, id), element: labelOf(lv, id), kind: kb.kind || (isCh ? 'Channel' : ''), finding: diagName(d.s, isCh), evidence: d.note || '', _s: d.s, _lv: lv });
+      rows.push({ level: levelNo(lv), system: levelName(lv), code: codeOf(lv, id), element: labelOf(lv, id), kind: kb.kind || (isCh ? 'Channel' : ''),
+        finding: ok ? DIAG_OK.name : diagName(d.s, isCh), evidence: d.note || '', source: DIAG_SOURCES[d.src] || '', confidence: DIAG_CONF[d.conf] || '',
+        consequence: ok ? '' : d.cons || '', status: ok ? '' : DIAG_STATUS[d.st || 'tentative'], recorded: d.at || '', ok, _s: d.s, _lv: lv });
     });
   });
-  return rows;
+  // findings first within each level, then what was found sound
+  return rows.sort((a, b) => (order.indexOf(a._lv) - order.indexOf(b._lv)) || (a.ok - b.ok));
 }
 const csvCell = v => { const s = String(v == null ? '' : v); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
 function findingsCsv() {
-  const rows = findingsRows();
-  return '﻿' + [FINDING_COLS.map(c => c[1])].concat(rows.map(r => FINDING_COLS.map(c => r[c[0]]))).map(r => r.map(csvCell).join(',')).join('\r\n') + '\r\n';
+  const rows = findingsRows(true);
+  return '\ufeff' + [FINDING_COLS.map(c => c[1])].concat(rows.map(r => FINDING_COLS.map(c => r[c[0]]))).map(r => r.map(csvCell).join(',')).join('\r\n') + '\r\n';
 }
 async function findingsReport() {
-  const rows = findingsRows(), when = new Date();
+  const rows = findingsRows(false), oks = findingsRows(true).filter(r => r.ok), when = new Date();
   let img = '';
   if (canExportView()) { try { img = (await viewPng(2)).toDataURL('image/png'); } catch (e) { img = ''; } }
-  const byLevel = new Map(); rows.forEach(r => { if (!byLevel.has(r._lv)) byLevel.set(r._lv, []); byLevel.get(r._lv).push(r); });
-  const sections = Array.from(byLevel.entries()).map(([lv, rs]) =>
-    '<h2>Level ' + esc(levelNo(lv)) + ' · ' + esc(levelName(lv)) + '</h2>' + (lv.purpose ? '<p class="purpose">' + esc(lv.purpose) + '</p>' : '') +
-    '<table><thead><tr><th>Code</th><th>Element</th><th>Finding</th><th>Evidence</th></tr></thead><tbody>' +
-    rs.map(r => '<tr><td class="code">' + esc(r.code) + '</td><td>' + esc(r.element) + '<small>' + esc(r.kind) + '</small></td><td><span class="dg" style="background:' + DIAG[r._s].color + '">' + DIAG[r._s].glyph + '</span>' + esc(r.finding) + '</td><td>' + (r.evidence ? esc(r.evidence) : '<span class="none">No evidence recorded</span>') + '</td></tr>').join('') +
-    '</tbody></table>').join('');
+  // every level that has been assessed at all, with what was found, what held up and what nobody has looked at
+  const lvs = levelsInOrder().filter(lv => Object.values(lv.diag || {}).some(diagMark));
+  const sections = lvs.map(lv => {
+    const rs = rows.filter(r => r._lv === lv), ok = oks.filter(r => r._lv === lv), LL = buildLayout(lv.opCount), cv = assessment(lv, LL);
+    const meta = r => [r.source, r.confidence ? r.confidence + ' confidence' : '', r.recorded].filter(Boolean).join(' · ');
+    return '<h2>Level ' + esc(levelNo(lv)) + ' · ' + esc(levelName(lv)) + '</h2>' + (lv.purpose ? '<p class="purpose">' + esc(lv.purpose) + '</p>' : '') +
+      '<p class="meta">' + cv.assessed + ' of ' + cv.total + ' elements and channels assessed · ' + cv.findings + (cv.findings === 1 ? ' finding' : ' findings') + ' · ' + cv.ok + ' with no issue found</p>' +
+      (rs.length ? '<table><thead><tr><th>Code</th><th>Element</th><th>Finding</th><th>Evidence</th><th>Consequence</th><th>Status</th></tr></thead><tbody>' +
+      rs.map(r => '<tr><td class="code">' + esc(r.code) + '</td><td>' + esc(r.element) + '<small>' + esc(r.kind) + '</small></td><td><span class="dg" style="background:' + DIAG[r._s].color + '">' + DIAG[r._s].glyph + '</span>' + esc(r.finding) + '</td><td>' + (r.evidence ? esc(r.evidence) : '<span class="none">No evidence recorded</span>') + (meta(r) ? '<small>' + esc(meta(r)) + '</small>' : '') + '</td><td>' + (r.consequence ? esc(r.consequence) : '<span class="none">Not stated</span>') + '</td><td class="st">' + esc(r.status) + '</td></tr>').join('') +
+      '</tbody></table>' : '<p>No findings at this level.</p>') +
+      (ok.length ? '<h3>Assessed, no issue found</h3><ul class="oks">' + ok.map(r => '<li><span class="code">' + esc(r.code) + '</span> ' + esc(r.element) + (r.evidence ? ': ' + esc(r.evidence) : '') + '</li>').join('') + '</ul>' : '') +
+      (cv.missing.length ? '<h3>Not yet assessed</h3><p class="todo">' + cv.missing.map(id => '<span class="code">' + esc(codeOf(lv, id) || '') + '</span> ' + esc(labelOf(lv, id))).join(' · ') + '</p>' : '');
+  }).join('');
   const html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + esc(modelName()) + ': findings</title>' +
     '<style>:root{--navy:#141b38;--gold:#a07a0e;--ink:#1d2333;--ink2:#5a6072;--rule:#d9d6cf}' +
     'body{margin:0;background:#fbfaf7;color:var(--ink);font:14px/1.5 "Open Sans",system-ui,sans-serif}main{max-width:980px;margin:0 auto;padding:32px 20px 48px}' +
     'h1{font:700 26px/1.2 Raleway,system-ui,sans-serif;color:var(--navy);margin:0 0 4px}h2{font:700 17px/1.3 Raleway,system-ui,sans-serif;color:var(--navy);margin:28px 0 6px}' +
     '.meta{color:var(--ink2);margin:0 0 18px}.purpose{color:var(--ink2);margin:0 0 8px;font-style:italic}img{max-width:100%;border:1px solid var(--rule);border-radius:6px}' +
     'table{width:100%;border-collapse:collapse;margin-top:6px}th,td{text-align:left;vertical-align:top;padding:7px 8px;border-bottom:1px solid var(--rule)}th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink2)}' +
+    'h3{font:700 13px/1.3 Raleway,system-ui,sans-serif;color:var(--ink2);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 4px}.oks{margin:0;padding-left:18px}.todo{color:var(--ink2);font-size:13px}.st{white-space:nowrap}' +
     'td small{display:block;color:var(--ink2);font-size:12px}.code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:600;white-space:nowrap}' +
     '.dg{display:inline-grid;place-items:center;min-width:1.5em;height:1.5em;border-radius:99px;color:#fff;font:700 11px ui-monospace,monospace;margin-right:6px}.none{color:var(--ink2);font-style:italic}' +
     'footer{margin-top:32px;color:var(--ink2);font-size:12px;border-top:1px solid var(--rule);padding-top:10px}@media print{body{background:#fff}main{padding:0}h2{break-after:avoid}tr{break-inside:avoid}}</style></head><body><main>' +
-    '<h1>' + esc(modelName()) + ': diagnosis findings</h1><p class="meta">' + rows.length + (rows.length === 1 ? ' finding' : ' findings') + ' across ' + byLevel.size + (byLevel.size === 1 ? ' level' : ' levels') + ' · ' + esc(when.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })) + '</p>' +
+    '<h1>' + esc(modelName()) + ': diagnosis findings</h1><p class="meta">' + rows.length + (rows.length === 1 ? ' finding' : ' findings') + ', ' + oks.length + ' assessed with no issue, across ' + lvs.length + (lvs.length === 1 ? ' level' : ' levels') + ' · ' + esc(when.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })) + '</p>' +
     (img ? '<figure style="margin:0"><img src="' + img + '" alt="' + esc(viewTitle()) + '"><figcaption class="meta" style="margin-top:6px">' + esc(viewTitle()) + '</figcaption></figure>' : '') +
     (sections || '<p>Nothing has been flagged yet.</p>') +
     '<footer>' + esc(EXPORT_CREDIT) + '. Findings are the judgements of the people who recorded them, against Stafford Beer\'s Viable System Model.</footer></main></body></html>';
   return html;
 }
 async function exportFindings(kind) {
-  if (!findingsRows().length) { showToast('Nothing is flagged yet, so there are no findings to export. Right-click an element to flag it.', null, null, 6000); return; }
+  if (!findingsRows(true).length) { showToast('Nothing has been assessed yet, so there are no findings to export. Right-click an element to record a finding.', null, null, 6000); return; }
   if (kind === 'csv') await offerFile(exportSlug() + '-findings.csv', findingsCsv(), 'text/csv');
   else await offerFile(exportSlug() + '-findings.html', await findingsReport(), 'text/html');
 }
@@ -6332,7 +6417,7 @@ async function exportFindings(kind) {
    shortcut sheet, About, focus keys for each system, the tour and
    presentation mode
    ===================================================================== */
-const APP_VERSION = '1.2.3 (November 2026)';
+const APP_VERSION = '1.3 (November 2026)';
 const CITE_YEAR = 2026;
 const modals = ['welcome', 'keysSheet', 'about'];
 let modalReturn = null;

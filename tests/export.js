@@ -12,7 +12,7 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   const grab = async text => { const [d] = await Promise.all([pg.waitForEvent('download', { timeout: 15000 }), pick(text)]); const p = path.join(OUT, d.suggestedFilename()); await d.saveAs(p); return p; };
   // nothing flagged yet
   await pick('Findings table'); await pg.waitForTimeout(400);
-  ok(/Nothing is flagged/.test(await pg.textContent('#toast')), 'with no findings, export says so instead of saving an empty table');
+  ok(/Nothing has been assessed/.test(await pg.textContent('#toast')), 'with no findings, export says so instead of saving an empty table');
   // flag System Four with evidence
   await pg.click('#btnSide'); await pg.waitForTimeout(300);
   await pg.click('.erow[data-id="s4"] .ecode'); await pg.waitForTimeout(400);

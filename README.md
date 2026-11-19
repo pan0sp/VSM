@@ -17,12 +17,14 @@ Open `index.html` in a recent browser. Everything is in that one file; it loads 
 | Recursion | Recursion runs only through System One. Each operation holds its own viable system, drawn inside the circle and turned 45 degrees. Scroll toward an operation to zoom into it; past a threshold it becomes the System-in-Focus, and zooming far out rises to the containing level. Double-click or **Open level n** does the same in one step. The breadcrumb trail, the level chip and the **Recursion** view always show which level is in focus. **Nested** keeps the inner systems visible at every zoom. |
 | Colours | Change any element's colour in the inspector or element list, and the four group colours (Environment, Operations, Metasystem, Channels) in the Settings tab. Child levels inherit their parent's group colours. |
 | Data flows | The **Flows** tab names what travels on each channel and in which direction; the moving dots follow those directions, and a coverage bar shows which channels carry nothing. Load the model company, fill gaps with standard flows, or (in the Claude artifact) describe any organization and let Claude map it. |
+| Diagnosis as evidence | Every element and channel starts **not assessed**. Record **no issue found**, or a finding (missing, nominal only, lacking requisite variety, malfunctioning, collapsed, pathologically autopoietic) with its evidence, source, confidence, consequence and status (tentative, under review, agreed, resolved), dated. Settings shows how much of the level has been assessed. Flows added by **Fill gaps** or by Claude are marked **suggested** until someone renames them or marks them observed. |
+| Export | **Model › Export**: the current view as PNG (twice screen size) or SVG (the value network as vectors; the VSM views as the picture with live-text labels), each with a footer naming the view; the findings of every level as a CSV table or a printable HTML report with the view, what held up and what nobody has assessed yet. |
 
 Labels, colours, notes, levels and view settings are saved in the browser's local storage.
 
 ## Starting, presenting and shortcuts
 
-- **First visit.** A welcome card says what the app is for (diagnosing real organizations with the VSM, not only learning it). The app opens in 2D with the panels closed and offers three ways in: explore the model, map your organization (opens Settings and the Method), or open one of the examples. Later visits return to where you left off. **Start screen** in the **⋯** menu brings the choices back.
+- **First visit.** A welcome card says what the app is for (the facilitated diagnosis of real organizations with the VSM, not only learning it). The app opens in 2D with the panels closed and offers three ways in: explore the model, map your organization (opens Settings and the Method), or open one of the examples. Later visits return to where you left off. **Start screen** in the **⋯** menu brings the choices back.
 - **Focus keys.** `1` to `5` focus Systems One to Five, `*` System Three-Star, `E` the environment (press again for the future environment), `M` the metasystem, `A` the algedonic channel, and `0` shows everything again. `D` switches 2D and 3D, `H` opens the Hemispheres view.
 - **Tour.** `PageDown` and `PageUp` step through the environment, Systems One to Five with Three-Star, and the whole model, so a presenter's clicker drives it.
 - **Presentation mode** (`P`, or **Present** in the toolbar) hides the toolbar and panels, goes full screen and dark, enlarges labels for a projector at 1280×720, and shows a caption with the name and a one-line description of whatever is in focus. `Esc` leaves focus, then presentation mode.
@@ -125,7 +127,7 @@ In every view, wide pale ribbons are value flows, after the material-flow arrows
 Each channel has two sides, A and B, and every flow runs A to B, B to A, or both ways. The element inspector lists what reaches and leaves an element through its channels.
 
 - **Load model company** (also under **Model › Examples**) replaces the model with Larchmere Cycles, a bicycle maker with three divisions. Level 0 flows are mapped by hand; its divisions (and one product line below them) are generated as recursions with standard flows.
-- **Fill gaps with standard flows** gives any level a neutral starting point per channel type.
+- **Fill gaps with standard flows** gives any level a neutral starting point per channel type, marked as suggested until confirmed.
 - **Map this level** (Claude artifact only) sends the description you type to Claude, which proposes operations, labels, flows for every channel and sub-operations one level down. Each operation's inspector also offers **Map it with Claude** for its own level, using the flows and names above it as context. Copies of the page opened outside claude.ai hide these buttons.
 
 ## Recursion notes

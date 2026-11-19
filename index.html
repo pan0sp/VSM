@@ -1169,6 +1169,8 @@ details.adv > .block + .block { margin-top: 20px; }
 .welcome-hero .about-tag { margin-bottom: 0 !important; opacity: 0; animation: aboutRise .7s ease 1.45s forwards; }
 .welcome-body .lead { font-size: 14px; }
 .welcome-body .choices { margin-top: 14px; }
+/* two ways in stacked on the left, the examples beside them, so no card stretches empty */
+@media (min-width: 641px) { .welcome-body .choices { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .welcome-body .choices > [role="group"] { grid-column: 2; grid-row: 1 / span 2; } }
 .welcome-body .choice { position: relative; border-radius: 8px; padding: 16px 14px 14px; border-top: 3px solid var(--rule); opacity: 0; animation: aboutRise .55s cubic-bezier(.2, .8, .2, 1) forwards; transition: border-color .15s, background .15s, transform .15s; }
 .welcome-body .choice:nth-child(1) { animation-delay: 1.7s; } .welcome-body .choice:nth-child(2) { animation-delay: 1.82s; } .welcome-body .choice:nth-child(3) { animation-delay: 1.94s; }
 .welcome-body .choice.primary { border-color: var(--rule); border-top-color: var(--gold, #eeba2b); }

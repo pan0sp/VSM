@@ -36,6 +36,10 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   await pg.click('#vHemi'); await pg.waitForTimeout(1200);
   await pg.click('#lawsCard [data-law="rs"]'); await pg.waitForTimeout(900);
   ok(/Recursive/.test(await pg.textContent('#focusBar')), 'laws work in Hemispheres');
+  const body = await pg.textContent('#lawsCard .law.cur .lbody');
+  ok(/“In a recursive organizational structure any viable system contains, and is contained in, a viable system\.”/.test(body) && /quoted from Wikipedia/.test(body), 'a law Wikipedia states is quoted exactly and credited');
+  await pg.click('#lawsCard [data-law="gr"]'); await pg.waitForTimeout(600);
+  ok(/paraphrased/.test(await pg.textContent('#lawsCard .law.cur .lbody')), 'a law it does not state says it is paraphrased');
   await pg.screenshot({ path: process.env.SP + '/shots/laws-hemi.png' });
   await pg.click('#lawsCard [data-lclose]'); await pg.waitForTimeout(500);
   ok(await pg.isHidden('#lawsCard') && await pg.isHidden('#focusBar'), 'closing the card ends the law focus');

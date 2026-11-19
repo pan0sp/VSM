@@ -1593,7 +1593,7 @@ details.adv > .block + .block { margin-top: 20px; }
       <p>An interactive explorer for Stafford Beer's Viable System Model: the canonical diagram in 2D, a 3D model and the Hemispheres view, with the value network of System One, recursion through every level, data flows and diagnosis.</p>
       <h3>Licence</h3>
       <p><b>Code:</b> GNU Affero General Public License, version 3 or later (<a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener">AGPL-3.0</a>). You may use, study, change and share it. If you change it and offer it to others, including as a hosted web page, you must share your changed source under the same licence.</p>
-      <p><b>Text, examples and documentation:</b> <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">Creative Commons Attribution-ShareAlike 4.0</a>. Quotations from Stafford Beer's books remain under their own copyright.</p>
+      <p><b>Text, examples and documentation:</b> <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">Creative Commons Attribution-ShareAlike 4.0</a>. Quotations from Stafford Beer's books remain under their own copyright. The wording of the principles, axioms, law of cohesion and recursive system theorem in the Laws layer is quoted from Wikipedia's article <a href="https://en.wikipedia.org/wiki/Viable_system_model" target="_blank" rel="noopener">Viable system model</a>, by its contributors, under the same licence.</p>
       <p><b>Name and logo:</b> the name Viable System Explorer and the Close the Loop logo are not covered by either licence. Copies and changed versions should use another name.</p>
       <p id="aboutSource">Source: <a href="https://github.com/pan0sp/VSM" target="_blank" rel="noopener">github.com/pan0sp/VSM</a>, where you can read the code, report problems and suggest changes. The whole app is one HTML file, so saving the page also keeps a complete copy.</p>
       <h3>How to cite</h3>
@@ -6332,7 +6332,7 @@ async function exportFindings(kind) {
    shortcut sheet, About, focus keys for each system, the tour and
    presentation mode
    ===================================================================== */
-const APP_VERSION = '1.2.2 (November 2026)';
+const APP_VERSION = '1.2.3 (November 2026)';
 const CITE_YEAR = 2026;
 const modals = ['welcome', 'keysSheet', 'about'];
 let modalReturn = null;
@@ -6489,7 +6489,7 @@ function renderCaption() {
   let k = '', n = '', d = '';
   if (lawAt && focusMode) {
     const law = lawById(lawAt);
-    k = 'Law · ' + law.src; n = law.name; d = law.text;
+    k = 'Law · ' + law.src; n = law.name; d = lawText(law);
   } else if (sysAt && focusMode) {
     const spec = SYSTEM_KEYS[sysAt](), lab = labelOf(lv, spec.primary);
     k = spec.title; n = lab && lab !== spec.title ? lab : spec.title; d = spec.what;
@@ -6505,7 +6505,9 @@ function renderCaption() {
 
 /* =====================================================================
    Laws: the laws Beer built the model on, and where each acts in it.
-   Statements are paraphrased; sources are given with each. Choosing a
+   Where Wikipedia's article "Viable system model" states a law, its wording
+   is quoted exactly (wiki: true, CC BY-SA 4.0); the others are paraphrased
+   and say so. Sources are given with each. Choosing a
    law focuses the elements and channels it governs.
    ===================================================================== */
 const LAWS = [
@@ -6515,47 +6517,47 @@ const LAWS = [
     q: 'Where does the variety facing a unit exceed what it can absorb, and what attenuates or amplifies it?',
     match: [/^(e|o|m)\d+$/, /^(eo|om)\d+$/, /^(env|s3|rb|ci)$/] },
   { id: 'p1', name: 'First principle of organization', src: 'Beer, The Heart of Enterprise, 1979',
-    text: 'Managerial, operational and environmental varieties, diffusing through an institutional system, tend to equate. They should be designed to do so with minimum damage to people and to cost.',
+    text: 'Managerial, operational and environmental varieties diffusing through an institutional system, tend to equate; they should be designed to do so with minimum damage to people and cost.', wiki: true,
     where: 'Each environment, operation and local management in System One, and the loops that join them.',
     q: 'Is the balance between environment, operation and management designed, or left to settle at a cost to people?',
     match: [/^(e|o|m)\d+$/, /^(eo|om)\d+$/] },
   { id: 'p2', name: 'Second principle of organization', src: 'Beer, The Heart of Enterprise, 1979',
-    text: 'The four directional channels carrying information between the management unit, the operation and the environment must each have a higher capacity to transmit information relevant to selecting variety than the originating subsystem has to generate it in the same time.',
+    text: 'The four directional channels carrying information between the management unit, the operation, and the environment must each have a higher capacity to transmit a given amount of information relevant to variety selection in a given time than the originating subsystem has to generate it in that time.', wiki: true,
     where: 'The channels between each environment and its operation, and between each operation and its local management, in both directions.',
     q: 'Can each channel carry what its source generates, in time, or does information pile up and get lost?',
     match: [/^(eo|om)\d+$/] },
   { id: 'p3', name: 'Third principle of organization', src: 'Beer, The Heart of Enterprise, 1979',
-    text: 'Wherever information carried on a channel crosses a boundary, it undergoes transduction, and the variety of the transducer must be at least equivalent to the variety of the channel.',
+    text: 'Wherever the information carried on a channel capable of distinguishing a given variety crosses a boundary, it undergoes transduction (converting energy from one form to another); the variety of the transducer must be at least equivalent to the variety of the channel.', wiki: true,
     where: 'Every channel that crosses a boundary: from the environments into the operations, from the operations into the metasystem, and from the future environment into System Four.',
     q: 'Who or what translates information at this boundary, and does the translation strip out what matters?',
     match: [/^eo\d+$/, /^(c4f|rb|ci|aud|alg|s14)$/] },
   { id: 'p4', name: 'Fourth principle of organization', src: 'Beer, The Heart of Enterprise, 1979',
-    text: 'The operation of the first three principles must be cyclically maintained through time, without hiatus or lags.',
+    text: 'The operation of the first three principles must be cyclically maintained without delays.', wiki: true,
     where: 'Every channel: the loops must keep running, and keep pace with what they regulate.',
     q: 'Which loops run only at the annual plan or the monthly meeting, and what happens between them?',
     match: [/^(eo|om|ms|oo)\d+$/, /^(c2|c23|ci|rb|aud|h34|c45|s5h|c4f|s4cmd|s14|alg)$/] },
   { id: 'a1', name: 'First axiom of management', src: 'Beer, The Heart of Enterprise, 1979',
-    text: 'The sum of horizontal variety disposed by the operational elements equals the sum of vertical variety disposed on the six vertical components of corporate cohesion.',
+    text: 'The sum of horizontal variety disposed by n operational elements (systems one) equals the sum of the vertical variety disposed by the six vertical components of corporate cohesion.', wiki: true,
     where: 'The operations and their local managements on one side; on the other, the six vertical channels: the Resource Bargain, Corporate Intervention, System Two, Three-Star audit, the operational linkages and the environmental intersects.',
     q: 'Do the vertical channels together carry enough variety to hold the operations together, or does cohesion depend on one of them?',
     match: [/^(o|m|a)\d+$/, /^(oo|ms)\d+$/, /^(s2|s3|s3s|c2|c23|rb|ci|aud)$/] },
   { id: 'a2', name: 'Second axiom of management', src: 'Beer, The Heart of Enterprise, 1979',
-    text: 'The variety disposed by System Three, resulting from the first axiom, equals the variety disposed by System Four.',
+    text: 'The variety disposed by System Three resulting from the operation of the First Axiom equals the variety disposed by System Four.', wiki: true,
     where: 'System Three, System Four and the homeostat between them.',
     q: 'Which side of the Three–Four homeostat usually prevails, and is that by design?',
     match: [/^(s3|s4|h34)$/] },
   { id: 'a3', name: 'Third axiom of management', src: 'Beer, The Heart of Enterprise, 1979',
-    text: 'The variety disposed by System Five equals the residual variety generated by the second axiom.',
+    text: 'The variety disposed by System Five equals the residual variety generated by the operation of the Second Axiom.', wiki: true,
     where: 'System Five, monitoring the Three–Four homeostat and linked to System Four.',
     q: 'Does System Five absorb only what Three and Four cannot settle between them, or does it reach further down?',
     match: [/^(s5|s5h|h34|c45)$/] },
   { id: 'lc', name: 'Law of cohesion for multiple recursions', src: 'Beer, The Heart of Enterprise, 1979',
-    text: 'The System One variety accessible to System Three of one recursion equals the variety disposed by the sum of the metasystems of the recursion below, for every recursive pair.',
+    text: 'The System One variety accessible to System Three of recursion x equals the variety disposed by the sum of the metasystems of recursion y for every recursive pair.', wiki: true,
     where: 'System Three and the local managements, which are the metasystems of the next recursion down, with the channels between them.',
     q: 'Does System Three see as much of System One as the local managements below manage, or is it guessing?',
     match: [/^m\d+$/, /^(s3|s3s|rb|ci|aud|c2|c23)$/] },
   { id: 'rs', name: 'Recursive system theorem', src: 'Beer, The Heart of Enterprise, 1979',
-    text: 'In a recursive organizational structure, any viable system contains, and is contained in, a viable system.',
+    text: 'In a recursive organizational structure any viable system contains, and is contained in, a viable system.', wiki: true,
     where: 'Each operation with its local management is a viable system one level down; the whole is an operation one level up. Turn on Nested, or open the Recursion view, to see it.',
     q: 'Which viable system contains this one, and which viable systems does it contain?',
     match: [/^(o|m)\d+$/, /^(sys1|meta)$/] },
@@ -6566,6 +6568,9 @@ const LAWS = [
     match: [/^(s3|s4|h34|c4f)$/] }
 ];
 const lawById = id => LAWS.find(l => l.id === id);
+const WIKI_VSM = 'https://en.wikipedia.org/wiki/Viable_system_model';
+const lawText = l => l.wiki ? '“' + l.text + '”' : l.text;
+const lawSrcHTML = l => esc(l.src) + (l.wiki ? ' · wording quoted from Wikipedia, <a href="' + WIKI_VSM + '" target="_blank" rel="noopener">Viable system model</a> (CC BY-SA 4.0)' : ' · paraphrased');
 function lawIds(law) {
   if (!L) return [];
   const all = L.els.map(e => e.id).concat(L.chans.map(c => c.id));
@@ -6577,11 +6582,11 @@ const lawsOn = () => !!prefs.laws && !['net', 'rec'].includes(prefs.diagram);
 function lawsHTML() {
   const lv = level();
   return '<div class="mhead"><div class="eyebrow" style="margin:0">Laws · ' + esc(levelName(lv)) + '</div><button class="icon-btn" type="button" data-lclose aria-label="Hide the laws" style="width:26px;height:26px">×</button></div>' +
-    '<p class="src lintro">The laws Beer built the model on, paraphrased. Choose one to see where it acts in this model.</p>' +
+    '<p class="src lintro">The laws Beer built the model on, quoted as Wikipedia states them where it does, otherwise paraphrased. Choose one to see where it acts in this model.</p>' +
     LAWS.map(l => {
       const cur = l.id === lawAt;
       return '<div class="law' + (cur ? ' cur' : '') + '"><button type="button" data-law="' + l.id + '" aria-expanded="' + cur + '"><span class="ln">' + esc(l.name) + '</span><span class="ls">' + esc(l.src.replace(/^.*, (\d{4})$/, '$1')) + '</span></button>' +
-        (cur ? '<div class="lbody"><p>' + esc(l.text) + '</p><span class="lk">Where it acts</span><p>' + esc(l.where) + '</p><span class="lk">Ask</span><p class="lq">' + esc(l.q) + '</p><p class="src" style="margin:0">' + esc(l.src) + '</p></div>' : '') + '</div>';
+        (cur ? '<div class="lbody"><p' + (l.wiki ? ' class="lquote"' : '') + '>' + esc(lawText(l)) + '</p><span class="lk">Where it acts</span><p>' + esc(l.where) + '</p><span class="lk">Ask</span><p class="lq">' + esc(l.q) + '</p><p class="src" style="margin:0">' + lawSrcHTML(l) + '</p></div>' : '') + '</div>';
     }).join('');
 }
 function renderLaws() {

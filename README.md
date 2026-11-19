@@ -31,7 +31,7 @@ Labels, colours, notes, levels and view settings are saved in the browser's loca
 
 ## Laws
 
-**Laws** in the toolbar (key `L`) lists the laws Beer built the model on, paraphrased, with their sources: Ashby's Law of Requisite Variety; the four principles of organization, the three axioms of management, the law of cohesion for multiple recursions and the recursive system theorem from *The Heart of Enterprise* (1979); and Conant and Ashby's good regulator theorem. Choosing a law focuses the elements and channels it governs and gives a diagnostic question. The details pane of any element or channel lists the laws that apply there.
+**Laws** in the toolbar (key `L`) lists the laws Beer built the model on, with their sources (quoted from Wikipedia's article *Viable system model* where it states them, otherwise paraphrased): Ashby's Law of Requisite Variety; the four principles of organization, the three axioms of management, the law of cohesion for multiple recursions and the recursive system theorem from *The Heart of Enterprise* (1979); and Conant and Ashby's good regulator theorem. Choosing a law focuses the elements and channels it governs and gives a diagnostic question. The details pane of any element or channel lists the laws that apply there.
 
 ## Licence
 

@@ -593,9 +593,9 @@ input[type="color"].sw.custom::-moz-color-swatch { box-shadow: inset 0 0 0 2px v
 .frow.sug input { font-style: italic; border-style: dashed; color: var(--ink-2); }
 .frow .fsug { grid-column: 2 / 4; display: flex; gap: 8px; align-items: baseline; font-size: 11.5px; color: var(--ink-2); margin: -2px 0 2px; }
 .frow .fsug .linkish { font-size: 11.5px; }
-.frow.net .fdir { display: grid; place-items: center; height: 26px; color: var(--ink-2); font-family: var(--f-mono); }
-.frow.net .fnet { font-size: 12.5px; padding: 3px 0; grid-column: 2 / 4; }
-.frow.net .fnet small { display: block; color: var(--ink-2); font: 10px var(--f-mono); letter-spacing: .04em; text-transform: uppercase; }
+.frow.nf .fdir { display: grid; place-items: center; height: 26px; color: var(--ink-2); font-family: var(--f-mono); }
+.frow.nf .fnet { font-size: 12.5px; padding: 3px 0; grid-column: 2 / 4; }
+.frow.nf .fnet small { display: block; color: var(--ink-2); font: 10px var(--f-mono); letter-spacing: .04em; text-transform: uppercase; }
 .fadd { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px; }
 .fadd button { border: 1px solid var(--rule); background: var(--surface); border-radius: 6px; font-size: 12.5px; font-weight: 600; padding: 4px 10px; }
 .fempty { font-size: 12.5px; color: var(--ink-2); }
@@ -4837,10 +4837,10 @@ function renderFlowEditor(box, chId) {
     '<input type="text" value="' + esc(f.name) + '" aria-label="Flow name"' + (f.sug ? ' title="Suggested, not yet observed"' : '') + '><button class="x" type="button" aria-label="Remove ' + esc(f.name) + '">×</button>' +
     (f.sug ? '<div class="fsug"><span>Suggested, not yet observed</span><button type="button" class="linkish fok">Mark as observed</button></div>' : '') + '</div>').join('')
     : (netFlowsOn(lv, chId).length ? '' : '<div class="fempty">No flows mapped to this channel yet.</div>')) +
-    netFlowsOn(lv, chId).map(f => '<div class="frow net" title="From the value network: edit it there"><span class="fdir">' + glyph(f.dir) + '</span><span class="fnet">' + esc(f.name) + '<small>value network</small></span></div>').join('') +
+    netFlowsOn(lv, chId).map(f => '<div class="frow nf" title="From the value network: edit it there"><span class="fdir">' + glyph(f.dir) + '</span><span class="fnet">' + esc(f.name) + '<small>value network</small></span></div>').join('') +
     '<form class="fadd"><input type="text" placeholder="Add a flow, e.g. Monthly KPIs" aria-label="New flow on ' + esc(labelOf(lv, chId)) + '"><button type="submit">Add</button></form>';
   const inInsp = !!box.closest('#insp');
-  box.querySelectorAll('.frow:not(.net)').forEach(r => {
+  box.querySelectorAll('.frow:not(.nf)').forEach(r => {
     const i = +r.dataset.i;
     r.querySelector('.fdir').addEventListener('click', e => {
       const f = lv.flows[chId][i];
@@ -6614,7 +6614,7 @@ async function exportFindings(kind) {
    shortcut sheet, About, focus keys for each system, the tour and
    presentation mode
    ===================================================================== */
-const APP_VERSION = '1.5.1 (November 2026)';
+const APP_VERSION = '1.5.2 (November 2026)';
 const CITE_YEAR = 2026;
 const modals = ['welcome', 'keysSheet', 'about'];
 let modalReturn = null;

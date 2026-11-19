@@ -52,7 +52,7 @@ The **Model** menu at the top left treats the whole model (every level, with its
 - **New blank model** starts again with Beer's own labels.
 - **Save to file** (`Ctrl S`) downloads the model as `name.vsm.json`. The file also carries the drawing conventions (square or diamond, System Two centre, local regulatory centres, the two extensions and how value flows are drawn), so it opens looking as it was saved. Personal settings such as the theme and the current view stay with the browser.
 - **Open from file** (`Ctrl O`), or dropping a `.json` file on the page, replaces the model with the saved one. Files are checked and repaired on the way in (missing parts filled, levels that no longer apply dropped); a file that holds no model is refused and nothing changes.
-- **Examples** open complete models: the model company with data flows, a regional hospital, a software company, and the café with its value network and a lower level for the brewing station.
+- **Examples** open complete models: the model company with data flows, a regional hospital, a software company, the café with its value network and a lower level for the brewing station, and the same café cut by service (Dine-in, Takeaway, Catering as System One, with the stations as activities inside them).
 
 Each of these replaces the whole model, so each offers **Undo**. **Reset this level** at the bottom of the Settings tab clears only the level in focus. In the Claude artifact, saving asks the viewer to confirm the download.
 
@@ -107,6 +107,9 @@ The **Value network** view (toolbar, or key `N`) maps System One before the VSM 
 1. **Purpose.** One sentence, in verbs. The purpose of a system is what it does (POSIWID).
 2. **Identify and map the S1s.**
    - Each primary activity is a circle inside the System-in-Focus (the *white box*). These are activities, processes or functions, not (yet) roles or departments, and only those the organization performs itself.
+   - How fine to cut System One is the modeller's call, a matter of scale. Optionally, an operation can hold the work it does as smaller **activities inside it** (small boxes inside Beer's circle round the operation; **+ Activity inside it** in the operation's card). They are the operation's workflow, not System Ones: in the VSM their flows count as the operation's, and they never become a lower level by themselves. **Make it an operation** promotes one when the modeller decides it should be a System One of its own.
+   - **System One unfolds by** (Settings, optional) names the organising criterion a level is split by: technology, customers and suppliers, geography, time, or other, with a note on why. The recursion tree shows it. After Espejo and Bowling (1999) as used by Panagiotakopoulos (2005, 2008): the criterion carrying more variety partitions at the higher level. The two café examples differ exactly here: stations are a technological unfolding, services a customer one.
+   - An operation's details, in both views, offer four optional prompts for where to draw System One: what outcome it produces and for whom, what it decides without escalating, how it regulates and adapts itself, and why this is a useful boundary at this level. They are prompts, not a check.
    - The customers, suppliers and other actors each activity deals with sit outside as amoebas.
    - Wide pale ribbons with broad arrowheads carry what they exchange, money included.
    - The *black box* shows the system as one box in its business context, with only the flows that cross its boundary.

@@ -152,6 +152,9 @@ button { cursor: pointer; }
 .net .nn text { text-anchor: middle; pointer-events: none; }
 .net .nl { font: 600 12.5px var(--f-body); fill: var(--ink); }
 .net .nl.big { font-size: 16px; }
+.net .nl.sm { font-size: 11.5px; font-weight: 560; }
+.net .hull { fill-opacity: .07; stroke-width: 1.6; stroke-opacity: .75; pointer-events: none; }
+.net .nn.actv rect { fill: var(--surface); fill-opacity: 1; stroke-width: 1.4; }
 .net .nc { font: 600 11px var(--f-mono); fill: var(--ink-2); }
 .net .fl { cursor: pointer; color: var(--fc, var(--vflow, var(--ink-2))); }
 .net .fl .hit { fill: none; stroke: transparent; stroke-width: 16; }
@@ -1079,6 +1082,10 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 details.adv { border-top: 1px solid var(--rule); padding-top: 12px; }
 details.adv > summary { cursor: pointer; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2); list-style-position: outside; margin-left: 14px; }
 details.adv[open] > summary { margin-bottom: 14px; }
+.rtree .uf { display: block; margin-top: 3px; font-family: var(--f-mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+details.bq > summary { cursor: pointer; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2); }
+details.bq[open] > summary { margin-bottom: 8px; }
+details.bq ul { margin: 6px 0 0; padding-left: 18px; }
 details.adv > .block + .block { margin-top: 20px; }
 
 /* ---------- Dialogs: welcome, keyboard shortcuts, about ---------- */
@@ -1266,6 +1273,9 @@ details.adv > .block + .block { margin-top: 20px; }
             <button id="opPlus" type="button" aria-label="Add an operation">+</button>
           </div>
         </div>
+        <label class="fld"><span>System One unfolds by <small style="font-size:11.5px">(optional)</small></span><select class="inp" id="levelUnfold"></select></label>
+        <label class="fld" id="levelUnfoldWhyF" hidden><span>Why this criterion</span><textarea id="levelUnfoldWhy" rows="2" placeholder="Why it carries more variety than the others at this level"></textarea></label>
+        <p class="src" id="levelUnfoldSrc" hidden>Organising criteria after Espejo and Bowling (1999) and Panagiotakopoulos (2005, 2008): the criterion carrying more variety partitions at the higher level.</p>
         <p class="opmax" id="opMax" hidden>Six operations is the most this explorer draws on one level. With more, group them into fewer, larger units that could each stand on their own, or open one and map what it contains on the level below.</p>
       </div>
 
@@ -1645,6 +1655,7 @@ details.adv > .block + .block { margin-top: 20px; }
       <div class="isec" id="iLinksSec"><h4>Connected</h4><ul class="links" id="iLinks"></ul></div>
       <div class="isec" id="iPracticeSec"><h4>In practice</h4><ul id="iPractice"></ul></div>
       <div class="isec" id="iQuestionsSec"><h4>Diagnostic questions</h4><ul id="iQuestions"></ul></div>
+      <details class="isec bq" id="iBoundarySec" hidden><summary>Where to draw System One (optional)</summary><p class="src">Prompts for when the cut is unclear. How fine to go is the modeller's call.</p><ul id="iBoundary"></ul></details>
       <div class="isec" id="iWatchSec"><h4>Watch for</h4><ul id="iWatch"></ul></div>
       <label class="fld"><span>Notes for your organization</span><textarea id="iNotes" placeholder="Who or what performs this function here? What works, what doesn't?"></textarea></label>
     </div>
@@ -1679,6 +1690,23 @@ const MIN_OPS = 1, MAX_OPS = 6;
 /* =====================================================================
    Knowledge base: what each element and channel is, after Beer
    ===================================================================== */
+/* Organising criteria: the line along which a level's System One unfolds into operations. After Espejo and Bowling
+   (1999, Viplan Learning System) as used by Panagiotakopoulos (2005, 2008); the criterion carrying more variety
+   partitions at the higher level. A label and a note, never a rule. */
+const UNFOLD = {
+  tech: { name: 'Technology', hint: 'the transformation processes, the way the work is done' },
+  customer: { name: 'Customers and suppliers', hint: 'products, services or market segments' },
+  geo: { name: 'Geography', hint: 'places, regions or sites' },
+  time: { name: 'Time', hint: 'shifts, seasons or projects' },
+  other: { name: 'Other', hint: 'say which in the note' }
+};
+// optional prompts for where to draw System One at this level (after Astra's review, Nov 2026); never a gate
+const BOUNDARY_PROMPTS = [
+  'What outcome does it produce, and for whom?',
+  'What can it decide without escalating?',
+  'How does it regulate and adapt itself?',
+  'Why is this a useful place to draw the boundary at this level of recursion?'
+];
 const KB = {
   envTotal: {
     kind: 'Environment', role: 'Environment of the System-in-Focus',
@@ -2359,6 +2387,8 @@ function normaliseDb(d) {
   Object.values(d.levels).forEach(l => {
     ['flows', 'notes', 'labels', 'diag', 'colors', 'children'].forEach(f => { l[f] = obj(l[f]); });
     // marks from any version: a known state, text fields as text; the evidence fields are optional
+    if (l.unfold && (typeof l.unfold !== 'object' || !UNFOLD[l.unfold.by])) delete l.unfold;
+    if (l.unfold && typeof l.unfold.why !== 'string') delete l.unfold.why;
     Object.keys(l.diag).forEach(k => { const d = l.diag[k]; if (!d || typeof d !== 'object' || !(DIAG[d.s] || d.s === 'ok')) { delete l.diag[k]; return; } ['note', 'cons', 'src', 'conf', 'st', 'at'].forEach(f => { if (d[f] != null && typeof d[f] !== 'string') delete d[f]; }); });
     Object.keys(l.labels).forEach(k => { if (typeof l.labels[k] !== 'string') delete l.labels[k]; });
     l.opCount = clamp(Math.round(+l.opCount || 3), MIN_OPS, MAX_OPS);
@@ -4067,7 +4097,11 @@ function removeOperation(lv, k) {
   lv.children = kids;
   if (lv.net) {
     const rn = id => { const i = opIdx(id); return i < 0 ? id : i === k ? null : i > k ? 'o' + (i - 1) : id; };
-    lv.net.flows = lv.net.flows.filter(f => rn(f.from) && rn(f.to)).map(f => Object.assign(f, { from: rn(f.from), to: rn(f.to) }));
+    const gone = lv.net.actors.filter(a => isAct(a) && !rn(a.op)).map(a => a.id);
+    lv.net.actors = lv.net.actors.filter(a => !gone.includes(a.id));
+    lv.net.actors.forEach(a => { if (isAct(a)) a.op = rn(a.op); });
+    gone.forEach(id => delete lv.net.pos[id]);
+    lv.net.flows = lv.net.flows.filter(f => rn(f.from) && rn(f.to) && !gone.includes(f.from) && !gone.includes(f.to)).map(f => Object.assign(f, { from: rn(f.from), to: rn(f.to) }));
     const pos = {};
     Object.keys(lv.net.pos).forEach(id => { const n = rn(id); if (n) pos[n] = lv.net.pos[id]; });
     lv.net.pos = pos;
@@ -4336,6 +4370,10 @@ function renderModelPane() {
   const purp = $('#levelPurpose');
   if (document.activeElement !== purp) purp.value = lv.purpose || '';
   $('#opCount').textContent = lv.opCount;
+  const uf = $('#levelUnfold'), u = lv.unfold || {};
+  uf.innerHTML = '<option value="">Not stated</option>' + Object.keys(UNFOLD).map(k => '<option value="' + k + '"' + (u.by === k ? ' selected' : '') + ' title="' + esc(UNFOLD[k].hint) + '">' + esc(UNFOLD[k].name) + '</option>').join('');
+  $('#levelUnfoldWhyF').hidden = $('#levelUnfoldSrc').hidden = !u.by;
+  if (document.activeElement !== $('#levelUnfoldWhy')) $('#levelUnfoldWhy').value = u.why || '';
   $('#opMinus').disabled = lv.opCount <= MIN_OPS;
   $('#opPlus').disabled = lv.opCount >= MAX_OPS;
   $('#opPlus').title = lv.opCount >= MAX_OPS ? 'Six operations is the most per level' : 'Add an operation';
@@ -4422,7 +4460,8 @@ function renderTree() {
     let html = '<li><div class="rcard level' + (isCur ? ' current' : '') + '" data-level="' + lv.id + '"><button class="tbtn" type="button" data-level="' + lv.id + '">' +
       '<span class="chips"><span class="lv">L' + levelNo(lv) + '</span>' + (lv.id === (db.refId || db.rootId) && db.refId && db.refId !== db.rootId ? '<span class="cd" title="Main System-in-Focus: level 0">MAIN</span>' : '') + (code ? '<span class="cd">' + esc(code) + '</span>' : '') + (flags ? '<span class="tflag" title="' + flags + ' flagged in the diagnosis">⚑' + flags + '</span>' : '') + '</span>' +
       '<span class="tn">' + esc(levelName(lv)) + '</span>' +
-      '<span class="sub">' + (isCur ? '<span class="here">SYSTEM IN FOCUS</span>' : lv.opCount + (lv.opCount === 1 ? ' operation' : ' operations')) + '</span></button>' +
+      '<span class="sub">' + (isCur ? '<span class="here">SYSTEM IN FOCUS</span>' : lv.opCount + (lv.opCount === 1 ? ' operation' : ' operations')) + '</span>' +
+      (lv.unfold ? '<span class="uf" title="' + esc('Organising criterion' + (lv.unfold.why ? ': ' + lv.unfold.why : '')) + '">Unfolds by ' + esc(UNFOLD[lv.unfold.by].name.toLowerCase()) + '</span>' : '') + '</button>' +
       more('data-lv="' + lv.id + '"') + '</div>';
     const rows = [];
     for (let i = 0; i < lv.opCount; i++) {
@@ -4523,6 +4562,8 @@ function renderInspector() {
   fillList('#iPractice', kb.practice);
   fillList('#iQuestions', kb.questions);
   fillList('#iWatch', kb.watch);
+  $('#iBoundary').innerHTML = BOUNDARY_PROMPTS.map(x => '<li>' + esc(x) + '</li>').join('');
+  $('#iBoundarySec').hidden = t !== 'op';
   const notes = $('#iNotes');
   if (document.activeElement !== notes) notes.value = lv.notes[id] || '';
   const isCh = !!L.chanById[id];
@@ -4548,7 +4589,7 @@ function renderInspectorNet() {
       '<div class="btn-row"><button class="btn" type="button" id="iNetGo">Open the value network</button></div>';
   } else {
     box.innerHTML = '<ul class="io">' + xs.map(x => {
-      const a = actorById(lv, x), fl = netFlows(lv).filter(f => (f.from === x && f.to === 'o' + k) || (f.to === x && f.from === 'o' + k));
+      const a = actorById(lv, x), fl = vsmFlows(lv).filter(f => (f.from === x && f.to === 'o' + k) || (f.to === x && f.from === 'o' + k));
       return '<li><span class="ar">◌</span><span><button class="linkish" type="button" data-actor="' + x + '">' + esc(netName(lv, x)) + '</button> <span class="via">' + esc(NET_KINDS[a.kind] || 'Actor') + '</span>' +
         fl.map(f => '<span class="via">' + (f.from === x ? 'sends ' : 'receives ') + esc(flowName(f)) + '</span>').join('') + '</span></li>';
     }).join('') + '</ul><div class="btn-row"><button class="btn" type="button" id="iNetGo">Edit in the value network</button></div>';
@@ -5034,6 +5075,13 @@ $('#iName').addEventListener('input', e => renameElement(selected, e.target.valu
 $('#iColor').addEventListener('input', e => recolorElement(selected, e.target.value, 'insp'));
 $('#iColorReset').addEventListener('click', () => recolorElement(selected, null, 'insp'));
 $('#iNotes').addEventListener('input', e => { const lv = level(); if (e.target.value) lv.notes[selected] = e.target.value; else delete lv.notes[selected]; save(); });
+$('#levelUnfold').addEventListener('change', e => {
+  const lv = level(), by = e.target.value;
+  if (by) lv.unfold = Object.assign({}, lv.unfold, { by }); else delete lv.unfold;
+  save(); renderModelPane(); renderTree();
+});
+$('#levelUnfoldWhy').addEventListener('input', e => { const lv = level(); if (!lv.unfold) return; lv.unfold.why = e.target.value.slice(0, 300); save(); });
+$('#levelUnfoldWhy').addEventListener('change', () => renderTree());
 $('#levelPurpose').addEventListener('input', e => { level().purpose = e.target.value.slice(0, 400); save(); renderMethod(); });
 $('#levelPurpose').addEventListener('change', () => { if (prefs.diagram === 'net') { renderNetCard(); renderNetSvg(); } renderCaption(); });
 $('#levelName').addEventListener('input', e => {
@@ -5156,7 +5204,8 @@ const EXAMPLES = {
   example: { name: 'Model company, with data flows', build: root => { applySpec(root, EXAMPLE); $('#aiBrief').value = EXAMPLE.brief; } },
   hospital: { name: 'Regional hospital', build: root => applyPreset(root, PRESETS.hospital) },
   software: { name: 'Software company', build: root => applyPreset(root, PRESETS.software) },
-  cafe: { name: 'Café, with its value network', build: root => applyCafe(root) }
+  cafe: { name: 'Café, with its value network', build: root => applyCafe(root) },
+  cafeServices: { name: 'Café by service, stations as activities', build: root => applyCafeServices(root) }
 };
 function applyPreset(lv, p) {
   lv.labels = Object.assign({}, p.labels);
@@ -5372,14 +5421,29 @@ function ensureNet(lv) {
 }
 const opIdx = id => { const m = /^o(\d+)$/.exec(id); return m ? +m[1] : -1; };
 const actorById = (lv, id) => netOf(lv).actors.find(a => a.id === id);
-function netNodeOk(lv, id) { const k = opIdx(id); return k >= 0 ? k < lv.opCount : !!actorById(lv, id); }
+/* An activity (kind 'act') is work done inside one operation: its workflow, at whatever scale the modeller
+   chooses. It is not an environment actor, and it never becomes a System One of the level below by itself.
+   For the VSM, an activity's flows are its operation's flows. */
+const isAct = a => !!a && a.kind === 'act';
+function opOf(lv, id) {
+  const k = opIdx(id); if (k >= 0) return k < lv.opCount ? id : null;
+  const a = actorById(lv, id), j = isAct(a) ? opIdx(a.op) : -1;
+  return j >= 0 && j < lv.opCount ? a.op : null;
+}
+const envActors = lv => netOf(lv).actors.filter(a => !isAct(a));
+const actsOf = (lv, opId) => netOf(lv).actors.filter(a => isAct(a) && a.op === opId);
+function netNodeOk(lv, id) { const k = opIdx(id); if (k >= 0) return k < lv.opCount; const a = actorById(lv, id); return !!a && (!isAct(a) || !!opOf(lv, id)); }
 function netFlows(lv) { return netOf(lv).flows.filter(f => f.from !== f.to && netNodeOk(lv, f.from) && netNodeOk(lv, f.to)); }
+// the flows as the VSM sees them: each activity stands for its operation; work inside one operation drops out
+function vsmFlows(lv) {
+  return netFlows(lv).map(f => Object.assign({}, f, { from: opOf(lv, f.from) || f.from, to: opOf(lv, f.to) || f.to })).filter(f => f.from !== f.to);
+}
 function netName(lv, id) { const a = actorById(lv, id); return a ? (a.name || NET_DEFAULT_NAMES[a.kind] || 'Actor') : labelOf(lv, id); }
 const flowName = f => f.name || 'Unnamed flow';
 // the actors an operation exchanges flows with: its local environment in the VSM
 function actorsOfOp(lv, k) {
   const o = 'o' + k, out = [];
-  netFlows(lv).forEach(f => {
+  vsmFlows(lv).forEach(f => {
     const other = f.from === o ? f.to : f.to === o ? f.from : null;
     if (other && opIdx(other) < 0 && !out.includes(other)) out.push(other);
   });
@@ -5387,7 +5451,7 @@ function actorsOfOp(lv, k) {
 }
 function opsOfActor(lv, aid) {
   const ks = new Set();
-  netFlows(lv).forEach(f => {
+  vsmFlows(lv).forEach(f => {
     if (f.from === aid && opIdx(f.to) >= 0) ks.add(opIdx(f.to));
     if (f.to === aid && opIdx(f.from) >= 0) ks.add(opIdx(f.from));
   });
@@ -5402,13 +5466,13 @@ function netFlowsOn(lv, chId) {
   const out = [];
   if ((m = /^eo(\d+)$/.exec(chId))) {
     const k = +m[1], o = 'o' + k, many = actorsOfOp(lv, k).length > 1;
-    netFlows(lv).forEach(f => {
+    vsmFlows(lv).forEach(f => {
       if (f.to === o && opIdx(f.from) < 0) out.push({ name: flowName(f) + (many ? ' (' + netName(lv, f.from) + ')' : ''), dir: 'ab', net: true });
       else if (f.from === o && opIdx(f.to) < 0) out.push({ name: flowName(f) + (many ? ' (' + netName(lv, f.to) + ')' : ''), dir: 'ba', net: true });
     });
   } else if ((m = /^oo(\d+)$/.exec(chId))) {
     const i = +m[1];
-    netFlows(lv).forEach(f => {
+    vsmFlows(lv).forEach(f => {
       const a = opIdx(f.from), b = opIdx(f.to);
       if (a < 0 || b < 0 || Math.min(a, b) > i || Math.max(a, b) <= i) return;
       const far = Math.abs(a - b) > 1;
@@ -5416,7 +5480,7 @@ function netFlowsOn(lv, chId) {
     });
   } else if ((m = /^ee(\d+)$/.exec(chId))) {
     const i = +m[1];
-    netOf(lv).actors.forEach(a => {
+    envActors(lv).forEach(a => {
       const ks = opsOfActor(lv, a.id);
       if (ks.length > 1 && ks[0] <= i && ks[ks.length - 1] > i) out.push({ name: 'Shared: ' + netName(lv, a.id), dir: 'both', net: true });
     });
@@ -5436,7 +5500,7 @@ let netSel = null;       // { t: 'node' | 'flow', id }
 let netView = null;      // { cx, cy, s }: centre in model units, pixels per unit
 let netConnect = null;   // { from } while drawing a flow
 let netDrag = null, netLastClick = null;
-const NET_R = 46, NET_RX = 66, NET_RY = 38, SIF_W = 128, SIF_H = 70;
+const NET_R = 46, NET_RX = 66, NET_RY = 38, SIF_W = 128, SIF_H = 70, ACT_W = 58, ACT_H = 21;
 const netBlack = () => prefs.netBox === 'black';
 
 function netAutoLayout(lv, all) {
@@ -5456,8 +5520,13 @@ function netAutoLayout(lv, all) {
     if (all || !net.pos[id]) net.pos[id] = [r * DX, (j - (cols[r].length - 1) / 2) * DY];
   }));
   const top = -tallest * DY / 2 - 150, bottom = tallest * DY / 2 + 150, slots = {};
-  net.actors.forEach(a => {
+  net.actors.filter(isAct).forEach(a => {
     if (!all && net.pos[a.id]) return;
+    const o = net.pos[a.op] || [0, 0], sib = actsOf(lv, a.op), j = sib.indexOf(a), t = -Math.PI / 2 + (j + 0.5) * 2 * Math.PI / Math.max(3, sib.length);
+    net.pos[a.id] = [o[0] + Math.cos(t) * 120, o[1] + Math.sin(t) * 95];
+  });
+  net.actors.forEach(a => {
+    if (isAct(a) || (!all && net.pos[a.id])) return;
     const ks = opsOfActor(lv, a.id), rs = ks.map(k => rank[k]), ys = ks.map(k => net.pos['o' + k][1]);
     const meanY = ys.length ? ys.reduce((x, y) => x + y, 0) / ys.length : 0;
     let p;
@@ -5481,6 +5550,7 @@ function netRadius(id, dx, dy) {
   const l = Math.hypot(dx, dy) || 1, c = dx / l, s = dy / l;
   if (id === 'sif') return Math.min(SIF_W / Math.max(Math.abs(c), 1e-6), SIF_H / Math.max(Math.abs(s), 1e-6));
   if (opIdx(id) >= 0) return NET_R;
+  if (isAct(actorById(level(), id))) return Math.min(ACT_W / Math.max(Math.abs(c), 1e-6), ACT_H / Math.max(Math.abs(s), 1e-6));
   return 1 / Math.sqrt((c / NET_RX) ** 2 + (s / NET_RY) ** 2);
 }
 function quad(p0, c, p1, t) { const u = 1 - t; return [u * u * p0[0] + 2 * u * t * c[0] + t * t * p1[0], u * u * p0[1] + 2 * u * t * c[1] + t * t * p1[1]]; }
@@ -5537,6 +5607,8 @@ function netFit() {
   const lv = level(), net = ensureNet(lv), r = netEl.getBoundingClientRect();
   const ids = netBlack() ? netOf(lv).actors.map(a => a.id).concat(['sif']) : netNodesOf(lv);
   const pts = ids.map(id => id === 'sif' ? sifPos(lv) : net.pos[id]).filter(Boolean);
+  // an operation's circle round its activities reaches further than its nodes
+  if (!netBlack()) for (let k = 0; k < lv.opCount; k++) { const h = netHull(lv, 'o' + k); if (h) { const e = Math.max(0, h[2] - 40); pts.push([h[0] - e, h[1] - e], [h[0] + e, h[1] + e]); } }
   if (!pts.length || !r.width) { netView = { cx: 0, cy: 0, s: 1 }; return; }
   const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
   const x0 = Math.min(...xs) - 120, x1 = Math.max(...xs) + 120, y0 = Math.min(...ys) - 110, y1 = Math.max(...ys) + 120;
@@ -5575,13 +5647,21 @@ function renderNet() {
   renderNetSvg();
 }
 // drag the handle (or Shift-drag a node) to draw a flow; drop on empty space to add a connected actor
+// the circle round an operation and its activities: [cx, cy, r], or null when it has none
+function netHull(lv, id) {
+  const net = ensureNet(lv), as = actsOf(lv, id).filter(a => net.pos[a.id]);
+  if (!as.length || !net.pos[id]) return null;
+  const pts = [net.pos[id]].concat(as.map(a => net.pos[a.id])), cx = pts.reduce((t, p) => t + p[0], 0) / pts.length, cy = pts.reduce((t, p) => t + p[1], 0) / pts.length;
+  const r = Math.max(NET_R + Math.hypot(net.pos[id][0] - cx, net.pos[id][1] - cy), ...as.map(a => Math.hypot(net.pos[a.id][0] - cx, net.pos[a.id][1] - cy) + ACT_W + 4)) + 14;
+  return [cx, cy, r];
+}
 const netHandle = (id, x) => '<g class="hd" data-handle="' + id + '" transform="translate(' + x + ' 0)"><circle r="9"/><path d="M-4 0H4M0 -4V4"/></g>';
 function renderNetSvg() {
   const lv = level(), net = ensureNet(lv), r = netSvg.getBoundingClientRect();
   if (!r.width) return;
   const vw = r.width / netView.s, vh = r.height / netView.s, vx = netView.cx - vw / 2, vy = netView.cy - vh / 2;
   netSvg.setAttribute('viewBox', [vx, vy, vw, vh].map(v => v.toFixed(1)).join(' '));
-  const black = netBlack(), out = [];
+  const black = netBlack(), out = [], hullAt = {};
   const opsCol = lv.groupColors.ops || DEFAULT_GROUP_COLORS.ops;
   const isSel = (t, id) => netSel && netSel.t === t && netSel.id === id;
   const posOf = id => id === 'sif' ? sifPos(lv) : net.pos[id];
@@ -5597,20 +5677,22 @@ function renderNetSvg() {
       '<text class="nk" y="-' + (SIF_H - 20) + '">System-in-Focus · black box</text><text class="nl big">' + tspans(wrapText(name, 22, 2), 17) + '</text>' +
       (lv.purpose ? '<text class="np" y="' + (SIF_H - 30) + '">' + tspans(wrapText(lv.purpose, 40, 2), 13) + '</text>' : '') + '</g>');
   } else {
-    const ps = Array.from({ length: lv.opCount }, (_, k) => net.pos['o' + k]);
-    const x0 = Math.min(...ps.map(p => p[0])) - NET_R - 34, x1 = Math.max(...ps.map(p => p[0])) + NET_R + 34;
+    // each operation with activities is Beer's circle drawn round them; the box holds the circles
+    const ps = Array.from({ length: lv.opCount }, (_, k) => { const h = netHull(lv, 'o' + k); if (h) hullAt['o' + k] = h; return h || net.pos['o' + k].concat(NET_R); });
+    const x0 = Math.min(...ps.map(p => p[0] - p[2])) - 34, x1 = Math.max(...ps.map(p => p[0] + p[2])) + 34;
     const pl = lv.purpose ? wrapText(lv.purpose, Math.max(30, Math.floor((x1 - x0 - 28) / 5.9)), 3) : [];
-    const y0 = Math.min(...ps.map(p => p[1])) - NET_R - 56, y1 = Math.max(...ps.map(p => p[1])) + NET_R + 30 + pl.length * 15;
+    const y0 = Math.min(...ps.map(p => p[1] - p[2])) - 56, y1 = Math.max(...ps.map(p => p[1] + p[2])) + 30 + pl.length * 15;
     out.push('<g class="wbox"><rect x="' + x0 + '" y="' + y0 + '" width="' + (x1 - x0) + '" height="' + (y1 - y0) + '" rx="14" style="stroke:' + opsCol + '"/>' +
       '<text class="bl" x="' + (x0 + 14) + '" y="' + (y0 + 22) + '">' + esc(name) + '</text><text class="bk" x="' + (x0 + 14) + '" y="' + (y0 + 37) + '">System-in-Focus · white box</text>' +
       pl.map((l, i) => '<text class="np" x="' + (x0 + 14) + '" y="' + (y1 - 12 - (pl.length - 1 - i) * 15) + '">' + esc(l) + '</text>').join('') + '</g>');
   }
+  const hullIdx = out.length;   // operation circles go under the flows
   // flows: in the black box only what crosses the boundary, merged per actor and direction
   let list;
   if (black) {
     const agg = {};
     netFlows(lv).forEach(f => {
-      const fa = opIdx(f.from) < 0, ta = opIdx(f.to) < 0;
+      const fa = !opOf(lv, f.from), ta = !opOf(lv, f.to);
       if (fa === ta) return;
       const key = fa ? f.from + '>sif' : 'sif>' + f.to;
       (agg[key] = agg[key] || { id: f.id, from: fa ? f.from : 'sif', to: fa ? 'sif' : f.to, names: [] }).names.push(flowName(f));
@@ -5636,6 +5718,18 @@ function renderNetSvg() {
       '<text class="ft' + (f.unnamed ? ' un' : '') + '" x="' + f.at[0].toFixed(1) + '" y="' + (f.at[1] - 7).toFixed(1) + '">' + tspans(f.lines, 12, f.at[0].toFixed(1)) + '</text></g>');
   });
   // nodes
+  Object.keys(hullAt).forEach(id => {
+    const [cx, cy, r] = hullAt[id], col = colorOf(lv, id, L);
+    out.splice(hullIdx, 0, '<circle class="hull" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) + '" style="stroke:' + col + ';fill:' + col + '"/>');
+  });
+  if (!black) net.actors.filter(isAct).forEach(a => {
+    const p = net.pos[a.id]; if (!p || !opOf(lv, a.id)) return;
+    const col = colorOf(lv, a.op, L);
+    const cls = 'nn actv' + (isSel('node', a.id) ? ' sel' : '') + (netConnect && netConnect.from === a.id ? ' src' : '');
+    out.push('<g class="' + cls + '" data-id="' + a.id + '" transform="translate(' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + ')">' +
+      '<rect x="' + -ACT_W + '" y="' + -ACT_H + '" width="' + ACT_W * 2 + '" height="' + ACT_H * 2 + '" rx="9" style="stroke:' + col + '"/>' +
+      '<text class="nl sm" y="' + (wrapText(netName(lv, a.id), 17, 2).length > 1 ? -2 : 4) + '">' + tspans(wrapText(netName(lv, a.id), 17, 2), 12) + '</text>' + netHandle(a.id, ACT_W) + '</g>');
+  });
   if (!black) for (let k = 0; k < lv.opCount; k++) {
     const id = 'o' + k, p = net.pos[id], col = colorOf(lv, id, L);
     const cls = 'nn act' + (isSel('node', id) ? ' sel' : '') + (netConnect && netConnect.from === id ? ' src' : '');
@@ -5646,7 +5740,7 @@ function renderNetSvg() {
   }
   net.actors.forEach((a, i) => {
     const p = net.pos[a.id];
-    if (!p) return;
+    if (!p || isAct(a)) return;
     const cls = 'nn actor' + (isSel('node', a.id) ? ' sel' : '') + (netConnect && netConnect.from === a.id ? ' src' : '');
     out.push('<g class="' + cls + '" data-id="' + a.id + '" transform="translate(' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + ')">' +
       '<path d="' + blobD(i * 1.7 + 0.4) + '" style="fill:' + actorColor(lv, a) + ';stroke:' + actorColor(lv, a) + '"/>' +
@@ -5713,9 +5807,20 @@ function renderNetCard() {
       '<label class="fld"><span>Name</span><input type="text" id="nName" value="' + esc(labelOf(lv, id)) + '"></label>' +
       netColorRow(colorOf(lv, id, L), !!lv.colors[id], 'operations') +
       '<div class="isec"><h4>Flows</h4>' + netCardFlowRows(lv, id) + '</div>' +
+      '<div class="isec"><h4>Activities inside it</h4>' + (actsOf(lv, id).length ? '<ul class="io links">' + actsOf(lv, id).map(a => '<li><button type="button" data-node="' + a.id + '"><span class="ar">▭</span><span>' + esc(netName(lv, a.id)) + '</span></button></li>').join('') + '</ul>' : '<p class="src">Optional. Map the work this operation does as activities when it helps; how fine to go is your call. They stay its workflow: they do not become its System One one level down.</p>') +
+        '<div class="btn-row"><button class="btn" type="button" id="nAddAct">+ Activity inside it</button></div></div>' +
+      '<details class="isec bq"><summary>Where to draw System One (optional)</summary><ul>' + BOUNDARY_PROMPTS.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></details>' +
       '<div class="isec"><h4>In the VSM</h4><p class="src">' + (env.length ? 'Its local environment: ' + esc(env.map(x => netName(lv, x)).join(', ')) + '.' : 'No outside actor exchanges flows with it, so its environment is the other operations.') + '</p></div>' +
       '<div class="btn-row"><button class="btn primary" type="button" id="nOpen">' + (child ? 'Open lower level' : 'Create lower level') + '</button><button class="btn" type="button" id="nShow">Show in the VSM</button></div>' +
       (lv.opCount > MIN_OPS ? '<div class="btn-row"><button class="btn warn" type="button" id="nRemove">Remove operation</button></div>' : '');
+  } else if (netSel.t === 'node' && isAct(actorById(lv, netSel.id))) {
+    const a = actorById(lv, netSel.id);
+    h = '<div class="nhead"><span class="code-chip" style="background:' + colorOf(lv, a.op, L) + '">' + esc(codeOf(lv, a.op)) + '</span><span class="insp-kind"><span class="k">Activity</span><span class="r">Inside ' + esc(labelOf(lv, a.op)) + '</span></span></div>' +
+      '<label class="fld"><span>Name</span><input type="text" id="nName" value="' + esc(a.name || '') + '" placeholder="What is done here"></label>' +
+      '<label class="fld"><span>Inside the operation</span><select class="inp" id="nOp">' + Array.from({ length: lv.opCount }, (_, k) => '<option value="o' + k + '"' + ('o' + k === a.op ? ' selected' : '') + '>' + esc(codeOf(lv, 'o' + k) + ' ' + labelOf(lv, 'o' + k)) + '</option>').join('') + '</select></label>' +
+      '<div class="isec"><h4>Flows</h4>' + netCardFlowRows(lv, a.id) + '</div>' +
+      '<div class="isec"><h4>In the VSM</h4><p class="src">Part of the workflow of ' + esc(codeOf(lv, a.op) + ' ' + labelOf(lv, a.op)) + '. Its flows with outside actors count as that operation\'s; flows with activities of other operations travel on the operational linkages. If it could keep a separate existence, make it an operation of its own instead.</p></div>' +
+      '<div class="btn-row"><button class="btn" type="button" id="nPromote"' + (lv.opCount >= MAX_OPS ? ' disabled title="Six operations is the most per level"' : '') + '>Make it an operation</button><button class="btn warn" type="button" id="nRemove">Remove activity</button></div>';
   } else if (netSel.t === 'node') {
     const a = actorById(lv, netSel.id), ks = opsOfActor(lv, a.id);
     h = '<div class="nhead"><span class="code-chip" style="background:' + actorColor(lv, a) + '">E</span><span class="insp-kind"><span class="k">Environment</span><span class="r">' + esc(NET_KINDS[a.kind] || 'Actor') + '</span></span></div>' +
@@ -5727,16 +5832,17 @@ function renderNetCard() {
       '<div class="btn-row"><button class="btn warn" type="button" id="nRemove">Remove actor</button></div>';
   } else {
     const f = net.flows.find(x => x.id === netSel.id);
-    const opts = cur => netNodesOf(lv).map(id => '<option value="' + id + '"' + (id === cur ? ' selected' : '') + '>' + esc((opIdx(id) >= 0 ? codeOf(lv, id) + ' ' : '') + netName(lv, id)) + '</option>').join('');
-    const a = opIdx(f.from), b = opIdx(f.to);
-    const where = a >= 0 && b >= 0 ? (Math.abs(a - b) === 1 ? 'the operational linkage between ' + codeOf(lv, f.from) + ' and ' + codeOf(lv, f.to) : 'the operational linkages from ' + codeOf(lv, f.from) + ' to ' + codeOf(lv, f.to) + ' (the VSM column only joins neighbours)')
-      : 'the channel between ' + codeOf(lv, a >= 0 ? f.from : f.to) + ' and its environment';
+    const opts = cur => netNodesOf(lv).map(id => '<option value="' + id + '"' + (id === cur ? ' selected' : '') + '>' + esc((opIdx(id) >= 0 ? codeOf(lv, id) + ' ' : opOf(lv, id) ? codeOf(lv, opOf(lv, id)) + ' › ' : '') + netName(lv, id)) + '</option>').join('');
+    const fo = opOf(lv, f.from), to = opOf(lv, f.to), a = fo ? opIdx(fo) : -1, b = to ? opIdx(to) : -1;
+    const where = a >= 0 && a === b ? 'nothing: it stays inside ' + codeOf(lv, fo) + ' ' + labelOf(lv, fo) + ', as part of its workflow'
+      : a >= 0 && b >= 0 ? (Math.abs(a - b) === 1 ? 'the operational linkage between ' + codeOf(lv, f.from) + ' and ' + codeOf(lv, f.to) : 'the operational linkages from ' + codeOf(lv, f.from) + ' to ' + codeOf(lv, f.to) + ' (the VSM column only joins neighbours)')
+      : 'the channel between ' + codeOf(lv, a >= 0 ? fo : to) + ' and its environment';
     h = '<div class="nhead"><span class="code-chip">⇝</span><span class="insp-kind"><span class="k">Flow</span><span class="r">Value exchanged</span></span></div>' +
       '<label class="fld"><span>What flows</span><input type="text" id="nName" value="' + esc(f.name || '') + '" placeholder="Coffee orders, $, ingredients…"></label>' +
       netColorRow(f.color || '#6b7c78', !!f.color, 'default') +
       '<label class="fld"><span>From</span><select class="inp" id="nFrom">' + opts(f.from) + '</select></label>' +
       '<label class="fld"><span>To</span><select class="inp" id="nTo">' + opts(f.to) + '</select></label>' +
-      '<div class="isec"><h4>In the VSM</h4><p class="src">Travels on ' + esc(where) + '.</p></div>' +
+      '<div class="isec"><h4>In the VSM</h4><p class="src">' + (a >= 0 && a === b ? 'Travels on ' : 'Travels on ') + esc(where) + '.</p></div>' +
       '<div class="btn-row"><button class="btn" type="button" id="nRev">Reverse</button><button class="btn warn" type="button" id="nRemove">Remove flow</button></div>';
   }
   if (netSel) netCard.hidden = false;
@@ -5763,8 +5869,16 @@ function wireNetCard(lv) {
     const id = netSel.id, k = opIdx(id);
     name.addEventListener('input', () => { renameElement(id, name.value, 'net'); renderNetSvg(); });
     q('#nOpen').addEventListener('click', () => netOpen(k));
+    q('#nAddAct').addEventListener('click', () => netAddAct(id));
+    netCard.querySelectorAll('[data-node]').forEach(b => b.addEventListener('click', () => netSelect({ t: 'node', id: b.dataset.node })));
     q('#nShow').addEventListener('click', () => { setDiagram('vsm'); setTimeout(() => select(id, { reveal: true }), 60); });
     const rm = q('#nRemove'); if (rm) rm.addEventListener('click', () => removeOpUI(lv.id, k));
+  } else if (netSel.t === 'node' && isAct(actorById(lv, netSel.id))) {
+    const a = actorById(lv, netSel.id);
+    name.addEventListener('input', () => { a.name = name.value.slice(0, 60); save(); renderNetSvg(); });
+    q('#nOp').addEventListener('change', e => { a.op = e.target.value; save(); rebuildParticles(); renderNet(); });
+    q('#nRemove').addEventListener('click', () => netRemoveActor(a.id));
+    q('#nPromote').addEventListener('click', () => netPromoteAct(a.id));
   } else if (netSel.t === 'node') {
     const a = actorById(lv, netSel.id);
     wireColor(() => actorColor(lv, a), v => { if (v) a.color = v; else delete a.color; save(); });
@@ -5777,7 +5891,7 @@ function wireNetCard(lv) {
     name.addEventListener('input', () => { f.name = name.value.slice(0, 80); save(); renderNetSvg(); });
     const ends = () => {
       const from = q('#nFrom').value, to = q('#nTo').value;
-      if (from === to || (opIdx(from) < 0 && opIdx(to) < 0)) { showToast(from === to ? 'A flow needs two different ends.' : 'Flows between two outside actors lie outside this system.'); renderNetCard(); return; }
+      if (from === to || (!opOf(lv, from) && !opOf(lv, to))) { showToast(from === to ? 'A flow needs two different ends.' : 'Flows between two outside actors lie outside this system.'); renderNetCard(); return; }
       f.from = from; f.to = to; netFlowsChanged();
     };
     q('#nFrom').addEventListener('change', ends);
@@ -5824,11 +5938,36 @@ function netAddActor(kind) {
   netSelect({ t: 'node', id });
   focusNetName();
 }
+function netAddAct(opId) {
+  const lv = level(), net = ensureNet(lv);
+  net.seq = (net.seq || 0) + 1;
+  const id = 'x' + net.seq, o = net.pos[opId] || [0, 0], n = actsOf(lv, opId).length, t = -Math.PI / 2 + n * 1.1;
+  net.actors.push({ id, kind: 'act', op: opId, name: '' });
+  net.pos[id] = [o[0] + Math.cos(t) * 125, o[1] + Math.sin(t) * 100];
+  save();
+  netSelect({ t: 'node', id });
+  focusNetName();
+}
+// an activity that turns out to keep a separate existence becomes an operation, keeping its name, place and flows
+function netPromoteAct(aid) {
+  const lv = level(), net = ensureNet(lv), a = actorById(lv, aid);
+  if (!a || lv.opCount >= MAX_OPS) return;
+  lastRemoved = JSON.stringify(db);
+  const k = lv.opCount, id = 'o' + k;
+  lv.opCount += 1;
+  lv.labels[id] = a.name || 'Operation';
+  net.pos[id] = net.pos[aid];
+  net.flows.forEach(f => { if (f.from === aid) f.from = id; if (f.to === aid) f.to = id; });
+  net.flows = net.flows.filter(f => f.from !== f.to);
+  net.actors = net.actors.filter(x => x.id !== aid); delete net.pos[aid];
+  save(); buildScene(); renderAllPanels(); netSelect({ t: 'node', id });
+  offerUndo((a.name || 'The activity') + ' is now operation ' + codeOf(lv, id) + '.');
+}
 function focusNetName() { setTimeout(() => { const n = netCard.querySelector('#nName'); if (n) { n.focus(); n.select(); } }, 30); }
 function netAddFlow(from, to) {
   const lv = level(), net = ensureNet(lv);
   if (from === to) return;
-  if (opIdx(from) < 0 && opIdx(to) < 0) { showToast('Flows between two outside actors lie outside this system.'); return; }
+  if (!opOf(lv, from) && !opOf(lv, to)) { showToast('Flows between two outside actors lie outside this system.'); return; }
   net.seq = (net.seq || 0) + 1;
   const f = { id: 'f' + net.seq, from, to, name: '' };
   net.flows.push(f);
@@ -5856,7 +5995,7 @@ function netRemoveActor(id) {
 // a drop on empty space adds an actor there: a supplier on the inputs side, a customer on the outputs side
 function netDropActor(from, at) {
   const lv = level(), net = ensureNet(lv);
-  if (opIdx(from) < 0) { showToast('Flows between two outside actors lie outside this system. Drop on an activity instead.'); renderNetSvg(); return; }
+  if (!opOf(lv, from)) { showToast('Flows between two outside actors lie outside this system. Drop on an activity instead.'); renderNetSvg(); return; }
   const kind = at[0] < sifPos(lv)[0] ? 'supplier' : 'customer';
   net.seq = (net.seq || 0) + 1;
   const id = 'x' + net.seq;
@@ -5981,8 +6120,9 @@ netSvg.addEventListener('pointermove', e => {
     return;
   }
   if (netDrag.kind === 'node') {
-    const pt = netPt(e);
-    ensureNet(level()).pos[netDrag.id] = [pt[0] - netDrag.dx, pt[1] - netDrag.dy];
+    const pt = netPt(e), lv = level(), net = ensureNet(lv), old = net.pos[netDrag.id], nw = [pt[0] - netDrag.dx, pt[1] - netDrag.dy];
+    if (old && opIdx(netDrag.id) >= 0) actsOf(lv, netDrag.id).forEach(a => { const q = net.pos[a.id]; if (q) net.pos[a.id] = [q[0] + nw[0] - old[0], q[1] + nw[1] - old[1]]; });
+    net.pos[netDrag.id] = nw;
     renderNetSvg();
   } else if (netDrag.kind === 'pan') {
     netView.cx = netDrag.cx - (e.clientX - netDrag.x0) / netView.s;
@@ -6139,6 +6279,52 @@ const CAFE = {
     }
   }
 };
+/* The same café cut at a coarser scale: three services are its System Ones and the stations are activities
+   inside them. Where to draw System One is the modeller's choice; both cuts are offered as examples. */
+const CAFE_SERVICES = {
+  ops: 3,
+  purpose: 'The purpose of the café is to serve coffee and food to guests at its tables, to people on the go, and at events it caters, for a busy urban street.',
+  labels: {
+    o0: 'Dine-in', o1: 'Takeaway', o2: 'Catering',
+    s2: 'Order tickets, shift rota and shared station schedule', s3: 'Shift manager', s3s: 'Spot checks', s4: 'Owner: new menu, catering and location ideas'
+  },
+  net: {
+    seq: 60,
+    actors: [
+      { id: 'x1', kind: 'customer', name: 'Guests' }, { id: 'x2', kind: 'customer', name: 'People on the go' },
+      { id: 'x3', kind: 'customer', name: 'Event clients' }, { id: 'x4', kind: 'supplier', name: 'Suppliers' },
+      { id: 'x10', kind: 'act', op: 'o0', name: 'Table ordering' }, { id: 'x11', kind: 'act', op: 'o0', name: 'Barista Station' },
+      { id: 'x12', kind: 'act', op: 'o0', name: 'Pastry & Food Prep' }, { id: 'x13', kind: 'act', op: 'o0', name: 'Table service' },
+      { id: 'x20', kind: 'act', op: 'o1', name: 'Counter & cashier' }, { id: 'x21', kind: 'act', op: 'o1', name: 'Brewing Station' },
+      { id: 'x22', kind: 'act', op: 'o1', name: 'Pickup counter' },
+      { id: 'x30', kind: 'act', op: 'o2', name: 'Event bookings' }, { id: 'x31', kind: 'act', op: 'o2', name: 'Batch brewing' },
+      { id: 'x32', kind: 'act', op: 'o2', name: 'Platter prep' }, { id: 'x33', kind: 'act', op: 'o2', name: 'Delivery & set-up' }
+    ],
+    flows: [
+      ['x1', 'x10', 'Orders & $'], ['x10', 'x11', 'Drink orders'], ['x10', 'x12', 'Food orders'], ['x11', 'x13', 'Drinks'], ['x12', 'x13', 'Food'], ['x13', 'x1', 'Coffee & food'],
+      ['x2', 'x20', 'Orders & $'], ['x20', 'x21', 'Coffee orders'], ['x21', 'x22', 'Drip coffee'], ['x22', 'x2', 'Coffee to go'],
+      ['x3', 'x30', 'Bookings & $'], ['x30', 'x31', 'Coffee for the event'], ['x30', 'x32', 'Menu'], ['x31', 'x33', 'Urns of coffee'], ['x32', 'x33', 'Platters'], ['x33', 'x3', 'Catered event'],
+      ['x4', 'o0', 'Beans, milk & food'], ['x4', 'o1', 'Beans & cups'], ['x4', 'o2', 'Beans & food'], ['o2', 'x4', '$']
+    ],
+    pos: {
+      o0: [-135, -470], x10: [115, -580], x11: [-5, -515], x12: [-5, -435], x13: [115, -365],
+      o1: [-135, 0], x20: [115, -80], x21: [-5, 0], x22: [115, 80],
+      o2: [-135, 470], x30: [115, 365], x31: [-5, 430], x32: [-5, 510], x33: [115, 575],
+      x1: [440, -470], x2: [440, 0], x3: [440, 470], x4: [-480, 0]
+    }
+  }
+};
+function applyCafeServices(lv) {
+  applyCafe(lv);
+  Object.values(lv.children || {}).forEach(cid => { const c = db.levels[cid]; if (c) { deleteSubtree(c); delete db.levels[cid]; } });
+  lv.children = {};
+  Object.keys(lv.labels).filter(k => /^o\d+$/.test(k)).forEach(k => delete lv.labels[k]);
+  Object.assign(lv.labels, CAFE_SERVICES.labels);
+  lv.opCount = CAFE_SERVICES.ops;
+  lv.purpose = CAFE_SERVICES.purpose;
+  lv.unfold = { by: 'customer', why: 'Guests at the tables, people on the go and event clients ask for different things at different paces.' };
+  lv.net = cafeNet(CAFE_SERVICES.net);
+}
 function cafeNet(spec) {
   return { seq: spec.seq, actors: spec.actors.map(a => Object.assign({}, a)), flows: spec.flows.map((f, i) => ({ id: 'f' + (i + 1), from: f[0], to: f[1], name: f[2] })), pos: JSON.parse(JSON.stringify(spec.pos)) };
 }
@@ -6149,6 +6335,7 @@ function applyCafe(lv) {
   if (lv.parent) setLevelName(lv, 'Café'); else lv.name = 'Café';
   lv.opCount = CAFE.ops; lv.flows = {}; lv.diag = {};
   lv.purpose = CAFE.purpose;
+  lv.unfold = { by: 'tech', why: 'Each station is a different way of turning ingredients into what is served.' };
   lv.net = cafeNet(CAFE.net);
   const b = newLevel(lv, 'o2');
   b.opCount = CAFE.brewing.ops; b.labels = Object.assign({}, CAFE.brewing.labels);
@@ -6417,7 +6604,7 @@ async function exportFindings(kind) {
    shortcut sheet, About, focus keys for each system, the tour and
    presentation mode
    ===================================================================== */
-const APP_VERSION = '1.3 (November 2026)';
+const APP_VERSION = '1.4 (November 2026)';
 const CITE_YEAR = 2026;
 const modals = ['welcome', 'keysSheet', 'about'];
 let modalReturn = null;

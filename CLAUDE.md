@@ -63,7 +63,6 @@ Agreed next steps, in order:
 3. App foundations, as proposed (Panos has not yet picked one): a library of several models in the browser; splitting `index.html` into modules with a build that still emits one file; running `npm test` in GitHub Actions; PNG/SVG export of the current view.
 
 Open questions and known issues:
-- The GitHub repository is private, so About points to the page itself as its source rather than to GitHub. If the repository goes public, add its link to About.
 - Overlapping local environments: operations are spaced evenly round the ring, which will not fit overlaps. One idea is to order operations by shared actors. Undecided.
 - Against the skills and lecture notes: lecture slide 10 labels conflict with the skills; recursion numbering differs; the two extension channels are on by default; Beer's archetypes are missing.
 - The code `EF` is used both for the future environment and for the sixth local environment.

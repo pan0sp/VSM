@@ -25,7 +25,7 @@ Labels, colours, notes, levels and view settings are saved in the browser's loca
 ## Starting, presenting and shortcuts
 
 - **First visit.** A welcome card says what the app is for (the facilitated diagnosis of real organizations with the VSM, not only learning it). The app opens in 2D with the panels closed and offers three ways in: explore the model, map your organization (opens Settings and the Method), or open one of the examples. Later visits return to where you left off. **Start screen** in the **⋯** menu brings the choices back.
-- **Focus keys.** `1` to `5` focus Systems One to Five, `*` System Three-Star, `E` the environment (press again for the future environment), `M` the metasystem, `A` the algedonic channel, and `0` shows everything again. `D` switches 2D and 3D, `H` opens the Hemispheres view.
+- **Focus keys.** `1` to `5` focus Systems One to Five, `*` System Three-Star, `E` the environment (press again for the future environment), `M` the metasystem, `A` the algedonic channel, and `0` shows everything again. `D` switches 2D and 3D, `H` opens the Orthogonal view.
 - **Tour.** `PageDown` and `PageUp` step through the environment, Systems One to Five with Three-Star, and the whole model, so a presenter's clicker drives it.
 - **Presentation mode** (`P`, or **Present** in the toolbar) hides the toolbar and panels, goes full screen and dark, enlarges labels for a projector at 1280×720, and shows a caption with the name and a one-line description of whatever is in focus. `Esc` leaves focus, then presentation mode.
 - **Shortcut sheet.** `?` lists every key. The hint bar at the bottom of the model fades after first use.
@@ -78,7 +78,9 @@ The layout follows Beer's diagram from *Brain of the Firm* and *Diagnosing the S
 
 Terminology follows Beer's books as collected in the [Pure VSM](https://wiki.cybernetic-futures.org/pure-vsm/) source set: inside-and-now (System Three), outside-and-then (System Four), closure and identity (System Five), anti-oscillation and regulatory centre (System Two), System-in-Focus, local management.
 
-### The Hemispheres view
+### The Orthogonal view
+
+Beer's orthogonal representation of management on operations: the metasystem stands at right angles to System One. (Earlier versions called it Hemispheres.)
 
 A 3D alternative beside 2D and 3D in the toolbar (key `H`), after the author's clay and Tinkercad ("VSM 3D-Hemispheres") models:
 - **The environment** is a bowl. Each operation's local environment is a cap set in its rim, and the future environment is a faint dome above.

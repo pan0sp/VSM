@@ -35,7 +35,7 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   ok(/Good regulator/.test(await pg.textContent('#focusBar')) && await pg.isVisible('#lawsCard'), 'a law in the details opens it in the Laws layer');
   await pg.click('#vHemi'); await pg.waitForTimeout(1200);
   await pg.click('#lawsCard [data-law="rs"]'); await pg.waitForTimeout(900);
-  ok(/Recursive/.test(await pg.textContent('#focusBar')), 'laws work in Hemispheres');
+  ok(/Recursive/.test(await pg.textContent('#focusBar')), 'laws work in the Orthogonal view');
   const body = await pg.textContent('#lawsCard .law.cur .lbody');
   ok(/“In a recursive organizational structure any viable system contains, and is contained in, a viable system\.”/.test(body) && /quoted from Wikipedia/.test(body), 'a law Wikipedia states is quoted exactly and credited');
   await pg.click('#lawsCard [data-law="gr"]'); await pg.waitForTimeout(600);

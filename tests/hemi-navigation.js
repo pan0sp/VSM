@@ -15,7 +15,7 @@ const lblAt = (pg, code, dy) => pg.evaluate(([code, dy]) => { const l = [...docu
   for (let i = 0; i < 16; i++) { await pg.mouse.wheel(0, -160); await pg.waitForTimeout(60); }
   await pg.waitForTimeout(500);
   await pg.screenshot({ path: process.env.SP + '/shots/h-zoom.png' });
-  ok(!/Brewing/.test(await pg.textContent('#crumbs')), 'zooming does not jump levels in Hemispheres');
+  ok(!/Brewing/.test(await pg.textContent('#crumbs')), 'zooming does not jump levels in the Orthogonal view');
   await pg.click('#btnRecentre'); await pg.waitForTimeout(900);
   const q = await lblAt(pg, '1C', 6);
   await pg.mouse.click(q[0], q[1]); await pg.waitForTimeout(500);

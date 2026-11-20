@@ -33,6 +33,8 @@ Labels, colours, notes, levels and view settings are saved in the browser's loca
 
 ## Laws
 
+**Attenuation and amplification.** Select any channel (except the environmental intersects and the operational linkages, which belong to the value network) to see its pair on the diagram: Beer's resistor zigzag where variety is attenuated on its way, his triangle pointing at the receiver where it is amplified. Going up, towards management, variety is attenuated; going down, amplified; the Three-Four homeostat amplifies both ways. Name each one in the channel's details. Settings › Advanced can show the words *filters* and *boosts* instead of the symbols. An operation's details take Beer's **Triple Index** (actuality, capability, potentiality, giving productivity, latency and performance), and System Three's details show every operation's index side by side.
+
 **Laws** in the toolbar (key `L`) lists the laws Beer built the model on, with their sources (quoted from Wikipedia's article *Viable system model* where it states them, otherwise paraphrased): Ashby's Law of Requisite Variety; the four principles of organization, the three axioms of management, the law of cohesion for multiple recursions and the recursive system theorem from *The Heart of Enterprise* (1979); and Conant and Ashby's good regulator theorem. Choosing a law focuses the elements and channels it governs and gives a diagnostic question. The details pane of any element or channel lists the laws that apply there.
 
 ## Licence

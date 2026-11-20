@@ -1405,7 +1405,7 @@ details.adv > .block + .block { margin-top: 20px; }
           <button class="btn" id="resetLevel" type="button">Reset this level</button>
         </div>
         <div class="src" id="saveNote">Changes are saved in this browser.</div>
-        <div class="src">To start again, open an example, or keep a copy as a file, use the <b>Model</b> menu at the top.</div>
+        <div class="src">Examples, files and starting again are in the <b>Model</b> menu.</div>
       </div>
     </section>
 
@@ -4719,7 +4719,7 @@ function renderInspectorNet() {
   const k = +(me || mo)[1], xs = actorsOfOp(lv, k);
   sec.hidden = false;
   if (!xs.length) {
-    box.innerHTML = '<p class="src">' + (lv.net && netOf(lv).actors.length ? 'No actor in the value network deals with ' + esc(labelOf(lv, 'o' + k)) + ' yet. In Beer\'s model every operation has an environment of its own: worth checking whether one is missing from the map, or whether this is a primary activity at all.' : 'Map the customers, suppliers and other actors this operation deals with in the value network; they become its local environment here.') + '</p>' +
+    box.innerHTML = '<p class="src">' + (lv.net && netOf(lv).actors.length ? 'No actor in the value network deals with ' + esc(labelOf(lv, 'o' + k)) + ' yet. Is an actor missing, or is this not a primary activity?' : 'Actors this operation deals with in the value network become its local environment.') + '</p>' +
       '<div class="btn-row"><button class="btn" type="button" id="iNetGo">Open the value network</button></div>';
   } else {
     box.innerHTML = '<ul class="io">' + xs.map(x => {
@@ -4742,7 +4742,7 @@ function renderInspectorIsect() {
   const envName = j => codeOf(lv, 'e' + j) + ' · ' + labelOf(lv, 'e' + j);
   const srcText = (x, a, b) => x.src === 'set' ? 'Set by hand.'
     : x.src === 'actors' ? (x.on ? 'Suggested by the value network.' : 'No shared actor in the value network.')
-    : 'Drawn symbolically: neighbours overlap until the value network or you say otherwise.';
+    : 'Symbolic: neighbours overlap by default.';
   box.innerHTML = '<div class="isx">' + pairs.map(([a, b]) => {
     const x = intersect(lv, a, b), far = Math.abs(a - b) > 1;
     const seg = (v, t) => '<button type="button" data-a="' + a + '" data-b="' + b + '" data-on="' + v + '" aria-pressed="' + (v === 'auto' ? x.src !== 'set' : x.src === 'set' && String(x.on) === v) + '">' + t + '</button>';
@@ -4750,7 +4750,7 @@ function renderInspectorIsect() {
       '<span class="src">' + (x.on ? 'Intersect' : 'Apart') + '</span></div>' +
       '<div class="seg small" role="group" aria-label="Intersect">' + seg('auto', 'As found') + seg('true', 'Intersect') + seg('false', 'Apart') + '</div>' +
       '<p class="src">' + esc(srcText(x)) + (x.shared.length ? ' Shared: ' + esc(x.shared.map(s => netName(lv, s.id)).join(', ')) + '.' : '') +
-      (far && x.on ? ' Not drawn yet: the diagram overlaps neighbours only.' : '') + '</p>' +
+      (far && x.on ? ' Listed, not drawn.' : '') + '</p>' +
       (x.src === 'set' ? '<input type="text" data-why="' + a + '-' + b + '" value="' + esc(x.why) + '" placeholder="Why? For example: same regulator, shared customers, one labour market" aria-label="Why">' : '') +
       '</div>';
   }).join('') + '</div>';
@@ -4782,8 +4782,8 @@ const VARIETY_KINDS = {
 const VK = { att: 'Attenuator', amp: 'Amplifier' };
 const VWORD = { att: 'filters', amp: 'boosts' };
 const VHINT = {
-  att: 'What cuts the variety down on its way (a specification, a fixed menu, a report that aggregates, a gatekeeper)',
-  amp: 'What multiplies it on its way (advertising, distribution, a schedule, a standard, an incentive scheme)'
+  att: 'Name it, e.g. a fixed menu, a summary report',
+  amp: 'Name it, e.g. advertising, a standard'
 };
 const varSpecs = ch => { const k = VARIETY_KINDS[ch.type]; return k ? [['ab', k[0]], ['ba', k[1]]].filter(x => x[1]).map(([dir, k]) => ({ dir, k })) : []; };
 const varName = (lv, chId, g) => (lv.vari && lv.vari[chId] && lv.vari[chId][g.dir + g.k]) || '';
@@ -4844,9 +4844,9 @@ function renderInspectorVar() {
     const from = end(ch.poles[g.dir === 'ab' ? 0 : 1]), to = end(ch.poles[g.dir === 'ab' ? 1 : 0]);
     return '<div class="vrow ' + g.k + '" style="color:var(--' + g.k + ')">' + varSymbol(g.k, 14) +
       '<span style="color:var(--ink)"><b>' + VK[g.k] + '</b> · ' + esc(from) + ' → ' + esc(to) + '</span>' +
-      '<input type="text" data-v="' + g.dir + g.k + '" value="' + esc(varName(lv, id, g)) + '" placeholder="Name it, if you know it" aria-label="' + VK[g.k] + ' from ' + esc(from) + ' to ' + esc(to) + '">' +
-      '<p class="src" style="color:var(--ink-2)">' + esc(VHINT[g.k]) + '</p></div>';
-  }).join('') + '<p class="src" style="margin-top:10px">Beer\'s notation: a resistor zigzag attenuates variety on its way to the receiver; a triangle pointing at the receiver amplifies it. Shown on the channel while it is selected.</p>';
+      '<input type="text" data-v="' + g.dir + g.k + '" value="' + esc(varName(lv, id, g)) + '" placeholder="' + VHINT[g.k] + '" aria-label="' + VK[g.k] + ' from ' + esc(from) + ' to ' + esc(to) + '">' +
+      '</div>';
+  }).join('');
   box.querySelectorAll('[data-v]').forEach(inp => inp.addEventListener('input', () => {
     lv.vari = lv.vari || {};
     const v = lv.vari[id] = lv.vari[id] || {};
@@ -4881,18 +4881,18 @@ function renderInspectorTix() {
     let whole = '';
     if (lv.parent && /^o\d+$/.test(lv.parent.el) && db.levels[lv.parent.level]) {
       const pt = tixOf(db.levels[lv.parent.level], lv.parent.el);
-      if (pt) whole = '<p class="src" style="margin-top:8px">This system in focus as a whole, measured one level up as an operation: productivity ' + tixFmt(pt.prod) + ', latency ' + tixFmt(pt.lat) + ', performance ' + tixFmt(pt.perf) + '.</p>';
+      if (pt) whole = '<p class="src" style="margin-top:8px">Whole system, from the level above: productivity ' + tixFmt(pt.prod) + ', latency ' + tixFmt(pt.lat) + ', performance ' + tixFmt(pt.perf) + '.</p>';
     }
-    box.innerHTML = '<p class="src">The operations\' indices side by side, as System Three reads them in the resource bargain. Enter the figures on each operation.</p>' + tixTable(rows) + whole;
+    box.innerHTML = '<p class="src">Entered on each operation.</p>' + tixTable(rows) + whole;
     return;
   }
   const t = (lv.tix && lv.tix[id]) || {}, r = tixOf(lv, id);
   const fld = (k, name, hint) => '<label title="' + esc(hint) + '">' + name + '<input type="number" min="0" step="any" inputmode="decimal" data-t="' + k + '" value="' + (t[k] != null ? t[k] : '') + '"></label>';
-  const warn = r && ((r.prod != null && r.prod > 1) || (r.lat != null && r.lat > 1)) ? '<p class="src" style="color:var(--att)">Actuality should not exceed capability, nor capability potentiality. Check the figures.</p>' : '';
+  const warn = r && ((r.prod != null && r.prod > 1) || (r.lat != null && r.lat > 1)) ? '<p class="src" style="color:var(--att)">Check the figures: actuality cannot exceed capability, nor capability potentiality.</p>' : '';
   box.innerHTML = '<div class="tix">' + fld('a', 'Actuality', 'What is done now') + fld('c', 'Capability', 'What could be done now, with existing resources and constraints') + fld('p', 'Potentiality', 'What could be done by developing resources and removing constraints') + '</div>' +
     '<label class="fld" style="margin-top:6px"><span>Unit</span><input class="inp" type="text" data-t="unit" value="' + esc(t.unit || '') + '" placeholder="Covers a month, units a week, hours…"></label>' +
     '<div id="iTixOut">' + tixTable([{ name: 'This operation', t: r }]) + warn + '</div>' +
-    '<p class="src" style="margin-top:6px">Productivity = actuality / capability; latency = capability / potentiality; performance = actuality / potentiality. Beer, <i>Brain of the Firm</i>, ch. 11, and <i>The Heart of Enterprise</i>, ch. 11 (pages to verify).</p>';
+    '<p class="src" style="margin-top:6px">Productivity A/C, latency C/P, performance A/P (Beer, <i>Brain of the Firm</i>).</p>';
   box.querySelectorAll('[data-t]').forEach(inp => inp.addEventListener('input', () => {
     lv.tix = lv.tix || {};
     const v = lv.tix[id] = lv.tix[id] || {}, k = inp.dataset.t;
@@ -4901,7 +4901,7 @@ function renderInspectorTix() {
     if (!Object.keys(v).length) delete lv.tix[id];
     save();
     const rr = tixOf(lv, id), out = $('#iTixOut');
-    if (out) out.innerHTML = tixTable([{ name: 'This operation', t: rr }]) + (rr && ((rr.prod != null && rr.prod > 1) || (rr.lat != null && rr.lat > 1)) ? '<p class="src" style="color:var(--att)">Actuality should not exceed capability, nor capability potentiality. Check the figures.</p>' : '');
+    if (out) out.innerHTML = tixTable([{ name: 'This operation', t: rr }]) + (rr && ((rr.prod != null && rr.prod > 1) || (rr.lat != null && rr.lat > 1)) ? '<p class="src" style="color:var(--att)">Check the figures: actuality cannot exceed capability, nor capability potentiality.</p>' : '');
   }));
 }
 const today = () => new Date().toISOString().slice(0, 10);
@@ -4959,7 +4959,7 @@ function renderDiagList() {
     (ids.length ? ids.map(id => {
     const d = lv.diag[id], k = DIAG[d.s], meta = [diagName(d.s, !!L.chanById[id]), DIAG_STATUS[d.st || 'tentative'], d.conf ? DIAG_CONF[d.conf] + ' confidence' : 'confidence not set'].concat(d.note ? [] : ['no evidence yet']);
     return '<li><button type="button" data-id="' + id + '"><span class="dg" style="background:' + k.color + '">' + k.glyph + '</span><span>' + esc(shownName(id)) + '<small>' + esc(meta.join(' · ')) + '</small>' + (d.note ? '<small class="dev">' + esc(d.note) + '</small>' : '') + '</span></button></li>';
-  }).join('') : '<li class="src" style="padding:2px 0">No findings. Right-click any element, or use Diagnosis in its details, to record what you found: no issue, or missing, weak, malfunctioning and so on, with the evidence.</li>');
+  }).join('') : '<li class="src" style="padding:2px 0">No findings yet. Right-click an element, or use Diagnosis in its details.</li>');
   ul.querySelectorAll('button').forEach(b => b.addEventListener('click', () => select(b.dataset.id)));
 }
 const levelFlags = lv => Object.values(lv.diag || {}).filter(isFinding).length;
@@ -6126,7 +6126,7 @@ function netCardFlowRows(lv, id) {
     const out = f.from === id;
     return '<li><button type="button" data-flow="' + f.id + '"><span class="ar">' + (out ? '→' : '←') + '</span><span>' + esc(flowName(f)) + '<span class="via">' + (out ? 'to ' : 'from ') + esc(netName(lv, out ? f.to : f.from)) + '</span></span></button></li>';
   });
-  return rows.length ? '<ul class="io links">' + rows.join('') + '</ul>' : '<p class="src">No flows yet. Drag the + handle on its edge to another element, or into empty space to add a connected customer or supplier.</p>';
+  return rows.length ? '<ul class="io links">' + rows.join('') + '</ul>' : '<p class="src">No flows yet. Drag its + handle to another element, or into empty space for a new actor.</p>';
 }
 /* The method, shared by every view: the current view's step is open, the others link to their views */
 function methodHTML(view) {
@@ -6177,7 +6177,7 @@ function renderNetCard() {
       '<label class="fld"><span>Name</span><input type="text" id="nName" value="' + esc(labelOf(lv, id)) + '"></label>' +
       netColorRow(colorOf(lv, id, L), !!lv.colors[id], 'operations') +
       '<div class="isec"><h4>Flows</h4>' + netCardFlowRows(lv, id) + '</div>' +
-      '<div class="isec"><h4>Activities inside it</h4>' + (actsOf(lv, id).length ? '<ul class="io links">' + actsOf(lv, id).map(a => '<li><button type="button" data-node="' + a.id + '"><span class="ar">▭</span><span>' + esc(netName(lv, a.id)) + '</span></button></li>').join('') + '</ul>' : '<p class="src">Optional. Map the work this operation does as activities when it helps; how fine to go is your call. They stay its workflow: they do not become its System One one level down.</p>') +
+      '<div class="isec"><h4>Activities inside it</h4>' + (actsOf(lv, id).length ? '<ul class="io links">' + actsOf(lv, id).map(a => '<li><button type="button" data-node="' + a.id + '"><span class="ar">▭</span><span>' + esc(netName(lv, a.id)) + '</span></button></li>').join('') + '</ul>' : '<p class="src">Optional. Activities stay this operation\'s workflow; they do not become a lower level.</p>') +
         '<div class="btn-row"><button class="btn" type="button" id="nAddAct">+ Activity inside it</button></div></div>' +
       '<details class="isec bq"><summary>Where to draw System One (optional)</summary><ul>' + BOUNDARY_PROMPTS.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></details>' +
       '<div class="isec"><h4>In the VSM</h4><p class="src">' + (env.length ? 'Its local environment: ' + esc(env.map(x => netName(lv, x)).join(', ')) + '.' : 'No outside actor exchanges flows with it, so its environment is the other operations.') + '</p></div>' +
@@ -6189,7 +6189,7 @@ function renderNetCard() {
       '<label class="fld"><span>Name</span><input type="text" id="nName" value="' + esc(a.name || '') + '" placeholder="What is done here"></label>' +
       '<label class="fld"><span>Inside the operation</span><select class="inp" id="nOp">' + Array.from({ length: lv.opCount }, (_, k) => '<option value="o' + k + '"' + ('o' + k === a.op ? ' selected' : '') + '>' + esc(codeOf(lv, 'o' + k) + ' ' + labelOf(lv, 'o' + k)) + '</option>').join('') + '</select></label>' +
       '<div class="isec"><h4>Flows</h4>' + netCardFlowRows(lv, a.id) + '</div>' +
-      '<div class="isec"><h4>In the VSM</h4><p class="src">Part of the workflow of ' + esc(codeOf(lv, a.op) + ' ' + labelOf(lv, a.op)) + '. Its flows with outside actors count as that operation\'s; flows with activities of other operations travel on the operational linkages. If it could keep a separate existence, make it an operation of its own instead.</p></div>' +
+      '<div class="isec"><h4>In the VSM</h4><p class="src">Part of the workflow of ' + esc(codeOf(lv, a.op) + ' ' + labelOf(lv, a.op)) + '; its flows count as that operation\'s. If it could exist on its own, make it an operation.</p></div>' +
       '<div class="btn-row"><button class="btn" type="button" id="nPromote"' + (lv.opCount >= MAX_OPS ? ' disabled title="Six operations is the most per level"' : '') + '>Make it an operation</button><button class="btn warn" type="button" id="nRemove">Remove activity</button></div>';
   } else if (netSel.t === 'node') {
     const a = actorById(lv, netSel.id), ks = opsOfActor(lv, a.id);

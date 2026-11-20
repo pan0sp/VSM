@@ -43,7 +43,7 @@ const ok = (c, m) => console.log((c ? 'ok   ' : 'FAIL ') + m);
   await pg.click('.erow[data-id="e1"] .ecode'); await pg.waitForTimeout(500);
   const hr = await pg.$$eval('#iIsec .isx-row', rs => rs.map(r => r.textContent.replace(/\s+/g, ' ')));
   console.log('     ' + hr.join('\n     '));
-  ok(hr.length === 3 && hr.filter(r => /symbolically/.test(r) && /IntersectAs found/.test(r)).length === 2, 'without a network, neighbours intersect symbolically and others stay apart');
+  ok(hr.length === 3 && hr.filter(r => /Symbolic/.test(r) && /IntersectAs found/.test(r)).length === 2, 'without a network, neighbours intersect symbolically and others stay apart');
   await pg.click('#iIsec .isx-row:nth-child(2) [data-on="false"]'); await pg.waitForTimeout(900);
   await pg.screenshot({ path: process.env.SP + '/shots/isect-apart.png' });
   // removing an operation keeps the right pairs

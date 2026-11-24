@@ -13,6 +13,7 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   const pick = async text => { await pg.click('#btnModel'); await pg.waitForTimeout(250); await pg.locator('.ctx button, [role=menuitem]').filter({ hasText: text }).first().click({ force: true }); };
   const grab = async text => { const [d] = await Promise.all([pg.waitForEvent('download', { timeout: 15000 }), pick(text)]); const p = path.join(OUT, 'ev-' + d.suggestedFilename()); await d.saveAs(p); return fs.readFileSync(p, 'utf8'); };
   await pg.click('#btnSide'); await pg.waitForTimeout(300);
+  await pg.click('#tab-model'); await pg.waitForTimeout(200); // the panel opens on the Register; these checks use Settings
   ok(/Nothing assessed yet/.test(await pg.textContent('#diagList')), 'a fresh level says nothing has been assessed');
   // System Five: assessed, no issue
   await pg.click('.erow[data-id="s5"] .ecode'); await pg.waitForTimeout(400);

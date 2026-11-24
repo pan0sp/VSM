@@ -26,6 +26,7 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   // details pane
   await pg.keyboard.press('l'); await pg.waitForTimeout(400);
   await pg.click('#btnSide'); await pg.waitForTimeout(300);
+  await pg.click('#tab-model'); await pg.waitForTimeout(200); // the panel opens on the Register; these checks use Settings
   await pg.click('.erow[data-id="s4"] .ecode'); await pg.waitForTimeout(600);
   await pg.click('#btnSide'); await pg.waitForTimeout(300);
   const ins = await pg.evaluate(() => [...document.querySelectorAll('#iLaws [data-law]')].map(b => b.dataset.law));

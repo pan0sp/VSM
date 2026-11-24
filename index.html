@@ -90,7 +90,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font: 14px/1.45 var(--f-body);
-  overflow: hidden;
+  overflow: clip;
   -webkit-font-smoothing: antialiased;
 }
 button, input, select, textarea { font: inherit; color: inherit; }
@@ -101,9 +101,9 @@ button { cursor: pointer; }
 .app {
   height: 100%;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   grid-template-columns: var(--left) minmax(0, 1fr) var(--right);
-  grid-template-areas: "top top top" "side stage insp" "foot foot foot";
+  grid-template-areas: "top top top" "side sbar insp" "side stage insp" "foot foot foot";
 }
 /* ---------- Footer: attribution ---------- */
 .foot {
@@ -141,7 +141,7 @@ button { cursor: pointer; }
 .net .bg { fill: transparent; }
 .net .wbox rect { fill: var(--stage-hi); fill-opacity: .55; stroke-width: 1.6; }
 .net .wbox .bl { font: 650 15px var(--f-display); fill: var(--ink); }
-.net .wbox .bk, .net .nk { font: 500 10px var(--f-mono); fill: var(--ink-2); letter-spacing: .06em; text-transform: uppercase; }
+.net .wbox .bk, .net .nk { font: 500 11px var(--f-body); fill: var(--ink-2); }
 .net .np { font: italic 12px var(--f-body); fill: var(--ink-2); }
 .net .nn { cursor: pointer; }
 .net .nn circle, .net .nn path, .net .nn rect { fill-opacity: .2; stroke-width: 1.8; }
@@ -273,9 +273,9 @@ button { cursor: pointer; }
   background: transparent;
   padding: 5px 13px;
   border-radius: 6px;
-  font-family: var(--f-mono);
+  font-family: var(--f-body);
   font-weight: 600;
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--ink-2);
 }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
@@ -305,7 +305,7 @@ button { cursor: pointer; }
   color: var(--ink-2);
   background: var(--surface);
   border: 1px solid var(--rule);
-  border-radius: 999px;
+  border-radius: 8px;
   padding: 5px 14px;
   box-shadow: var(--shadow);
   z-index: 2;
@@ -317,7 +317,7 @@ button { cursor: pointer; }
   gap: 8px;
   background: var(--surface);
   border: 1px solid var(--accent);
-  border-radius: 999px;
+  border-radius: 8px;
   padding: 3px 4px 3px 12px;
   box-shadow: var(--shadow);
   min-width: 0;
@@ -332,7 +332,7 @@ button { cursor: pointer; }
   flex: none;
   border: 1px solid var(--rule);
   background: var(--surface);
-  border-radius: 999px;
+  border-radius: 8px;
   padding: 5px 12px;
   font-size: 12.5px;
   font-weight: 600;
@@ -353,7 +353,7 @@ button { cursor: pointer; }
   color: var(--ink);
   background: var(--surface);
   border: 1px solid var(--rule);
-  border-radius: 999px;
+  border-radius: 8px;
   padding: 7px 14px 7px 11px;
   box-shadow: var(--shadow);
   z-index: 2;
@@ -402,12 +402,10 @@ button { cursor: pointer; }
 .pane { overflow-y: auto; padding: 14px 16px 24px; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 20px; }
 .block { display: flex; flex-direction: column; gap: 10px; }
 .eyebrow {
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+  font-family: var(--f-body);
+  font-size: 12.5px;
   color: var(--ink-2);
-  font-weight: 500;
+  font-weight: 600;
 }
 .focus-name {
   font-family: var(--f-display);
@@ -431,8 +429,8 @@ button { cursor: pointer; }
 .opmax { margin: 8px 0 0; font-size: 12px; line-height: 1.45; color: var(--ink-2); border-left: 2px solid var(--accent); padding-left: 8px; }
 #hlabels .lbl.far { opacity: .45; }
 #hlabels .lbl { pointer-events: auto; cursor: pointer; }
-@media (max-width: 1560px) { #vHemi .dlong { display: none; } #vHemi .dshort { display: inline !important; } }
-@media (max-width: 1560px) { #btnModel .t, #btnFrame .t { display: none; } #btnModel, #btnFrame { padding-left: 9px; padding-right: 9px; } }
+@media (max-width: 1100px) { #vHemi .dlong { display: none; } #vHemi .dshort { display: inline !important; } }
+@media (max-width: 1100px) { #btnModel .t, #btnFrame .t { display: none; } #btnModel, #btnFrame { padding-left: 9px; padding-right: 9px; } }
 .stepper { display: inline-flex; flex: none; align-items: center; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
 .stepper button { border: 0; background: var(--surface-2); width: 30px; height: 28px; font-size: 16px; line-height: 1; color: var(--ink); }
 .stepper button:disabled { opacity: .35; cursor: default; }
@@ -552,7 +550,7 @@ input[type="color"].sw.custom::-moz-color-swatch { box-shadow: inset 0 0 0 2px v
 .ai { border: 1px solid var(--rule); border-radius: 10px; padding: 12px; background: var(--surface-2); }
 .ai textarea { border: 1px solid var(--rule); background: var(--surface); border-radius: 7px; padding: 7px 9px; width: 100%; resize: vertical; font-size: 13px; }
 .ai textarea:focus { border-color: var(--accent); outline: none; }
-details.am > summary { cursor: pointer; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2); }
+details.am > summary { cursor: pointer; font-family: var(--f-body); font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
 details.am[open] > summary { margin-bottom: 8px; }
 details.am .fld { margin-top: 10px; }
 #amAnswer { font-family: var(--f-mono); font-size: 11.5px; }
@@ -562,7 +560,7 @@ details.am .fld { margin-top: 10px; }
 .fch .dot { width: 9px; height: 9px; border-radius: 50%; }
 .fch .nm { font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fch .nm small { display: block; font-weight: 400; color: var(--ink-2); font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; }
-.fch .cnt { font-family: var(--f-mono); font-size: 11px; color: var(--ink-2); border: 1px solid var(--rule); border-radius: 99px; padding: 0 7px; }
+.fch .cnt { font-family: var(--f-mono); font-size: 11px; color: var(--ink-2); border: 1px solid var(--rule); border-radius: 4px; padding: 0 6px; }
 .fch .cnt.zero { color: var(--accent); border-color: var(--accent); }
 .fch.sel > summary .nm { color: var(--accent); }
 .fed { display: grid; gap: 5px; padding: 0 0 10px; }
@@ -600,7 +598,7 @@ details.am .fld { margin-top: 10px; }
 .frow .fsug .linkish { font-size: 11.5px; }
 .frow.nf .fdir { display: grid; place-items: center; height: 26px; color: var(--ink-2); font-family: var(--f-mono); }
 .frow.nf .fnet { font-size: 12.5px; padding: 3px 0; grid-column: 2 / 4; }
-.frow.nf .fnet small { display: block; color: var(--ink-2); font: 10px var(--f-mono); letter-spacing: .04em; text-transform: uppercase; }
+.frow.nf .fnet small { display: block; color: var(--ink-2); font: 11px var(--f-body); }
 .fadd { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px; }
 .fadd button { border: 1px solid var(--rule); background: var(--surface); border-radius: 6px; font-size: 12.5px; font-weight: 600; padding: 4px 10px; }
 .fempty { font-size: 12.5px; color: var(--ink-2); }
@@ -636,7 +634,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 .law .lbody { padding: 0 0 8px; font-size: 12.5px; line-height: 1.45; }
 .law .lbody p { margin: 0 0 6px; }
 .law .lbody .lq { color: var(--ink-2); }
-.law .lbody .lk { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); display: block; margin-top: 6px; }
+.law .lbody .lk { font-family: var(--f-body); font-size: 12px; font-weight: 600; color: var(--ink-2); display: block; margin-top: 6px; }
 .lawlist { list-style: none; margin: 0; padding: 0; }
 .lawlist li { padding: 5px 0; border-top: 1px solid var(--rule); font-size: 12.5px; line-height: 1.4; }
 .lawlist li:first-child { border-top: 0; }
@@ -674,7 +672,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 .rcard .tflag { color: var(--accent); font-size: 11px; font-weight: 600; }
 .rcard.current { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft), var(--shadow); }
 .rcard.current .lv { background: var(--accent); color: var(--accent-ink); }
-.rcard .here { font: 600 9.5px var(--f-mono); letter-spacing: .06em; color: var(--accent); }
+.rcard .here { font: 600 11px var(--f-body); color: var(--accent); }
 .rcard.ghost { background: transparent; border-style: dashed; box-shadow: none; max-width: 128px; }
 .rcard.ghost .tn { font-weight: 500; color: var(--ink-2); }
 .rcard.ghost .sub { color: var(--accent); }
@@ -713,7 +711,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  background: radial-gradient(120% 90% at 58% 38%, var(--stage-hi), var(--stage) 70%);
+  background: var(--stage);
   touch-action: none;
 }
 #gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; outline: none; transition: opacity .18s ease; }
@@ -810,7 +808,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
   font-size: 13px;
 }
 .ctx .ch { padding: 6px 9px 7px; border-bottom: 1px solid var(--rule); margin-bottom: 4px; }
-.ctx .ch .k { display: block; font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-2); letter-spacing: .06em; text-transform: uppercase; }
+.ctx .ch .k { display: block; font-family: var(--f-body); font-size: 12px; color: var(--ink-2); }
 .ctx .ch b { font-weight: 650; }
 .ctx button {
   display: grid;
@@ -831,7 +829,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 .ctx button.warn { color: var(--accent); }
 .ctx button[aria-checked="true"] { font-weight: 650; }
 .ctx hr { border: 0; border-top: 1px solid var(--rule); margin: 4px 2px; }
-.ctx .sub { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); padding: 6px 9px 2px; }
+.ctx .sub { font-family: var(--f-body); font-size: 12px; font-weight: 600; color: var(--ink-2); padding: 6px 9px 2px; }
 .toast {
   position: absolute;
   left: 50%;
@@ -842,14 +840,14 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
   gap: 10px;
   background: var(--surface);
   border: 1px solid var(--rule);
-  border-radius: 999px;
+  border-radius: 8px;
   box-shadow: var(--shadow);
   padding: 6px 6px 6px 16px;
   z-index: 4;
   font-size: 12.5px;
   max-width: calc(100% - 24px);
 }
-.toast button { border: 1px solid var(--rule); background: var(--surface); border-radius: 999px; padding: 5px 12px; font-weight: 600; font-size: 12.5px; flex: none; }
+.toast button { border: 1px solid var(--rule); background: var(--surface); border-radius: 8px; padding: 5px 12px; font-weight: 600; font-size: 12.5px; flex: none; }
 .toast button.go { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .dgrid { display: flex; flex-wrap: wrap; gap: 5px; }
 .dchip {
@@ -858,7 +856,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
   gap: 6px;
   border: 1px solid var(--rule);
   background: var(--surface);
-  border-radius: 999px;
+  border-radius: 8px;
   padding: 4px 10px 4px 5px;
   font-size: 12.5px;
 }
@@ -896,7 +894,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
   max-width: 260px;
   z-index: 3;
 }
-.tip .k { font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-2); letter-spacing: .05em; text-transform: uppercase; display: block; }
+.tip .k { font-family: var(--f-body); font-size: 12px; color: var(--ink-2); display: block; }
 .tip b { font-weight: 650; }
 .tip .tf { display: block; margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--rule); color: var(--ink-2); font-size: 12px; }
 
@@ -907,13 +905,13 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
   gap: 8px;
   background: var(--surface);
   border: 1px solid var(--rule);
-  border-radius: 999px;
+  border-radius: 8px;
   padding: 4px 12px 4px 5px;
   box-shadow: var(--shadow);
   font-size: 12.5px;
   min-width: 0;
 }
-.level-chip .lv { font-family: var(--f-mono); font-weight: 600; font-size: 11px; background: var(--ink); color: var(--surface); border-radius: 999px; padding: 2px 8px; }
+.level-chip .lv { font-family: var(--f-mono); font-weight: 600; font-size: 11px; background: var(--ink); color: var(--surface); border-radius: 8px; padding: 2px 8px; }
 .level-chip .tx { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .level-chip .tx b { color: var(--ink); font-weight: 650; }
 .up-btn {
@@ -922,7 +920,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
   gap: 6px;
   border: 1px solid var(--rule);
   background: var(--surface);
-  border-radius: 999px;
+  border-radius: 8px;
   padding: 5px 12px;
   box-shadow: var(--shadow);
   font-size: 12.5px;
@@ -989,7 +987,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
   background: var(--ink);
 }
 .insp-kind { display: flex; flex-direction: column; min-width: 0; }
-.insp-kind .k { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2); }
+.insp-kind .k { font-family: var(--f-body); font-size: 12px; color: var(--ink-2); }
 .insp-kind .r { font-family: var(--f-display); font-stretch: 110%; font-weight: 700; font-size: 16px; line-height: 1.15; }
 .insp-body { overflow-y: auto; padding: 14px 16px 28px; display: flex; flex-direction: column; gap: 16px; min-height: 0; }
 .fld { display: flex; flex-direction: column; gap: 5px; }
@@ -1005,12 +1003,10 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 .summary { margin: 0; font-size: 14px; line-height: 1.55; max-width: 62ch; }
 .isec h4 {
   margin: 0 0 6px;
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  letter-spacing: .09em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-  font-weight: 500;
+  font-family: var(--f-display);
+  font-size: 13px;
+  color: var(--ink);
+  font-weight: 700;
 }
 .isec ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
 .isec ul.links { list-style: none; padding: 0; gap: 2px; }
@@ -1053,7 +1049,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 
 /* ---------- Narrow screens ---------- */
 @media (max-width: 860px) {
-  .app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "stage" "foot"; }
+  .app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "sbar" "stage" "foot"; }
   .foot { padding-inline: 12px; }
   .foot .fx { display: none; }
   .foot .fn { display: inline; }
@@ -1213,25 +1209,73 @@ details.adv > .block + .block { margin-top: 20px; }
 
 /* ---------- Presentation mode ---------- */
 .app.presenting { grid-template-rows: minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); grid-template-areas: "stage"; }
+.app.presenting .stagebar { display: none !important; }
 .app.presenting .topbar, .app.presenting .foot, .app.presenting .side, .app.presenting .insp, .app.presenting .scrim,
 .app.presenting #methodCard, .app.presenting #lawsCard, .app.presenting #netCard, .app.presenting .net-bar, .app.presenting .rec-head,
 .app.presenting .hint, .app.presenting .depth, .app.presenting .recentre, .app.presenting .overlay-tl { display: none !important; }
 .app.presenting .rec { right: 0; }
 .app.presenting .rec-scroll { padding-top: 40px; }
 .caption { position: absolute; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); width: min(880px, calc(100% - 32px)); z-index: 3; background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; box-shadow: var(--shadow); padding: 10px 18px 11px; display: none; }
-.app.presenting:not(.netmode) .caption { display: block; }
-.caption .ck { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.app.presenting .caption { display: block; }
+.caption .ck { font-family: var(--f-body); font-size: 13px; font-weight: 600; color: var(--accent); }
 .caption .cn { font: 700 21px/1.2 var(--f-display); font-stretch: 110%; }
 .caption .cd { font-size: 15px; line-height: 1.45; color: var(--ink-2); margin-top: 2px; }
 .caption .cs { float: right; font-family: var(--f-mono); font-size: 11px; color: var(--ink-2); margin-left: 12px; }
-.pres-exit { position: absolute; top: 12px; right: 12px; z-index: 4; display: none; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--rule); border-radius: 999px; padding: 5px 6px 5px 14px; box-shadow: var(--shadow); font-size: 12.5px; color: var(--ink-2); transition: opacity .4s ease; }
-.pres-exit button { border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); border-radius: 999px; padding: 4px 12px; font-weight: 600; font-size: 12.5px; }
+.pres-exit { position: absolute; top: 12px; right: 12px; z-index: 4; display: none; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 5px 6px 5px 14px; box-shadow: var(--shadow); font-size: 12.5px; color: var(--ink-2); transition: opacity .4s ease; }
+.pres-exit button { border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); border-radius: 8px; padding: 4px 12px; font-weight: 600; font-size: 12.5px; }
 .app.presenting .pres-exit { display: inline-flex; }
 .pres-exit.idle { opacity: 0; }
 .dshort { display: none; }
 @media (min-width: 861px) { .only-narrow { display: none !important; } }
 @media (prefers-reduced-motion: reduce) {
   * { transition-duration: 0s !important; }
+}
+
+/* ---------- Workbench (v1.8): the stage bar, the register, diagnosis first, the method in presentation ---------- */
+.stagebar { grid-area: sbar; display: flex; align-items: center; gap: 8px 16px; flex-wrap: wrap; padding: 8px 16px; background: var(--stage); border-bottom: 1px solid var(--rule); min-width: 0; }
+.stagebar .tgroup + .tgroup { margin-left: auto; padding-left: 0; border-left: 0; }
+.app.netmode .stagebar .tgroup.vsm-only { display: none; }
+.tools .tgroup + .tgroup { padding-left: 0; border-left: 0; }
+.reg-head { gap: 8px; }
+.reg-name { font: 700 19px/1.2 var(--f-display); margin: 0; overflow-wrap: anywhere; text-wrap: balance; }
+.reg-purpose { margin: 0; font-size: 13px; color: var(--ink-2); }
+.reg-purpose .linkish { font-size: 13px; }
+.reg-cov { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 4px 0 2px; }
+.reg-cov div { display: grid; }
+.reg-cov b { font: 700 19px/1.2 var(--f-display); font-variant-numeric: tabular-nums; }
+.reg-cov span { font-size: 12px; color: var(--ink-2); }
+.rlist { display: flex; flex-direction: column; gap: 2px; margin: 0 -8px; }
+.rlist h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 12px 8px 4px; font: 700 13px/1.3 var(--f-display); }
+.rlist h3:first-child { margin-top: 0; }
+.rlist h3 small { font: 400 12px var(--f-body); color: var(--ink-2); }
+.rrow { display: grid; grid-template-columns: 46px minmax(0, 1fr) 20px; gap: 8px; align-items: center; width: 100%; min-height: 32px; padding: 4px 8px; border: 0; border-radius: 6px; background: transparent; text-align: left; color: var(--ink); }
+.rrow.sub { padding-left: 24px; }
+.rrow:hover { background: var(--surface-2); }
+.rrow:active { background: var(--rule); }
+.rrow.sel { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.rrow .rc { font: 600 11px/1.5 var(--f-mono); text-align: center; border: 1.5px solid; border-radius: 4px; padding: 0 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rrow .rn { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rrow .rs { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font: 700 12px/1 var(--f-body); color: var(--surface); }
+.rrow .rs.none { border: 1px dashed var(--ink-2); opacity: .55; }
+.rlist details > summary { cursor: pointer; margin: 12px 8px 4px; font: 700 13px/1.3 var(--f-display); }
+.rlist .rempty { margin: 4px 8px; font-size: 13px; color: var(--ink-2); }
+.isec-diag { padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
+.isec-diag > h4 { font-size: 14px; }
+.pres-rail { display: none; position: absolute; left: 16px; top: 50%; transform: translateY(-50%); z-index: 4; flex-direction: column; gap: 4px; padding: 6px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; box-shadow: var(--shadow); }
+.app.presenting .pres-rail { display: flex; }
+.pres-rail button { display: grid; grid-template-columns: 26px auto; gap: 10px; align-items: center; padding: 8px 12px 8px 8px; border: 0; border-radius: 6px; background: transparent; text-align: left; font-size: 15px; font-weight: 600; color: var(--ink-2); }
+.pres-rail button:hover { background: var(--surface-2); color: var(--ink); }
+.pres-rail .n { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 6px; border: 1.5px solid var(--rule); font: 700 13px var(--f-display); }
+.pres-rail button[aria-current="step"] { color: var(--ink); }
+.pres-rail button[aria-current="step"] .n { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.pres-exit.idle ~ .pres-rail, .app.presenting .pres-rail.idle { opacity: .25; }
+.app.presenting .caption .cn { font-size: 26px; }
+.app.presenting .caption .cd { font-size: 17px; }
+@media (max-width: 860px) {
+  .stagebar { padding: 6px 12px; gap: 6px 10px; }
+  .stagebar .tgroup + .tgroup { margin-left: 0; }
+  .pres-rail { top: auto; bottom: 120px; transform: none; }
+  .pres-rail button span:last-child { display: none; }
 }
 </style>
 </head>
@@ -1260,6 +1304,23 @@ details.adv > .block + .block { margin-top: 20px; }
     <input type="file" id="fileOpen" accept=".json,application/json" hidden>
     <nav class="crumbs" id="crumbs" aria-label="Recursion trail"></nav>
     <div class="tools">
+      <div class="tgroup" role="group" aria-label="Present">
+        <button class="tool" id="btnMethod" type="button" aria-pressed="true" title="Show the method for this view">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 3.5h10M3 8h10M3 12.5h6"/><circle cx="13" cy="12.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+          <span class="t">Method</span>
+        </button>
+        <button class="tool" id="btnPresent" type="button" title="Presentation mode: the model fills the screen with larger labels (key P; Esc leaves)">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="1.8" y="2.5" width="12.4" height="8.2" rx="1"/><path d="M8 10.7v2.8M5.2 13.5h5.6" stroke-linecap="round"/></svg>
+          <span class="t">Present</span>
+        </button>
+        <button class="icon-btn" id="btnMore" type="button" aria-haspopup="menu" aria-label="More: theme, keyboard shortcuts, about" title="Theme, keyboard shortcuts (?) and about">
+          <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="3.5" cy="8" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="12.5" cy="8" r="1.3"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="stagebar" id="stagebar" role="toolbar" aria-label="View and layers">
       <div class="tgroup" role="group" aria-label="Views">
         <div class="seg" role="group" aria-label="View">
           <button id="dVsm" type="button" aria-pressed="true" title="Viable System Model (key N switches)">VSM</button>
@@ -1286,35 +1347,40 @@ details.adv > .block + .block { margin-top: 20px; }
           <span class="t">Laws</span>
         </button>
       </div>
-      <div class="tgroup" role="group" aria-label="Present">
-        <button class="tool" id="btnMethod" type="button" aria-pressed="true" title="Show the method for this view">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 3.5h10M3 8h10M3 12.5h6"/><circle cx="13" cy="12.5" r="1.2" fill="currentColor" stroke="none"/></svg>
-          <span class="t">Method</span>
-        </button>
-        <button class="tool" id="btnPresent" type="button" title="Presentation mode: the model fills the screen with larger labels (key P; Esc leaves)">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="1.8" y="2.5" width="12.4" height="8.2" rx="1"/><path d="M8 10.7v2.8M5.2 13.5h5.6" stroke-linecap="round"/></svg>
-          <span class="t">Present</span>
-        </button>
-        <button class="icon-btn" id="btnMore" type="button" aria-haspopup="menu" aria-label="More: theme, keyboard shortcuts, about" title="Theme, keyboard shortcuts (?) and about">
-          <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="3.5" cy="8" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="12.5" cy="8" r="1.3"/></svg>
-        </button>
-      </div>
-    </div>
-  </header>
-
+  </div>
   <aside class="side" id="side" aria-label="Settings">
     <div class="tabs" role="tablist">
       <button class="icon-btn only-narrow" id="sideClose" type="button" aria-label="Close panel" style="margin:0 6px 6px 0;width:30px;height:30px">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
       </button>
-      <button class="tab" role="tab" id="tab-model" aria-controls="pane-model" aria-selected="true">Settings</button>
+      <button class="tab" role="tab" id="tab-reg" aria-controls="pane-reg" aria-selected="true">Register</button>
+      <button class="tab" role="tab" id="tab-model" aria-controls="pane-model" aria-selected="false">Settings</button>
       <button class="tab" role="tab" id="tab-flows" aria-controls="pane-flows" aria-selected="false">Flows</button>
       <button class="tab" role="tab" id="tab-guide" aria-controls="pane-guide" aria-selected="false">Guide</button>
     </div>
 
-    <section class="pane" id="pane-model" role="tabpanel" aria-labelledby="tab-model">
+    <section class="pane reg" id="pane-reg" role="tabpanel" aria-labelledby="tab-reg">
+      <div class="block reg-head">
+        <h2 class="reg-name" id="regName">Organization</h2>
+        <p class="reg-purpose" id="regPurpose"></p>
+        <div class="reg-cov" id="regCov"></div>
+        <div class="seg small" role="group" aria-label="Show in the register" id="regFilter">
+          <button type="button" data-f="all" aria-pressed="true">All</button>
+          <button type="button" data-f="find" aria-pressed="false">Findings</button>
+          <button type="button" data-f="todo" aria-pressed="false">Not assessed</button>
+        </div>
+      </div>
+      <div class="rlist" id="regList"></div>
       <div class="block">
-        <div class="eyebrow" id="focusEyebrow">System in focus · Level 0</div>
+        <div class="eyebrow">Findings and their evidence</div>
+        <label class="chk"><input type="checkbox" id="diagShow"><span>Show diagnosis marks<small>Badges beside flagged elements; missing ones are greyed and struck through</small></span></label>
+        <ul class="dlist" id="diagList"></ul>
+      </div>
+    </section>
+
+    <section class="pane" id="pane-model" role="tabpanel" aria-labelledby="tab-model" hidden>
+      <div class="block">
+        <div class="eyebrow" id="focusEyebrow">System in focus, level 0</div>
         <input class="focus-name" id="levelName" type="text" aria-label="Name of the system in focus">
         <label class="fld"><span>Purpose</span><textarea id="levelPurpose" rows="3" placeholder="The purpose of … is to (verbs) … for …"></textarea></label>
         <div class="row">
@@ -1331,11 +1397,6 @@ details.adv > .block + .block { margin-top: 20px; }
         <p class="opmax" id="opMax" hidden>Six operations is the most this explorer draws on one level. With more, group them into fewer, larger units that could each stand on their own, or open one and map what it contains on the level below.</p>
       </div>
 
-      <div class="block">
-        <div class="eyebrow">Diagnosis · this level</div>
-        <label class="chk"><input type="checkbox" id="diagShow"><span>Show diagnosis marks<small>Badges beside flagged elements; missing ones are greyed and struck through</small></span></label>
-        <ul class="dlist" id="diagList"></ul>
-      </div>
 
       <div class="block">
         <div class="eyebrow">Group colours</div>
@@ -1411,7 +1472,7 @@ details.adv > .block + .block { margin-top: 20px; }
 
     <section class="pane" id="pane-flows" role="tabpanel" aria-labelledby="tab-flows" hidden>
       <div class="block">
-        <div class="eyebrow" id="flowsEyebrow">Data flows · Level 0</div>
+        <div class="eyebrow" id="flowsEyebrow">Data flows, level 0</div>
         <div class="cov">
           <div class="cov-bar"><span id="covFill"></span></div>
           <div class="cov-tx" id="covTx"></div>
@@ -1568,7 +1629,13 @@ details.adv > .block + .block { margin-top: 20px; }
     <div class="toast" id="toast" role="status" hidden></div>
     <div class="hint" id="hint"></div>
     <div class="caption" id="caption" aria-live="polite"></div>
-    <div class="pres-exit" id="presExit"><span>Presenting · <kbd>PageDown</kbd> tour · <kbd>Esc</kbd> leaves</span><button type="button" id="presLeave">Leave</button></div>
+    <nav class="pres-rail" id="presRail" aria-label="The method">
+      <button type="button" data-step="purpose"><span class="n">1</span><span>Purpose</span></button>
+      <button type="button" data-step="net"><span class="n">2</span><span>Value network</span></button>
+      <button type="button" data-step="rec"><span class="n">3</span><span>Recursion</span></button>
+      <button type="button" data-step="vsm"><span class="n">4</span><span>Viable system</span></button>
+    </nav>
+    <div class="pres-exit" id="presExit"><span>Presenting. <kbd>PageDown</kbd> tours the systems, <kbd>Esc</kbd> leaves.</span><button type="button" id="presLeave">Leave</button></div>
     <button class="recentre" id="btnRecentre" type="button" title="Recentre the model face-on, as in 2D (key C)">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="5.2"/><circle cx="8" cy="8" r="1.6" fill="currentColor" stroke="none"/><path d="M8 0.8v2.4M8 12.8v2.4M0.8 8h2.4M12.8 8h2.4"/></svg>
       <span>Recentre</span>
@@ -1601,7 +1668,6 @@ details.adv > .block + .block { margin-top: 20px; }
             <span class="wm">close the loop</span>
           </a>
         </div>
-        <div class="welcome-kicker">Welcome to the</div>
         <h2 id="welcomeTitle">Viable System Explorer</h2>
         <p class="about-tag">A working tool for the facilitated diagnosis of real organizations with Stafford Beer's Viable System Model, not only a way to learn it.</p>
       </div>
@@ -1609,9 +1675,9 @@ details.adv > .block + .block { margin-top: 20px; }
         <p class="lead">Map an organization's operations and management with the people who run it, flag what is missing or weak, and see which of Beer's laws apply where.</p>
         <p class="lead2">How would you like to start?</p>
         <div class="choices">
-          <button class="choice primary" type="button" id="wExplore"><span class="choice-n">01</span><b>Explore the model</b>Start from Beer's diagram. Click any element to read what it does, or press 1 to 5 to focus each system.</button>
-          <button class="choice" type="button" id="wMap"><span class="choice-n">02</span><b>Map your organization</b>Name it, state its purpose and its operations, then follow the four steps of the method.</button>
-          <div class="choice" role="group" aria-labelledby="wExTitle"><span class="choice-n">03</span><b id="wExTitle">Open an example</b>A complete model to explore and change:<div class="ex" id="wExamples"></div></div>
+          <button class="choice primary" type="button" id="wExplore"><b>Explore the model</b>Start from Beer's diagram. Click any element to read what it does, or press 1 to 5 to focus each system.</button>
+          <button class="choice" type="button" id="wMap"><b>Map your organization</b>Name it, state its purpose and its operations, then follow the four steps of the method.</button>
+          <div class="choice" role="group" aria-labelledby="wExTitle"><b id="wExTitle">Open an example</b>A complete model to explore and change:<div class="ex" id="wExamples"></div></div>
         </div>
         <div class="welcome-foot"><span>Press <kbd>?</kbd> at any time for keyboard shortcuts.</span><button class="linkish" type="button" id="wAbout">About this app</button></div>
       </div>
@@ -1726,6 +1792,7 @@ details.adv > .block + .block { margin-top: 20px; }
       </button>
     </div>
     <div class="insp-body">
+      <div class="isec isec-diag" id="iDiagSec"><h4>What did you find?</h4><div id="iDiag"></div></div>
       <label class="fld"><span>Label in this model</span><input type="text" id="iName"></label>
       <div class="fld">
         <span>Colour</span>
@@ -1736,7 +1803,6 @@ details.adv > .block + .block { margin-top: 20px; }
         </div>
       </div>
       <p class="summary" id="iSummary"></p>
-      <div class="isec" id="iDiagSec"><h4>Diagnosis</h4><div id="iDiag"></div></div>
       <div class="isec" id="iLawsSec" hidden><h4>Laws that apply here</h4><ul class="lawlist" id="iLaws"></ul></div>
       <div class="isec" id="iFlowSec"><h4>Data flows</h4><div id="iFlows"></div></div>
       <div class="isec" id="iNetSec" hidden><h4>In the value network</h4><div id="iNet"></div></div>
@@ -3945,7 +4011,7 @@ function select(id, opts) {
   renderFocusBar();
   refreshVisuals();
   renderInspector();
-  document.querySelectorAll('.erow').forEach(r => r.classList.toggle('sel', selSet.has(r.dataset.id)));
+  document.querySelectorAll('.erow, .rrow').forEach(r => r.classList.toggle('sel', selSet.has(r.dataset.id)));
   document.querySelectorAll('.fch').forEach(r => r.classList.toggle('sel', r.dataset.ch === selected));
   if (opts && opts.reveal && selected) revealInList(selected);
   if (selected && narrowQ.matches && !busy) keepAboveSheet(selected);
@@ -4495,7 +4561,7 @@ function renderCrumbs() {
 
 function renderModelPane() {
   const lv = level();
-  $('#focusEyebrow').textContent = 'System in focus · Level ' + levelNo(lv);
+  $('#focusEyebrow').textContent = 'System in focus, level ' + levelNo(lv);
   const nameInp = $('#levelName');
   if (document.activeElement !== nameInp) nameInp.value = levelName(lv);
   const purp = $('#levelPurpose');
@@ -4570,6 +4636,7 @@ function renameElement(id, value, source) {
   if (source !== 'insp' && selected === id) $('#iName').value = labelOf(lv, id);
   if (lv.children[recursionKey(id)] || /^[om]\d+$/.test(id)) { renderCrumbs(); renderTree(); }
   if (selected === id) renderRecursion();
+  renderRegister();
 }
 function recolorElement(id, value, source) {
   const lv = level();
@@ -4961,6 +5028,7 @@ function renderDiagList() {
     return '<li><button type="button" data-id="' + id + '"><span class="dg" style="background:' + k.color + '">' + k.glyph + '</span><span>' + esc(shownName(id)) + '<small>' + esc(meta.join(' · ')) + '</small>' + (d.note ? '<small class="dev">' + esc(d.note) + '</small>' : '') + '</span></button></li>';
   }).join('') : '<li class="src" style="padding:2px 0">No findings yet. Right-click an element, or use Diagnosis in its details.</li>');
   ul.querySelectorAll('button').forEach(b => b.addEventListener('click', () => select(b.dataset.id)));
+  renderRegister();
 }
 const levelFlags = lv => Object.values(lv.diag || {}).filter(isFinding).length;
 // how much of a level has been looked at: every element and channel the diagram draws
@@ -5111,7 +5179,7 @@ function renderCoverage() {
 }
 function renderFlowsPane() {
   const lv = level();
-  $('#flowsEyebrow').textContent = 'Data flows · Level ' + levelNo(lv) + ' · ' + levelName(lv);
+  $('#flowsEyebrow').textContent = 'Data flows in ' + levelName(lv) + ', level ' + levelNo(lv);
   renderCoverage();
   const brief = $('#aiBrief');
   if (document.activeElement !== brief && !aiBusy) brief.value = nearestBrief(lv);
@@ -5400,7 +5468,7 @@ $('#levelUnfold').addEventListener('change', e => {
 });
 $('#levelUnfoldWhy').addEventListener('input', e => { const lv = level(); if (!lv.unfold) return; lv.unfold.why = e.target.value.slice(0, 300); save(); });
 $('#levelUnfoldWhy').addEventListener('change', () => renderTree());
-$('#levelPurpose').addEventListener('input', e => { level().purpose = e.target.value.slice(0, 400); save(); renderMethod(); });
+$('#levelPurpose').addEventListener('input', e => { level().purpose = e.target.value.slice(0, 400); save(); renderMethod(); renderRegister(); });
 $('#levelPurpose').addEventListener('change', () => { if (prefs.diagram === 'net') { renderNetCard(); renderNetSvg(); } renderCaption(); });
 $('#levelName').addEventListener('input', e => {
   const lv = level();
@@ -5670,8 +5738,45 @@ $('#amApply').addEventListener('click', () => {
   } catch (e) { note.textContent = aiErrorText(e && e.code ? e : { code: 'invalid_shape' }); }
 });
 
+
+/* The register: every element and channel of the level in focus, with what has been found.
+   It reads the diagnosis the details pane writes; selecting a row selects the element in every view. */
+var regFilter = 'all';
+function renderRegister() {
+  const box = $('#regList'); if (!box || typeof L === 'undefined' || !L) return;
+  const lv = level(), cv = assessment(lv, L);
+  $('#regName').textContent = levelName(lv);
+  $('#regPurpose').innerHTML = lv.purpose ? esc(lv.purpose) : 'No purpose stated yet. <button class="linkish" type="button" id="regPurposeBtn">State the purpose</button>';
+  const pb = $('#regPurposeBtn'); if (pb) pb.addEventListener('click', () => { $('#tab-model').click(); requestAnimationFrame(() => $('#levelPurpose').focus()); });
+  $('#regCov').innerHTML = '<div><b>' + cv.assessed + '</b><span>of ' + cv.total + ' assessed</span></div><div><b>' + cv.findings + '</b><span>' + (cv.findings === 1 ? 'finding' : 'findings') + '</span></div><div><b>' + (cv.total - cv.assessed) + '</b><span>still to look at</span></div>';
+  const has = new Set(L.els.map(e => e.id)), used = new Set();
+  const stateOf = id => { const d = lv.diag && lv.diag[id]; if (!d) return null; return d.s === 'ok' ? DIAG_OK : DIAG[d.s] || null; };
+  const keep = id => { const d = stateOf(id); return regFilter === 'all' || (regFilter === 'find' ? d && d !== DIAG_OK : !d); };
+  const row = (id, sub) => {
+    used.add(id); if (!keep(id)) return '';
+    const d = stateOf(id), code = codeOf(lv, id) || (id === 'sys1' ? '1' : L.chanById[id] ? '↔' : ''), col = colorOf(lv, id, L), nm = labelOf(lv, id) || (KB[typeOfId(L, id)] || {}).role || '';
+    const st = d ? '<span class="rs" style="background:' + d.color + '" title="' + esc(d.name) + '" aria-label="' + esc(d.name) + '">' + d.glyph + '</span>' : '<span class="rs none" title="Not assessed" aria-label="Not assessed"></span>';
+    return '<button type="button" class="rrow' + (sub ? ' sub' : '') + (selSet.has(id) ? ' sel' : '') + '" data-id="' + id + '"><span class="rc" style="border-color:' + col + '">' + esc(code) + '</span><span class="rn">' + esc(nm) + '</span>' + st + '</button>';
+  };
+  const group = (title, note, body) => body ? '<h3>' + esc(title) + (note ? ' <small>' + esc(note) + '</small>' : '') + '</h3>' + body : '';
+  let meta = ['meta', 's5', 's4', 's3', 's3s', 's2'].filter(id => has.has(id)).map(id => row(id)).join('');
+  let ops = has.has('sys1') ? row('sys1') : '';
+  for (let k = 0; k < lv.opCount; k++) { if (has.has('o' + k)) ops += row('o' + k); ['m', 'a', 'e'].forEach(p => { if (has.has(p + k)) ops += row(p + k, true); }); }
+  let env = ['env', 'fut'].filter(id => has.has(id)).map(id => row(id)).join('');
+  L.els.forEach(e => { if (used.has(e.id)) return; const r = row(e.id); if (e.group === 'meta') meta += r; else if (e.group === 'ops') ops += r; else env += r; });
+  const ch = L.chans.map(c => row(c.id)).join('');
+  const nf = lv.opCount === 1 ? '1 operation' : lv.opCount + ' operations';
+  let h = group('Metasystem', labelOf(lv, 'meta') && labelOf(lv, 'meta') !== 'Metasystem' ? labelOf(lv, 'meta') : '', meta) + group('System One', nf, ops) + group('Environment', 'total and future', env);
+  if (ch) h += '<details' + (regFilter !== 'all' || L.chans.some(c => selSet.has(c.id)) ? ' open' : '') + '><summary>Channels</summary>' + ch + '</details>';
+  box.innerHTML = h || '<p class="rempty">' + (regFilter === 'find' ? 'No findings yet. Select an element and record what you see in its details.' : 'Everything at this level has been assessed.') + '</p>';
+}
+$('#regList').addEventListener('click', e => { const b = e.target.closest('.rrow'); if (b) select(b.dataset.id, { add: e.shiftKey || e.metaKey || e.ctrlKey }); });
+$('#regFilter').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+  regFilter = b.dataset.f; $('#regFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); renderRegister();
+}));
+
 // tabs
-const tabs = ['model', 'flows', 'guide'];
+const tabs = ['reg', 'model', 'flows', 'guide'];
 tabs.forEach(t => $('#tab-' + t).addEventListener('click', () => {
   tabs.forEach(o => { $('#tab-' + o).setAttribute('aria-selected', String(o === t)); $('#pane-' + o).hidden = o !== t; });
 }));
@@ -6051,7 +6156,7 @@ function renderNetSvg() {
     const pl = lv.purpose ? wrapText(lv.purpose, Math.max(30, Math.floor((x1 - x0 - 28) / 5.9)), 3) : [];
     const y0 = Math.min(...ps.map(p => p[1] - p[2])) - 56, y1 = Math.max(...ps.map(p => p[1] + p[2])) + 30 + pl.length * 15;
     out.push('<g class="wbox"><rect x="' + x0 + '" y="' + y0 + '" width="' + (x1 - x0) + '" height="' + (y1 - y0) + '" rx="14" style="stroke:' + opsCol + '"/>' +
-      '<text class="bl" x="' + (x0 + 14) + '" y="' + (y0 + 22) + '">' + esc(name) + '</text><text class="bk" x="' + (x0 + 14) + '" y="' + (y0 + 37) + '">System-in-Focus · white box</text>' +
+      '<text class="bl" x="' + (x0 + 14) + '" y="' + (y0 + 22) + '">' + esc(name) + '</text><text class="bk" x="' + (x0 + 14) + '" y="' + (y0 + 37) + '">System-in-Focus, white box</text>' +
       pl.map((l, i) => '<text class="np" x="' + (x0 + 14) + '" y="' + (y1 - 12 - (pl.length - 1 - i) * 15) + '">' + esc(l) + '</text>').join('') + '</g>');
   }
   const hullIdx = out.length;   // operation circles go under the flows
@@ -6131,10 +6236,10 @@ function netCardFlowRows(lv, id) {
 /* The method, shared by every view: the current view's step is open, the others link to their views */
 function methodHTML(view) {
   const lv = level();
-  const step = (n, key, title, body) => '<div class="mstep' + (key === view ? ' cur' : '') + '"><h4><span>Step ' + n + ' · ' + title + '</span>' +
+  const step = (n, key, title, body) => '<div class="mstep' + (key === view ? ' cur' : '') + '"><h4><span>Step ' + n + ': ' + title + '</span>' +
     (key && key !== view ? '<button class="linkish" type="button" data-view="' + key + '" aria-label="Open the ' + ({ net: 'value network', rec: 'recursion view', vsm: 'VSM' })[key] + '">Open →</button>' : '') + '</h4>' +
     (key === view || !key ? body : '') + '</div>';
-  return '<div class="mhead"><div class="eyebrow" style="margin:0">Method · ' + esc(levelName(lv)) + '</div><button class="icon-btn" type="button" data-mclose aria-label="Hide the method" style="width:26px;height:26px">×</button></div>' +
+  return '<div class="mhead"><div class="eyebrow" style="margin:0">The method for ' + esc(levelName(lv)) + '</div><button class="icon-btn" type="button" data-mclose aria-label="Hide the method" style="width:26px;height:26px">×</button></div>' +
     step(1, null, 'Purpose', '<label class="fld" style="margin-top:4px"><textarea class="mPurpose" rows="3" aria-label="Purpose" placeholder="The purpose of … is to (verbs) … for …">' + esc(lv.purpose || '') + '</textarea></label><p class="src">What the system does, in verbs. The purpose of a system is what it does.</p>') +
     step(2, 'net', 'Map the S1s', '<p class="src">Add the primary activities that fulfil the purpose: activities, processes or functions, not (yet) roles or departments, and only those the organization performs itself. Add the customers, suppliers and other actors each deals with, and the flows between them. Drag an element\'s + handle to draw a flow, or into empty space to add a connected actor; key L draws by clicking. Black box shows the system in its business context.</p>') +
     step(3, 'rec', 'Recursion', '<p class="src">Identify at least one level up and one level down from the System-in-Focus, and mark it clearly: it is highlighted here, and level 0 is the main one. Use + Level above for the supersystem. Click a level to focus it; a dashed operation has no lower level yet. Recursion runs only through System One.</p>') +
@@ -6974,7 +7079,7 @@ async function exportFindings(kind) {
    shortcut sheet, About, focus keys for each system, the tour and
    presentation mode
    ===================================================================== */
-const APP_VERSION = '1.7.1 (November 2026)';
+const APP_VERSION = '1.8 preview, workbench layout (November 2026)';
 const CITE_YEAR = 2026;
 const modals = ['welcome', 'keysSheet', 'about'];
 let modalReturn = null;
@@ -7122,6 +7227,25 @@ stage.addEventListener('pointermove', () => { if (isPresenting()) wakePresExit()
 let presFull = false;
 document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && isPresenting() && presFull) setPresenting(false); presFull = !!document.fullscreenElement; });
 
+
+// presentation mode leads with the method: four steps, the step's question in the caption
+const PRES_STEPS = { purpose: { n: 1, t: 'Purpose' }, net: { n: 2, t: 'Value network' }, rec: { n: 3, t: 'Recursion' }, vsm: { n: 4, t: 'Viable system' } };
+let presPurpose = false;
+const presStepOf = () => presPurpose && prefs.diagram !== 'net' && prefs.diagram !== 'rec' ? 'purpose' : (['net', 'rec'].includes(prefs.diagram) ? prefs.diagram : 'vsm');
+function renderPresRail() {
+  const st = presStepOf();
+  $('#presRail').querySelectorAll('button').forEach(b => { if (b.dataset.step === st) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+}
+$('#presRail').addEventListener('click', e => {
+  const b = e.target.closest('[data-step]'); if (!b) return;
+  const st = b.dataset.step;
+  presPurpose = st === 'purpose';
+  if (focusMode) exitFocus();
+  select(null);
+  setDiagram(st === 'purpose' ? 'vsm' : st);
+  renderCaption();
+});
+
 // the caption: what is in focus, in one line, after Beer
 const firstSentence = t => { const m = /^(.+?[.!?])(\s|$)/.exec(t || ''); return m ? m[1] : (t || ''); };
 function renderCaption() {
@@ -7131,16 +7255,22 @@ function renderCaption() {
   let k = '', n = '', d = '';
   if (lawAt && focusMode) {
     const law = lawById(lawAt);
-    k = 'Law · ' + law.src; n = law.name; d = lawText(law);
+    k = law.src; n = law.name; d = lawText(law);
   } else if (sysAt && focusMode) {
     const spec = SYSTEM_KEYS[sysAt](), lab = labelOf(lv, spec.primary);
     k = spec.title; n = lab && lab !== spec.title ? lab : spec.title; d = spec.what;
   } else if (selected) {
     const kb = KB[typeOfId(L, selected)] || {}, code = codeOf(lv, selected);
-    k = (kb.kind || '') + (code ? ' · ' + code : ''); n = labelOf(lv, selected); d = kb.role && kb.role !== n ? kb.role + '. ' + firstSentence(kb.summary) : firstSentence(kb.summary);
+    k = (kb.kind || '') + (code ? ', ' + code : ''); n = labelOf(lv, selected); d = kb.role && kb.role !== n ? kb.role + '. ' + firstSentence(kb.summary) : firstSentence(kb.summary);
   } else {
-    k = 'System in focus · Level ' + levelNo(lv); n = levelName(lv); d = lv.purpose || 'A viable system: Systems One to Five, in their environment. Press PageDown to tour it.';
+    const st = presStepOf(), nm = levelName(lv);
+    k = 'Step ' + PRES_STEPS[st].n + ' of 4, ' + PRES_STEPS[st].t.toLowerCase();
+    if (st === 'purpose') { n = 'What is ' + nm + ' for?'; d = lv.purpose || 'State it in one sentence: what it does, and for whom.'; }
+    else if (st === 'net') { n = 'Who does each operation create value with?'; d = 'The customers, suppliers and others each primary activity exchanges with, and what passes between them.'; }
+    else if (st === 'rec') { n = 'Which viable systems does ' + nm + ' contain?'; d = 'Each operation of System One is a viable system in its own right. Mark at least one level up and one level down.'; }
+    else { n = 'Who does each of the five systems in ' + nm + '?'; d = (lv.purpose ? 'Purpose: ' + lv.purpose + ' ' : '') + 'Select any element, or press PageDown to tour the systems.'; }
   }
+  renderPresRail();
   const step = sysAt && focusMode && tourAt >= 0 ? '<span class="cs">' + (tourAt + 1) + ' / ' + TOUR.length + '</span>' : '';
   c.innerHTML = step + '<div class="ck">' + esc(k) + '</div><div class="cn">' + esc(n) + '</div><div class="cd">' + esc(d) + '</div>';
 }
@@ -7223,7 +7353,7 @@ let lawAt = null;
 const lawsOn = () => !!prefs.laws && !['net', 'rec'].includes(prefs.diagram);
 function lawsHTML() {
   const lv = level();
-  return '<div class="mhead"><div class="eyebrow" style="margin:0">Laws · ' + esc(levelName(lv)) + '</div><button class="icon-btn" type="button" data-lclose aria-label="Hide the laws" style="width:26px;height:26px">×</button></div>' +
+  return '<div class="mhead"><div class="eyebrow" style="margin:0">Laws in ' + esc(levelName(lv)) + '</div><button class="icon-btn" type="button" data-lclose aria-label="Hide the laws" style="width:26px;height:26px">×</button></div>' +
     '<p class="src lintro">The laws Beer built the model on, quoted as Wikipedia states them where it does, otherwise paraphrased. Choose one to see where it acts in this model.</p>' +
     LAWS.map(l => {
       const cur = l.id === lawAt;

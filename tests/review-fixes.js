@@ -13,6 +13,7 @@ const menuPick = async (pg, text) => { await pg.click('#btnModel'); await pg.wai
   const codes = await pg.evaluate(() => [...document.querySelectorAll('#labels .lbl .code')].map(c => c.textContent));
   ok(codes.filter(c => c === 'EF').length <= 1 && codes.includes('FE'), 'the future environment is FE, so EF only names a local environment');
   await pg.click('#btnSide'); await pg.waitForTimeout(300);
+  await pg.click('#tab-model'); await pg.waitForTimeout(200);
   ok(await pg.isVisible('#opMax') && await pg.isDisabled('#opPlus'), 'at six operations, + is off and a note says why');
   ok(await pg.isHidden('#aiBlock'), 'off claude.ai the Claude mapping block is hidden');
   // the details pane: closed stays closed through view and model changes; a new choice opens it

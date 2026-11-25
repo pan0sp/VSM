@@ -1232,9 +1232,14 @@ details.adv > .block + .block { margin-top: 20px; }
 }
 
 /* ---------- Workbench (v1.8): the stage bar, the register, diagnosis first, the method in presentation ---------- */
-.stagebar { grid-area: sbar; display: flex; align-items: center; gap: 8px 16px; flex-wrap: wrap; padding: 8px 16px; background: var(--stage); border-bottom: 1px solid var(--rule); min-width: 0; }
+.stagebar { grid-area: sbar; container-type: inline-size; display: flex; align-items: center; gap: 8px 16px; flex-wrap: nowrap; padding: 8px 16px; background: var(--stage); border-bottom: 1px solid var(--rule); min-width: 0; }
 .stagebar .tgroup + .tgroup { margin-left: auto; padding-left: 0; border-left: 0; }
 .app.netmode .stagebar .tgroup.vsm-only { display: none; }
+@container (max-width: 860px) { .stagebar .tool .t { display: none; } .stagebar .tool { padding-inline: 8px; } }
+@container (max-width: 700px) { .stagebar #vHemi .dlong, .stagebar #dNet .dlong, .stagebar #dRec .dlong { display: none; } .stagebar #vHemi .dshort, .stagebar #dNet .dshort, .stagebar #dRec .dshort { display: inline !important; } }
+/* a container query cannot restyle its own container, so wrapping keys on the viewport */
+@media (max-width: 600px) { .stagebar { flex-wrap: wrap; } }
+.stagebar { overflow-x: auto; scrollbar-width: none; }
 .tools .tgroup + .tgroup { padding-left: 0; border-left: 0; }
 .reg-head { gap: 8px; }
 .reg-name { font: 700 19px/1.2 var(--f-display); margin: 0; overflow-wrap: anywhere; text-wrap: balance; }

@@ -21,25 +21,22 @@
 /* Layout: top bar with recursion trail; docked model panel (left), WebGL stage (centre), element inspector (right).
    On phones the panels become a drawer and a bottom sheet over a full-bleed stage. */
 :root {
-  /* Close the Loop gold #eeba2b on the warm paper the studio's Flourishing Business
-     Canvas Explorer uses, so the two tools read as one family: paper #fbf6e6,
-     warm ink #1f2d29, deep green #046656, gold #d8b73c. */
-  --bg: #ece4cd;
-  --stage: #fbf6e6;
-  --stage-hi: #fffdf4;
-  --surface: #fffdf5;
-  --surface-2: #f2ebd3;
-  --ink: #1f2d29;
-  --ink-2: #5a6963;
-  --rule: #ddd4ba;
-  --accent: #046656;
-  --accent-ink: #fbf6e6;
-  --accent-soft: rgba(4, 102, 86, 0.12);
-  --deep: #046656;
-  --halo: rgba(251, 246, 230, 0.94);
-  --shadow: 0 1px 2px rgba(1, 34, 27, 0.10), 0 10px 28px rgba(1, 34, 27, 0.14);
-  --gold: #d8b73c;
-  --eom-e: #cfdcc8; --eom-o: #0f4a40; --eom-m: #d8b73c;
+  /* Close the Loop brand: navy #141b38, gold #eeba2b (gold text on light is #a07a0e), off-white #f5f4f0 */
+  --bg: #e5e7ed;
+  --stage: #eef0f4;
+  --stage-hi: #f6f7f9;
+  --surface: #fbfbf8;
+  --surface-2: #eceef3;
+  --ink: #141b38;
+  --ink-2: #545c7a;
+  --rule: #d8dbe5;
+  --accent: #a07a0e;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(238, 186, 43, 0.16);
+  --halo: rgba(238, 240, 244, 0.94);
+  --shadow: 0 1px 2px rgba(20, 27, 56, 0.06), 0 10px 30px rgba(20, 27, 56, 0.10);
+  --gold: #eeba2b;
+  --eom-e: #c8cedf; --eom-o: #3d4f80; --eom-m: #eeba2b;
   --f-display: 'Raleway', 'Helvetica Neue', Arial, sans-serif;
   --f-body: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
   --f-brand: 'Comfortaa', 'Helvetica Neue', Arial, sans-serif;
@@ -51,14 +48,14 @@
 /* Dark: a black stage so the model stands out, neutral near-black panels; navy stays for the brand panels (About, welcome) */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0b0c0f;
+    --bg: #10152c;
     --stage: #000000;
     --stage-hi: #000000;
-    --surface: #15161b;
-    --surface-2: #202229;
-    --ink: #f5f4f0;
-    --ink-2: #a4a8b6;
-    --rule: #2d3039;
+    --surface: #192040;
+    --surface-2: #232a4d;
+    --ink: #ecebe4;
+    --ink-2: #a3abc6;
+    --rule: #2c3459;
     --accent: #eeba2b;
     --accent-ink: #141b38;
     --accent-soft: rgba(238, 186, 43, 0.16);
@@ -69,22 +66,19 @@
   }
 }
 :root[data-theme="dark"] {
-  /* The stage stays pure black so the model carries the screen; the panels take the
-     canvas explorer's deep green so the family holds in the dark too. */
-  --bg: #061310;
+  --bg: #10152c;
   --stage: #000000;
   --stage-hi: #000000;
-  --surface: #13221e;
-  --surface-2: #1c302a;
-  --ink: #ece8d6;
-  --ink-2: #9fb1a8;
-  --rule: #2a403a;
-  --accent: #d8b73c;
-  --accent-ink: #1f2d29;
-  --accent-soft: rgba(216, 183, 60, 0.18);
-  --deep: #7fc0ae;
+  --surface: #192040;
+  --surface-2: #232a4d;
+  --ink: #ecebe4;
+  --ink-2: #a3abc6;
+  --rule: #2c3459;
+  --accent: #eeba2b;
+  --accent-ink: #141b38;
+  --accent-soft: rgba(238, 186, 43, 0.16);
   --halo: rgba(0, 0, 0, 0.88);
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.35);
   --eom-e: #2a3560; --eom-o: #6575a8; --eom-m: #eeba2b;
   color-scheme: dark;
 }
@@ -1238,6 +1232,35 @@ details.adv > .block + .block { margin-top: 20px; }
 }
 
 /* ---------- Workbench (v1.8): the stage bar, the register, diagnosis first, the method in presentation ---------- */
+/* Close the Loop chrome, as on the studio's canvas explorer: navy header and panel tabs with a
+   gold rule under them, gold for what is current, cream words on navy. */
+:root { --chrome: #141b38; --chrome-2: #222b52; --chrome-line: rgba(245, 244, 240, .16); --chrome-ink: #f5f4f0; --chrome-ink-2: #aab3cf; --ctl-gold: #eeba2b; }
+:root[data-theme="dark"] { --chrome: #0b0f22; --chrome-2: #1c2446; --chrome-line: rgba(236, 235, 228, .12); --chrome-ink: #ecebe4; --chrome-ink-2: #a3abc6; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --chrome: #0b0f22; --chrome-2: #1c2446; --chrome-line: rgba(236, 235, 228, .12); --chrome-ink: #ecebe4; --chrome-ink-2: #a3abc6; } }
+.topbar { background: var(--chrome); color: var(--chrome-ink); border-bottom: 3px solid var(--ctl-gold); --eom-e: #2a3560; --eom-o: #6575a8; --eom-m: #eeba2b; }
+.topbar .brand-sub, .topbar .crumb, .topbar .crumb-sep { color: var(--chrome-ink-2); }
+.topbar .crumbs { border-left-color: var(--chrome-line); }
+.topbar .crumb:hover { background: var(--chrome-2); color: var(--chrome-ink); }
+.topbar .crumb[aria-current="page"] { background: var(--chrome-2); color: var(--chrome-ink); }
+.topbar .crumb .lv { background: var(--chrome-2); color: var(--chrome-ink-2); }
+.topbar .crumb[aria-current="page"] .lv { background: var(--ctl-gold); color: #141b38; }
+.topbar .tool, .topbar .icon-btn { background: transparent; border-color: var(--chrome-line); color: var(--chrome-ink); }
+.topbar .tool:hover, .topbar .icon-btn:hover { border-color: var(--chrome-ink-2); color: var(--chrome-ink); background: var(--chrome-2); }
+.topbar .tool[aria-pressed="true"] { background: var(--chrome-ink); color: var(--chrome); border-color: var(--chrome-ink); }
+.topbar #btnPresent { background: var(--ctl-gold); border-color: var(--ctl-gold); color: #141b38; }
+.topbar #btnPresent:hover { filter: brightness(1.08); }
+.side .tabs { background: var(--chrome); border-bottom: 3px solid var(--ctl-gold); }
+.side .tab { font-family: var(--f-display); font-weight: 700; color: var(--chrome-ink-2); border-bottom-width: 3px; margin-bottom: -3px; }
+.side .tab:hover { color: var(--chrome-ink); }
+.side .tab[aria-selected="true"] { color: var(--chrome-ink); border-bottom-color: var(--chrome-ink); }
+.side .tabs .icon-btn { background: transparent; border-color: var(--chrome-line); color: var(--chrome-ink); }
+.stagebar .seg { background: var(--chrome); }
+.stagebar .seg button { color: var(--chrome-ink-2); }
+.stagebar .seg button:hover { color: var(--chrome-ink); }
+.stagebar .seg button[aria-pressed="true"] { background: var(--chrome-ink); color: var(--chrome); box-shadow: none; }
+.stagebar .tool { background: var(--chrome); border-color: var(--chrome); color: var(--chrome-ink-2); }
+.stagebar .tool:hover { color: var(--chrome-ink); border-color: var(--chrome); }
+.stagebar .tool[aria-pressed="true"] { background: var(--chrome); color: var(--ctl-gold); border-color: var(--ctl-gold); }
 .seg button { display: inline-flex; align-items: center; gap: 7px; }
 .seg .pic { width: 18px; height: 18px; flex: none; opacity: .72; }
 .seg button[aria-pressed="true"] .pic { opacity: 1; }
@@ -1541,12 +1564,12 @@ details.adv > .block + .block { margin-top: 20px; }
       <div class="block">
         <h3>Beer's symbols</h3>
         <div class="legend">
-          <div class="leg"><svg viewBox="0 0 34 26"><path d="M5 13c0-7 7-10 13-9s12 4 11 10-6 9-13 8S5 20 5 13z" fill="#0f7a62" fill-opacity=".25" stroke="#0f7a62" stroke-width="1.5"/></svg><div><b>Amoeba</b><span>Environment: fuzzy, changing, of far greater variety than the system</span></div></div>
-          <div class="leg"><svg viewBox="0 0 34 26"><circle cx="17" cy="13" r="9" fill="#2d6a93" fill-opacity=".25" stroke="#2d6a93" stroke-width="1.5"/></svg><div><b>Circle</b><span>Operational element of System One</span></div></div>
-          <div class="leg"><svg viewBox="0 0 34 26"><rect x="9" y="5" width="16" height="16" fill="#2d6a93" fill-opacity=".25" stroke="#2d6a93" stroke-width="1.5"/></svg><div><b>Square</b><span>Systems Three, Four and Five; local management (tilted in the square convention)</span></div></div>
-          <div class="leg"><svg viewBox="0 0 34 26"><path d="M17 4l9 16H8z" fill="#b8870f" fill-opacity=".25" stroke="#b8870f" stroke-width="1.5"/></svg><div><b>Triangle</b><span>System Two anti-oscillation (pointing up) and Three-Star audit (pointing down)</span></div></div>
-          <div class="leg"><svg viewBox="0 0 34 26"><path d="M17 2l11 11-11 11L6 13z" fill="#b8870f" fill-opacity=".14" stroke="#b8870f" stroke-width="1.5"/></svg><div><b>Box</b><span>Metasystem: a square box in one convention, a rhombus in the other</span></div></div>
-          <div class="leg"><svg viewBox="0 0 34 26"><path d="M3 13h24" stroke="#c8402b" stroke-width="2"/><path d="M24 9l5 4-5 4" fill="none" stroke="#c8402b" stroke-width="2"/></svg><div><b>Algedonic signal</b><span>Alerts rising from every local management, behind 3, 4 and 5, to System Five</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><path d="M5 13c0-7 7-10 13-9s12 4 11 10-6 9-13 8S5 20 5 13z" fill="#4f9a63" fill-opacity=".25" stroke="#4f9a63" stroke-width="1.5"/></svg><div><b>Amoeba</b><span>Environment: fuzzy, changing, of far greater variety than the system</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><circle cx="17" cy="13" r="9" fill="#2f74c0" fill-opacity=".25" stroke="#2f74c0" stroke-width="1.5"/></svg><div><b>Circle</b><span>Operational element of System One</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><rect x="9" y="5" width="16" height="16" fill="#2f74c0" fill-opacity=".25" stroke="#2f74c0" stroke-width="1.5"/></svg><div><b>Square</b><span>Systems Three, Four and Five; local management (tilted in the square convention)</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><path d="M17 4l9 16H8z" fill="#cf8a1f" fill-opacity=".25" stroke="#cf8a1f" stroke-width="1.5"/></svg><div><b>Triangle</b><span>System Two anti-oscillation (pointing up) and Three-Star audit (pointing down)</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><path d="M17 2l11 11-11 11L6 13z" fill="#cf8a1f" fill-opacity=".14" stroke="#cf8a1f" stroke-width="1.5"/></svg><div><b>Box</b><span>Metasystem: a square box in one convention, a rhombus in the other</span></div></div>
+          <div class="leg"><svg viewBox="0 0 34 26"><path d="M3 13h24" stroke="#d43d33" stroke-width="2"/><path d="M24 9l5 4-5 4" fill="none" stroke="#d43d33" stroke-width="2"/></svg><div><b>Algedonic signal</b><span>Alerts rising from every local management, behind 3, 4 and 5, to System Five</span></div></div>
         </div>
       </div>
       <div class="block">
@@ -2391,8 +2414,8 @@ function samplePath(p) {
 /* =====================================================================
    Model data: a tree of levels (recursions), each with its own labels
    ===================================================================== */
-const DEFAULT_GROUP_COLORS = { env: '#0f7a62', ops: '#2d6a93', meta: '#b8870f', chan: '#6f7a71' };
-const SPECIAL_DEFAULTS = { alg: '#c8402b' };
+const DEFAULT_GROUP_COLORS = { env: '#4f9a63', ops: '#2f74c0', meta: '#cf8a1f', chan: '#6c7b86' };
+const SPECIAL_DEFAULTS = { alg: '#d43d33' };
 const GROUP_INFO = {
   env: { name: 'Environment', hint: 'Total, future and operational environments' },
   ops: { name: 'System One', hint: 'Operational elements and their local management' },
@@ -2405,24 +2428,24 @@ const STORE_KEY = 'vsm-explorer:v1';
    Think Before You Think): a system may be absent, lack requisite variety, malfunction, collapse into another
    system, turn pathologically autopoietic, or exist on paper without being "effectively there". */
 const DIAG = {
-  absent:      { glyph: '∅', color: '#77857f', name: 'Missing', short: 'Missing',
+  absent:      { glyph: '∅', color: '#7d8a87', name: 'Missing', short: 'Missing',
     text: 'The function is not performed at all. Beer: without System Four, "the whole metasystem collapses into System Three".' },
-  nominal:     { glyph: '?', color: '#55809b', name: 'Nominal only', short: 'Nominal',
+  nominal:     { glyph: '?', color: '#5b7fa6', name: 'Nominal only', short: 'Nominal',
     text: 'It exists on the chart but is not "effectively there": a role, committee or report that changes nothing.' },
-  weak:        { glyph: '↓', color: '#b9770e', name: 'Lacks requisite variety', short: 'Too weak',
+  weak:        { glyph: '↓', color: '#c98314', name: 'Lacks requisite variety', short: 'Too weak',
     text: 'Present but under-resourced: it cannot absorb the variety it faces, so problems pass it by or pile up.' },
-  malfunction: { glyph: '!', color: '#c8402b', name: 'Malfunctioning', short: 'Malfunction',
+  malfunction: { glyph: '!', color: '#d43d33', name: 'Malfunctioning', short: 'Malfunction',
     text: '"Some inadequacy in the system can be traced to malfunction in one of the five subsystems": present, but doing the wrong thing or doing it badly.' },
-  collapsed:   { glyph: '⇣', color: '#7b56ad', name: 'Collapsed into another system', short: 'Collapsed',
+  collapsed:   { glyph: '⇣', color: '#8a5cc7', name: 'Collapsed into another system', short: 'Collapsed',
     text: 'Its function has been absorbed by another system, as when System Five dives "straight into System Three" and the metasystem collapses.', notFor: ['chan', 'env'] },
-  autopoietic: { glyph: '↺', color: '#b23d6e', name: 'Pathologically autopoietic', short: 'Self-serving',
+  autopoietic: { glyph: '↺', color: '#c4457a', name: 'Pathologically autopoietic', short: 'Self-serving',
     text: 'It serves its own continuation rather than the whole: "self-production turned into an end-in-itself" (Beer\'s Establishment).', notFor: ['chan', 'env'] }
 };
 const DIAG_CH_NAMES = { weak: 'Insufficient capacity', malfunction: 'Distorted or blocked' };
 /* A finding is a judgement with its grounds: evidence (kept in `note`, as before), where it came from,
    how sure the team is, what follows if nothing changes, and how far it has been reviewed. `ok` records
    that something was looked at and no issue found, so "not assessed" (no entry) never reads as "fine". */
-const DIAG_OK = { glyph: '✓', color: '#2c8a4b', name: 'Assessed: no issue found', short: 'No issue',
+const DIAG_OK = { glyph: '✓', color: '#3f8a5a', name: 'Assessed: no issue found', short: 'No issue',
   text: 'Looked at, and nothing found wrong for now. Record what was checked, so the team can tell this from a function nobody has assessed.' };
 const DIAG_SOURCES = { interview: 'Interview', observation: 'Observation', document: 'Document or report', data: 'Data or measures', workshop: 'Workshop', other: 'Other' };
 const DIAG_CONF = { low: 'Low', medium: 'Medium', high: 'High' };
@@ -2437,16 +2460,16 @@ function diagAllowed(key, id) { const g = L.chanById[id] ? 'chan' : (L.byId[id] 
 const COLOR_SCHEMES = {
   // Beer's E–O–M reading of every recursion: environment green, operations red, management blue.
   // Local managements are management, so they are blue; the System One circle stays with the operations.
-  eom: { groups: { env: '#0f7a62', ops: '#c8402b', meta: '#2d6a93', chan: '#6f7a71' }, el: id => /^m\d+$/.test(id) ? '#2d6a93' : null },
+  eom: { groups: { env: '#4f9a63', ops: '#cc4a3f', meta: '#2f6fbf', chan: '#6c7b86' }, el: id => /^m\d+$/.test(id) ? '#2f6fbf' : null },
   // One colour per system, so System Three looks the same at every level
   systems: {
-    groups: { env: '#0f7a62', ops: '#2d6a93', meta: '#8a8468', chan: '#6f7a71' },
+    groups: { env: '#4f9a63', ops: '#2f74c0', meta: '#9a8c74', chan: '#6c7b86' },
     el: id => {
-      if (/^[om]\d+$/.test(id) || id === 'sys1') return '#2d6a93';   // System One
-      if (/^a\d+$/.test(id) || id === 's2') return '#7b56ad';         // System Two
-      if (id === 's3' || id === 's3s') return '#b9770e';              // System Three and Three-Star
-      if (id === 's4') return '#0f8a78';                              // System Four
-      if (id === 's5') return '#b23d6e';                              // System Five
+      if (/^[om]\d+$/.test(id) || id === 'sys1') return '#2f74c0';   // System One
+      if (/^a\d+$/.test(id) || id === 's2') return '#8a5cc7';         // System Two
+      if (id === 's3' || id === 's3s') return '#d0861b';              // System Three and Three-Star
+      if (id === 's4') return '#1f9a8c';                              // System Four
+      if (id === 's5') return '#c4457a';                              // System Five
       return null;
     }
   },

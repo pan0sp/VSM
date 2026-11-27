@@ -52,16 +52,16 @@
     --bg: #10152c;
     --stage: #000000;
     --stage-hi: #000000;
-    --surface: #192040;
-    --surface-2: #232a4d;
+    --surface: #1f2748;
+    --surface-2: #2a3358;
     --ink: #ecebe4;
-    --ink-2: #a3abc6;
-    --rule: #2c3459;
+    --ink-2: #b7bed6;
+    --rule: #3d4775;
     --accent: #eeba2b;
     --accent-ink: #141b38;
     --accent-soft: rgba(238, 186, 43, 0.16);
     --halo: rgba(0, 0, 0, 0.88);
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.35);
+    --shadow: 0 0 0 1px rgba(236, 235, 228, 0.10), 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.45);
     --eom-e: #2a3560; --eom-o: #6575a8; --eom-m: #eeba2b;
     color-scheme: dark;
   }
@@ -70,16 +70,16 @@
   --bg: #10152c;
   --stage: #000000;
   --stage-hi: #000000;
-  --surface: #192040;
-  --surface-2: #232a4d;
+  --surface: #1f2748;
+  --surface-2: #2a3358;
   --ink: #ecebe4;
-  --ink-2: #a3abc6;
-  --rule: #2c3459;
+  --ink-2: #b7bed6;
+  --rule: #3d4775;
   --accent: #eeba2b;
   --accent-ink: #141b38;
   --accent-soft: rgba(238, 186, 43, 0.16);
   --halo: rgba(0, 0, 0, 0.88);
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.35);
+  --shadow: 0 0 0 1px rgba(236, 235, 228, 0.10), 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.45);
   --eom-e: #2a3560; --eom-o: #6575a8; --eom-m: #eeba2b;
   color-scheme: dark;
 }
@@ -157,6 +157,11 @@ button { cursor: pointer; }
 .net .lines .fl.sel .w { stroke-width: 2.4; stroke-opacity: 1; }
 .net .lines .fl.sel polygon { fill-opacity: 1; }
 .net .fl:hover, .net .fl.sel { color: var(--accent); }
+/* on the black stage, value flows lighten so they read (Nov 27 2026) */
+:root[data-theme="dark"] .net .fl:not(:hover):not(.sel) { color: color-mix(in srgb, var(--fc, var(--vflow, var(--ink-2))) 62%, #fff); }
+:root[data-theme="dark"] .net .fl .w, :root[data-theme="dark"] .net .fl polygon { stroke-opacity: .6; fill-opacity: .6; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .net .fl:not(:hover):not(.sel) { color: color-mix(in srgb, var(--fc, var(--vflow, var(--ink-2))) 62%, #fff); }
+  :root:not([data-theme="light"]) .net .fl .w, :root:not([data-theme="light"]) .net .fl polygon { stroke-opacity: .6; fill-opacity: .6; } }
 .net .fl.sel .w, .net .fl.sel polygon { stroke-opacity: .7; fill-opacity: .7; }
 .net .ft { font: 500 11px var(--f-body); fill: var(--ink); text-anchor: middle; paint-order: stroke; stroke: var(--stage); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
 .net .ft.un { fill: var(--ink-2); font-style: italic; }
@@ -1223,8 +1228,8 @@ details.adv > .block + .block { margin-top: 20px; }
    a navy tool rail, navy header with the Close the Loop lockup and a gold rule, a dotted wall,
    and the drawing on a sheet pinned to it, with the panels as cards beside it. ===== */
 :root { --wall: #e5e7ed; --wall-dot: rgba(20, 27, 56, .1); --sheet-shadow: 0 1px 2px rgba(20, 27, 56, .18), 0 18px 40px -14px rgba(20, 27, 56, .4); }
-:root[data-theme="dark"] { --wall: #000; --wall-dot: rgba(236, 235, 228, .07); --sheet-shadow: 0 0 0 1px rgba(236, 235, 228, .12), 0 18px 40px -14px rgba(0, 0, 0, .75); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --wall: #000; --wall-dot: rgba(236, 235, 228, .07); --sheet-shadow: 0 0 0 1px rgba(236, 235, 228, .12), 0 18px 40px -14px rgba(0, 0, 0, .75); } }
+:root[data-theme="dark"] { --wall: #000; --wall-dot: rgba(236, 235, 228, .15); --sheet-shadow: 0 0 0 1px rgba(236, 235, 228, .12), 0 18px 40px -14px rgba(0, 0, 0, .75); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --wall: #000; --wall-dot: rgba(236, 235, 228, .15); --sheet-shadow: 0 0 0 1px rgba(236, 235, 228, .12), 0 18px 40px -14px rgba(0, 0, 0, .75); } }
 /* the dot grid is the wall's texture, as on Business Model, not a gradient wash */
 .app { background: var(--wall) radial-gradient(var(--wall-dot) 1px, transparent 1.3px) 0 0 / 16px 16px; }
 .app.presenting { background: var(--stage); }
@@ -1362,8 +1367,8 @@ details.adv > .block + .block { margin-top: 20px; }
 /* Close the Loop chrome, as on the studio's canvas explorer: navy header and panel tabs with a
    gold rule under them, gold for what is current, cream words on navy. */
 :root { --chrome: #141b38; --chrome-2: #222b52; --chrome-line: rgba(245, 244, 240, .16); --chrome-ink: #f5f4f0; --chrome-ink-2: #aab3cf; --ctl-gold: #eeba2b; }
-:root[data-theme="dark"] { --chrome: #0b0f22; --chrome-2: #1c2446; --chrome-line: rgba(236, 235, 228, .12); --chrome-ink: #ecebe4; --chrome-ink-2: #a3abc6; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --chrome: #0b0f22; --chrome-2: #1c2446; --chrome-line: rgba(236, 235, 228, .12); --chrome-ink: #ecebe4; --chrome-ink-2: #a3abc6; } }
+:root[data-theme="dark"] { --chrome: #0b0f22; --chrome-2: #1c2446; --chrome-line: rgba(236, 235, 228, .12); --chrome-ink: #ecebe4; --chrome-ink-2: #b7bed6; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --chrome: #0b0f22; --chrome-2: #1c2446; --chrome-line: rgba(236, 235, 228, .12); --chrome-ink: #ecebe4; --chrome-ink-2: #b7bed6; } }
 .topbar { background: var(--chrome); color: var(--chrome-ink); border-bottom: 3px solid var(--ctl-gold); --eom-e: #2a3560; --eom-o: #6575a8; --eom-m: #eeba2b; }
 .topbar .brand-sub, .topbar .crumb, .topbar .crumb-sep { color: var(--chrome-ink-2); }
 .topbar .crumbs { border-left-color: var(--chrome-line); }
@@ -3318,6 +3323,8 @@ function refreshClassic() {
     const c = selSet.has(id) ? theme.accent.clone() : base;
     const cd = prefs.diagShow && diagOf(lv, id);
     if (cd && cd.s === 'absent' && !selSet.has(id)) c.lerp(tmpC2.setRGB(0.6, 0.62, 0.62), 0.7);
+    // on the black stage, channels are lifted towards white so thin lines still read (Nov 27 2026)
+    else if (theme.dark && !selSet.has(id)) c.lerp(tmpC2.set(0xffffff), 0.32);
     o.mat.color.copy(c);
     o.mat.emissive.copy(c).multiplyScalar(lerp(0.3, 0.12, d) + (hovered === id ? 0.25 : 0));
     setOpacity(o.mat, (related ? 1 : 0.18) * (cd && cd.s === 'absent' ? 0.35 : cd && cd.s === 'nominal' ? 0.6 : 1));
@@ -3334,7 +3341,7 @@ function refreshClassic() {
       const related = !focusSet || focusSet.has(p.id);
       tmpC.set(colorOf(lv, p.id, L));
       if (selected === p.id) tmpC.copy(theme.accent);
-      if (theme.dark) tmpC.lerp(tmpC2.set(0xffffff), 0.45); else tmpC.lerp(theme.ink, 0.25);
+      if (theme.dark) tmpC.lerp(tmpC2.set(0xffffff), 0.6); else tmpC.lerp(theme.ink, 0.25);
       if (!related) tmpC.lerp(theme.stage, 0.8);
       particles.setColorAt(i, tmpC);
     });

@@ -6717,7 +6717,7 @@ function applyCafe(lv) {
    Export: the view in focus as an image (PNG, or SVG with live text),
    and the findings of every level as a table (CSV) or a printable report
    ===================================================================== */
-const EXPORT_CREDIT = 'Made with the Viable System Explorer · vsm.closetheloop.gr';
+const EXPORT_CREDIT = 'Made with the Viable System Explorer · studio.closetheloop.gr/vsm';
 // offer a file: through Claude's save prompt inside claude.ai, as a browser download elsewhere
 async function offerFile(filename, data, mime) {
   const dl = await Promise.race([downloadsCap, new Promise(r => setTimeout(() => r(null), 1500))]);
@@ -6974,7 +6974,7 @@ async function exportFindings(kind) {
    shortcut sheet, About, focus keys for each system, the tour and
    presentation mode
    ===================================================================== */
-const APP_VERSION = '1.7.1 (November 2026)';
+const APP_VERSION = '1.7.2 (November 2026)';
 const CITE_YEAR = 2026;
 const modals = ['welcome', 'keysSheet', 'about'];
 let modalReturn = null;
@@ -7023,6 +7023,13 @@ $('#wMap').addEventListener('click', () => {
   requestAnimationFrame(() => { const n = $('#levelName'); n.focus(); n.select(); });
 });
 
+// Close the Loop Studio, the home of this explorer and the other tools: the same tab when served
+// under studio.closetheloop.gr/vsm/, a new tab anywhere else (vsm.closetheloop.gr, the artifact, a file).
+function openStudio() {
+  const m = /^https?:$/.test(location.protocol) && location.pathname.match(/^(.*\/)vsm(\/|$)/);
+  if (m) location.href = m[1];
+  else window.open('https://studio.closetheloop.gr/', '_blank', 'noopener');
+}
 // More menu: theme, shortcuts, about, start again
 $('#btnMore').addEventListener('click', () => {
   if (!ctx.hidden && ctxAt && ctxAt.more) { closeCtx(); return; }
@@ -7036,6 +7043,7 @@ $('#btnMore').addEventListener('click', () => {
     { ic: '⌨', text: 'Keyboard shortcuts', kbd: '?', fn: () => openModalById('keysSheet') },
     { ic: '▭', text: 'Presentation mode', kbd: 'P', fn: () => setPresenting(true) },
     { ic: '⌂', text: 'Start screen', fn: () => openModalById('welcome') },
+    { ic: '↗', text: 'Close the Loop Studio', fn: openStudio },
     { ic: 'i', text: 'About and licence', fn: () => openModalById('about') }
   ], null);
   ctxAt.more = true;

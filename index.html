@@ -103,8 +103,8 @@ button { cursor: pointer; }
   height: 100%;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
-  grid-template-columns: var(--left) minmax(0, 1fr) var(--right);
-  grid-template-areas: "top top top" "side sbar insp" "side stage insp" "foot foot foot";
+  grid-template-columns: 84px var(--left) minmax(0, 1fr) var(--right);
+  grid-template-areas: "rail top top top" "rail side sbar insp" "rail side stage insp" "rail side foot insp";
 }
 /* ---------- Footer: attribution ---------- */
 .foot {
@@ -214,7 +214,6 @@ button { cursor: pointer; }
 .brand-text { display: flex; flex-direction: column; line-height: 1.05; }
 .brand-name {
   font-family: var(--f-display);
-  font-stretch: 118%;
   font-weight: 700;
   font-size: 15px;
   letter-spacing: 0.01em;
@@ -410,7 +409,6 @@ button { cursor: pointer; }
 }
 .focus-name {
   font-family: var(--f-display);
-  font-stretch: 112%;
   font-weight: 700;
   font-size: 18px;
   border: 1px solid transparent;
@@ -683,7 +681,6 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 .guide h3 {
   margin: 0;
   font-family: var(--f-display);
-  font-stretch: 112%;
   font-size: 15px;
   font-weight: 700;
 }
@@ -942,6 +939,9 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
   border-radius: 7px;
   pointer-events: none;
   max-width: calc(100% - 300px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .hint kbd { font-family: var(--f-mono); font-size: 11px; color: var(--ink); }
 .fallback {
@@ -1050,7 +1050,7 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 
 /* ---------- Narrow screens ---------- */
 @media (max-width: 860px) {
-  .app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "sbar" "stage" "foot"; }
+  .app { grid-template-rows: auto auto auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "rail" "sbar" "stage" "foot"; }
   .foot { padding-inline: 12px; }
   .foot .fx { display: none; }
   .foot .fn { display: inline; }
@@ -1210,6 +1210,8 @@ details.adv > .block + .block { margin-top: 20px; }
 
 /* ---------- Presentation mode ---------- */
 .app.presenting { grid-template-rows: minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); grid-template-areas: "stage"; }
+.app.presenting .rail { display: none !important; }
+.app.presenting .stage { margin: 0; border-radius: 0; box-shadow: none; }
 .app.presenting .stagebar { display: none !important; }
 .app.presenting .topbar, .app.presenting .foot, .app.presenting .side, .app.presenting .insp, .app.presenting .scrim,
 .app.presenting #methodCard, .app.presenting #lawsCard, .app.presenting #netCard, .app.presenting .net-bar, .app.presenting .rec-head,
@@ -1233,6 +1235,60 @@ details.adv > .block + .block { margin-top: 20px; }
 }
 
 /* ---------- Workbench (v1.8): the stage bar, the register, diagnosis first, the method in presentation ---------- */
+/* ===== Studio look (Nov 27 2026), after Business Model at studio.closetheloop.gr/model:
+   a navy tool rail, navy header with the Close the Loop lockup and a gold rule, a dotted wall,
+   and the drawing on a sheet pinned to it, with the panels as cards beside it. ===== */
+:root { --wall: #e5e7ed; --wall-dot: rgba(20, 27, 56, .1); --sheet-shadow: 0 1px 2px rgba(20, 27, 56, .18), 0 18px 40px -14px rgba(20, 27, 56, .4); }
+:root[data-theme="dark"] { --wall: #000; --wall-dot: rgba(236, 235, 228, .07); --sheet-shadow: 0 0 0 1px rgba(236, 235, 228, .12), 0 18px 40px -14px rgba(0, 0, 0, .75); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --wall: #000; --wall-dot: rgba(236, 235, 228, .07); --sheet-shadow: 0 0 0 1px rgba(236, 235, 228, .12), 0 18px 40px -14px rgba(0, 0, 0, .75); } }
+/* the dot grid is the wall's texture, as on Business Model, not a gradient wash */
+.app { background: var(--wall) radial-gradient(var(--wall-dot) 1px, transparent 1.3px) 0 0 / 16px 16px; }
+.app.presenting { background: var(--stage); }
+.rail { grid-area: rail; display: flex; flex-direction: column; gap: 2px; padding: 12px 8px; padding-left: max(8px, env(safe-area-inset-left, 0px)); background: var(--chrome); border-right: 1px solid var(--chrome-line); overflow-y: auto; scrollbar-width: none; z-index: 6; }
+.rl { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 2px 9px; border: 0; border-radius: 10px; background: transparent; font: 600 12px/1.1 var(--f-display); color: var(--chrome-ink-2); text-align: center; flex: none; }
+.rl .pic { width: 24px; height: 24px; flex: none; }
+.rl:hover { background: var(--chrome-2); color: var(--chrome-ink); }
+.rl[aria-pressed="true"] { background: var(--chrome-2); color: var(--chrome-ink); box-shadow: inset 0 -2px 0 var(--ctl-gold); }
+.rl[aria-pressed="true"] .pic { color: var(--ctl-gold); }
+.ctl-lock { display: inline-flex; align-items: center; gap: 8px; color: var(--chrome-ink); text-decoration: none; padding: 3px 12px 3px 0; border-right: 1px solid var(--chrome-line); flex: none; }
+.ctl-lock svg { width: 24px; height: 24px; flex: none; }
+.ctl-lock .arc, .ctl-lock .arc-c { fill: none; stroke: currentColor; stroke-linecap: round; }
+.ctl-lock .arc { stroke-width: 29; stroke-dasharray: 325.6 34.4; } .ctl-lock .arc-c { stroke-width: 37.4; stroke-dasharray: 304.7 55.3; } .ctl-lock .dot { fill: var(--ctl-gold); }
+.ctl-lock .wm { font: 500 15px/1 var(--f-brand); letter-spacing: .02em; white-space: nowrap; }
+.ctl-lock:hover .wm { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.topbar .brand-name { font-weight: 800; font-size: 17px; letter-spacing: -.005em; }
+/* the drawing is a sheet on the wall; panels are cards beside it */
+.stage { margin: 0 12px 0 12px; border-radius: 12px; box-shadow: var(--sheet-shadow); }
+.side, .insp { margin: 12px; border: 0; border-radius: 14px; box-shadow: var(--shadow); }
+.side { margin-right: 0; } .insp { margin-left: 0; }
+.stagebar { background: transparent; border-bottom: 0; padding: 12px 12px 10px; }
+.foot { background: transparent; border-top: 0; padding: 6px 14px calc(8px + env(safe-area-inset-bottom, 0px)); }
+.side .tabs { background: transparent; border-bottom: 3px solid var(--ctl-gold); }
+.side .tab { color: var(--ink-2); }
+.side .tab:hover { color: var(--ink); }
+.side .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+.side .tabs .icon-btn { border-color: var(--rule); color: var(--ink-2); }
+/* recursion reads as one of Business Model's navy pages, with its systems as cream cards */
+.rec { background: var(--chrome); color: var(--chrome-ink); }
+.rec-head > div:first-child { color: var(--chrome-ink-2); }
+.rec-head b { font: 800 22px/1.15 var(--f-display); color: var(--chrome-ink); }
+.rec .rtree li::before, .rec .rtree li::after, .rec .rtree ul::before { border-color: var(--chrome-line); }
+.rec .rcard { color: var(--ink); border-color: transparent; }
+.rec .rcard.current { border-color: var(--ctl-gold); box-shadow: 0 0 0 2px rgba(238, 186, 43, .35), var(--shadow); }
+.rec .rcard.ghost { color: var(--chrome-ink); border-color: var(--chrome-line); }
+.rec .rcard.ghost .tn { color: var(--chrome-ink-2); }
+.rec .rcard.ghost .sub { color: var(--ctl-gold); }
+.rec .btn { background: transparent; color: var(--chrome-ink); border-color: var(--chrome-line); }
+.rec .btn:hover { border-color: var(--chrome-ink-2); background: var(--chrome-2); }
+@media (max-width: 860px) {
+  .rail { flex-direction: row; justify-content: center; padding: 4px 8px; border-right: 0; border-bottom: 1px solid var(--chrome-line); }
+  .rl { flex-direction: row; gap: 6px; padding: 6px 10px; }
+  .rl .pic { width: 18px; height: 18px; }
+  .stage { margin: 0 8px; }
+  .ctl-lock .wm { display: none; }
+  .ctl-lock { padding-right: 8px; }
+  .side, .insp { margin: 0; border-radius: 0; }
+}
 /* Close the Loop chrome, as on the studio's canvas explorer: navy header and panel tabs with a
    gold rule under them, gold for what is current, cream words on navy. */
 :root { --chrome: #141b38; --chrome-2: #222b52; --chrome-line: rgba(245, 244, 240, .16); --chrome-ink: #f5f4f0; --chrome-ink-2: #aab3cf; --ctl-gold: #eeba2b; }
@@ -1250,11 +1306,7 @@ details.adv > .block + .block { margin-top: 20px; }
 .topbar .tool[aria-pressed="true"] { background: var(--chrome-ink); color: var(--chrome); border-color: var(--chrome-ink); }
 .topbar #btnPresent { background: var(--ctl-gold); border-color: var(--ctl-gold); color: #141b38; }
 .topbar #btnPresent:hover { filter: brightness(1.08); }
-.side .tabs { background: var(--chrome); border-bottom: 3px solid var(--ctl-gold); }
-.side .tab { font-family: var(--f-display); font-weight: 700; color: var(--chrome-ink-2); border-bottom-width: 3px; margin-bottom: -3px; }
-.side .tab:hover { color: var(--chrome-ink); }
-.side .tab[aria-selected="true"] { color: var(--chrome-ink); border-bottom-color: var(--chrome-ink); }
-.side .tabs .icon-btn { background: transparent; border-color: var(--chrome-line); color: var(--chrome-ink); }
+.side .tab { font-family: var(--f-display); font-weight: 700; border-bottom-width: 3px; margin-bottom: -3px; }
 .stagebar .seg { background: var(--chrome); }
 .stagebar .seg button { color: var(--chrome-ink-2); }
 .stagebar .seg button:hover { color: var(--chrome-ink); }
@@ -1269,7 +1321,7 @@ details.adv > .block + .block { margin-top: 20px; }
 .stagebar .tgroup + .tgroup { margin-left: auto; padding-left: 0; border-left: 0; }
 .app.netmode .stagebar .tgroup.vsm-only { display: none; }
 @container (max-width: 860px) { .stagebar .tool .t { display: none; } .stagebar .tool { padding-inline: 8px; } }
-@container (max-width: 700px) { .stagebar #vHemi .dlong, .stagebar #dNet .dlong, .stagebar #dRec .dlong { display: none; } .stagebar #vHemi .dshort, .stagebar #dNet .dshort, .stagebar #dRec .dshort { display: inline !important; } }
+@container (max-width: 560px) { .stagebar #vHemi .dlong, .stagebar #dNet .dlong, .stagebar #dRec .dlong { display: none; } .stagebar #vHemi .dshort, .stagebar #dNet .dshort, .stagebar #dRec .dshort { display: inline !important; } }
 /* a container query cannot restyle its own container, so wrapping keys on the viewport */
 @media (max-width: 600px) { .stagebar { flex-wrap: wrap; } }
 .stagebar { overflow-x: auto; scrollbar-width: none; }
@@ -1323,6 +1375,7 @@ details.adv > .block + .block { margin-top: 20px; }
     <button class="icon-btn" id="btnSide" aria-label="Toggle settings panel" aria-expanded="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v14H4zM10 5v14"/></svg>
     </button>
+    <a class="ctl-lock" href="/" id="ctlLock" title="Close the Loop Studio"><svg viewBox="0 0 800 800" aria-hidden="true"><circle class="arc" cx="400" cy="400" r="297" pathLength="360" transform="rotate(-36 400 400)"/><circle class="arc-c" cx="395" cy="399" r="75.6" pathLength="360" transform="rotate(25.4 395 399)"/><circle class="dot" cx="573" cy="168" r="16"/></svg><span class="wm">close the loop</span></a>
     <div class="brand">
       <svg class="eom" viewBox="0 0 32 32" aria-hidden="true"><!-- Environment, Operations, Management, nested -->
         <path class="e" d="M-1.8-6.4C.6-7.2 3.4-6.2 3.6-4.2 3.8-2.6 3-1.8 3.9-.6 4.9.8 4.8 3 4.1 4.6 3.2 6.6.8 6.9-1 6.3-2.4 5.8-2.6 4.6-3.8 4-5 3.4-4.9 1.4-4 .2-3.2-.8-4.3-1.8-4.4-3.2-4.6-4.9-3.4-5.9-1.8-6.4z" transform="translate(16 16) scale(3 2.1)"/>
@@ -1358,13 +1411,13 @@ details.adv > .block + .block { margin-top: 20px; }
     </div>
   </header>
 
+  <nav class="rail" id="rail" aria-label="Ways of drawing the system">
+    <button class="rl" id="dVsm" type="button" aria-pressed="true" title="Viable System Model (key N switches)"><svg class="pic" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 24c0-9 4-16 9-16s8 7 8 16-3 16-8 16-9-7-9-16z"/><path d="M29 7h13v14H29z"/><path d="M35.5 42a7.5 7.5 0 1 0 0-15 7.5 7.5 0 1 0 0 15z"/><path d="M17 14h12M17 34h11"/></svg><span>VSM</span></button>
+    <button class="rl" id="dNet" type="button" aria-pressed="false" title="Value network of System One: activities, actors and flows (key N switches)"><svg class="pic" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 14a4.5 4.5 0 1 0 0-9 4.5 4.5 0 1 0 0 9zM38 18a4.5 4.5 0 1 0 0-9 4.5 4.5 0 1 0 0 9zM10 43a4.5 4.5 0 1 0 0-9 4.5 4.5 0 1 0 0 9zM36 43a4.5 4.5 0 1 0 0-9 4.5 4.5 0 1 0 0 9z"/><path d="M24 29a5.5 5.5 0 1 0 0-11 5.5 5.5 0 1 0 0 11z"/><path d="M14.5 12l5.5 5M34 16l-5.5 4M13 34l6-6M32 34l-4-5"/></svg><span>Network</span></button>
+    <button class="rl" id="dRec" type="button" aria-pressed="false" title="Recursion: the hierarchy of viable systems, with the System-in-Focus marked (key R)"><svg class="pic" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 45a21 21 0 1 0 0-42 21 21 0 1 0 0 42z"/><path d="M24 37a13 13 0 1 0 0-26 13 13 0 1 0 0 26z"/><path d="M24 29a5 5 0 1 0 0-10 5 5 0 1 0 0 10z"/></svg><span>Recursion</span></button>
+  </nav>
   <div class="stagebar" id="stagebar" role="toolbar" aria-label="View and layers">
       <div class="tgroup" role="group" aria-label="Views">
-        <div class="seg" role="group" aria-label="View">
-          <button id="dVsm" type="button" aria-pressed="true" title="Viable System Model (key N switches)"><svg class="pic" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 24c0-9 4-16 9-16s8 7 8 16-3 16-8 16-9-7-9-16z"/><path d="M29 7h13v14H29z"/><path d="M35.5 42a7.5 7.5 0 1 0 0-15 7.5 7.5 0 1 0 0 15z"/><path d="M17 14h12M17 34h11"/></svg>VSM</button>
-          <button id="dNet" type="button" aria-pressed="false" title="Value network of System One: activities, actors and flows (key N switches)"><svg class="pic" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 14a4.5 4.5 0 1 0 0-9 4.5 4.5 0 1 0 0 9zM38 18a4.5 4.5 0 1 0 0-9 4.5 4.5 0 1 0 0 9zM10 43a4.5 4.5 0 1 0 0-9 4.5 4.5 0 1 0 0 9zM36 43a4.5 4.5 0 1 0 0-9 4.5 4.5 0 1 0 0 9z"/><path d="M24 29a5.5 5.5 0 1 0 0-11 5.5 5.5 0 1 0 0 11z"/><path d="M14.5 12l5.5 5M34 16l-5.5 4M13 34l6-6M32 34l-4-5"/></svg><span class="dlong">Value network</span><span class="dshort">Network</span></button>
-          <button id="dRec" type="button" aria-pressed="false" title="Recursion: the hierarchy of viable systems, with the System-in-Focus marked (key R)"><svg class="pic" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 45a21 21 0 1 0 0-42 21 21 0 1 0 0 42z"/><path d="M24 37a13 13 0 1 0 0-26 13 13 0 1 0 0 26z"/><path d="M24 29a5 5 0 1 0 0-10 5 5 0 1 0 0 10z"/></svg><span class="dlong">Recursion</span><span class="dshort">Levels</span></button>
-        </div>
         <div class="seg vsm-only" role="group" aria-label="View mode">
           <button id="v2d" type="button" aria-pressed="false" title="Classic 2D diagram (key D switches 2D and 3D)">2D</button>
           <button id="v3d" type="button" aria-pressed="true" title="3D model (key D switches 2D and 3D)">3D</button>
@@ -3606,7 +3659,8 @@ function stageCover() {
   const card = ['#methodCard', '#lawsCard'].map(s => $(s)).find(c => c && !c.hidden && c.offsetWidth);
   const right = !narrow && !present && card && w > 760 ? card.offsetWidth + 24 : 0;
   const top = narrow ? 0 : present ? 16 : 56;
-  const hint = $('#hint'), bottom = narrow ? 0 : present ? 112 : hint && !hint.classList.contains('gone') ? 40 : 12;
+  // the hint bar can wrap to two lines on a narrower sheet, so keep clear of its real height
+  const hint = $('#hint'), bottom = narrow ? 0 : present ? 112 : hint && !hint.classList.contains('gone') ? Math.max(40, hint.offsetHeight + 18) : 12;
   return { right, top, bottom };
 }
 // shift a camera target sideways and up by a number of screen pixels at a given distance
@@ -3674,9 +3728,10 @@ function applyControlMode() {
   $('#depthCtl').hidden = !is3d;
   $('#app').classList.toggle('mode3d', is3d);
   const narrow = matchMedia('(pointer: coarse)').matches;
-  $('#hint').innerHTML = is3d
-    ? (narrow ? 'Drag to rotate · two fingers to pan and zoom · tap to select · long-press for the menu' : '<kbd>Drag</kbd> rotate · <kbd>Right-drag</kbd> pan · <kbd>Scroll</kbd> zoom · <kbd>Right-click</kbd> menu · <kbd>Double-click</kbd> an operation to step inside')
-    : (narrow ? 'Drag to pan · pinch to zoom · tap to select · long-press for the menu' : '<kbd>Drag</kbd> pan · <kbd>Scroll</kbd> zoom · <kbd>Click</kbd> select · <kbd>Right-click</kbd> menu · <kbd>Double-click</kbd> an operation to step inside');
+  $('#hint').textContent = is3d
+    ? (narrow ? 'Drag to rotate, two fingers to pan and zoom, tap to select, long-press for more.' : 'Drag to rotate, right-drag to pan, scroll to zoom, right-click for more. Double-click an operation to step inside.')
+    : (narrow ? 'Drag to pan, pinch to zoom, tap to select, long-press for more.' : 'Drag to pan, scroll to zoom, right-click for more. Double-click an operation to step inside.');
+  $('#hint').title = $('#hint').textContent;
 }
 
 async function setView(mode) {
@@ -4696,7 +4751,7 @@ function renderTree() {
     let html = '<li><div class="rcard level' + (isCur ? ' current' : '') + '" data-level="' + lv.id + '"><button class="tbtn" type="button" data-level="' + lv.id + '">' +
       '<span class="chips"><span class="lv">L' + levelNo(lv) + '</span>' + (lv.id === (db.refId || db.rootId) && db.refId && db.refId !== db.rootId ? '<span class="cd" title="Main System-in-Focus: level 0">MAIN</span>' : '') + (code ? '<span class="cd">' + esc(code) + '</span>' : '') + (flags ? '<span class="tflag" title="' + flags + ' flagged in the diagnosis">⚑' + flags + '</span>' : '') + '</span>' +
       '<span class="tn">' + esc(levelName(lv)) + '</span>' +
-      '<span class="sub">' + (isCur ? '<span class="here">SYSTEM IN FOCUS</span>' : lv.opCount + (lv.opCount === 1 ? ' operation' : ' operations')) + '</span>' +
+      '<span class="sub">' + (isCur ? '<span class="here">System in focus</span>' : lv.opCount + (lv.opCount === 1 ? ' operation' : ' operations')) + '</span>' +
       (lv.unfold ? '<span class="uf" title="' + esc('Organising criterion' + (lv.unfold.why ? ': ' + lv.unfold.why : '')) + '">Unfolds by ' + esc(UNFOLD[lv.unfold.by].name.toLowerCase()) + '</span>' : '') + '</button>' +
       more('data-lv="' + lv.id + '"') + '</div>';
     const rows = [];
@@ -7173,6 +7228,8 @@ function openStudio() {
   if (m) location.href = m[1];
   else window.open('https://studio.closetheloop.gr/', '_blank', 'noopener');
 }
+$('#ctlLock').href = 'https://studio.closetheloop.gr/';
+$('#ctlLock').addEventListener('click', e => { e.preventDefault(); openStudio(); });
 // More menu: theme, shortcuts, about, start again
 $('#btnMore').addEventListener('click', () => {
   if (!ctx.hidden && ctxAt && ctxAt.more) { closeCtx(); return; }

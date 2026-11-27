@@ -20,9 +20,10 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   await pg.click('#iDiag .dchip[data-k="weak"]'); await pg.waitForTimeout(200);
   await pg.fill('#iDiagNote', 'Six people, "R&D" mostly fire-fighting, per COO interview'); await pg.waitForTimeout(200);
   await pg.click('#iClose');
+  const stageW = await pg.evaluate(() => document.getElementById('stage').clientWidth);
   const png = await grab('(PNG)');
   const buf = fs.readFileSync(png);
-  ok(/\.png$/.test(png) && buf.slice(1, 4).toString() === 'PNG' && buf.readUInt32BE(16) >= 1900, 'PNG of the 2D view at twice the size (' + path.basename(png) + ', ' + buf.readUInt32BE(16) + ' px wide)');
+  ok(/\.png$/.test(png) && buf.slice(1, 4).toString() === 'PNG' && buf.readUInt32BE(16) >= 2 * stageW - 2, 'PNG of the 2D view at twice the size (' + path.basename(png) + ', ' + buf.readUInt32BE(16) + ' px wide for a ' + stageW + ' px stage)');
   const svg = fs.readFileSync(await grab('(SVG)'), 'utf8');
   ok(/<svg/.test(svg) && /<image/.test(svg) && />City</.test(svg) && /studio\.closetheloop\.gr\/vsm/.test(svg), 'SVG keeps the labels as text, over the picture, with the credit');
   const csv = fs.readFileSync(await grab('(CSV)'), 'utf8');

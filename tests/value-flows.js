@@ -21,7 +21,7 @@ const ok = (c, m) => console.log((c ? 'ok   ' : 'FAIL ') + m);
   await pg.screenshot({ path: process.env.SP + '/shots/v-hemi-lines.png' });
   await pg.click('#v2d'); await pg.waitForTimeout(1500);
   await pg.screenshot({ path: process.env.SP + '/shots/v-2d-lines.png', clip: { x: 640, y: 500, width: 460, height: 360 } });
-  await pg.click('text=Value network'); await pg.waitForTimeout(900);
+  await pg.click('#dNet'); await pg.waitForTimeout(900);
   ok(await pg.$eval('#netSvg', e => e.classList.contains('lines')).catch(() => 'nosvg'), 'net in lines mode');
   await pg.screenshot({ path: process.env.SP + '/shots/v-net-lines.png' });
   await pg.click('#vfRibbon'); await pg.waitForTimeout(700);

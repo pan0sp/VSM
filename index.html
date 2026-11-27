@@ -14,6 +14,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Viable System Explorer</title>
 <meta name="description" content="Interactive 2D and 3D explorer for Stafford Beer's Viable System Model, with recursion, custom labels and colours.">
+<link rel="canonical" href="https://studio.closetheloop.gr/vsm/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;600;700;800&family=Comfortaa:wght@500;600&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -6859,7 +6860,7 @@ function applyCafe(lv) {
    Export: the view in focus as an image (PNG, or SVG with live text),
    and the findings of every level as a table (CSV) or a printable report
    ===================================================================== */
-const EXPORT_CREDIT = 'Made with the Viable System Explorer · vsm.closetheloop.gr';
+const EXPORT_CREDIT = 'Made with the Viable System Explorer · studio.closetheloop.gr/vsm';
 // offer a file: through Claude's save prompt inside claude.ai, as a browser download elsewhere
 async function offerFile(filename, data, mime) {
   const dl = await Promise.race([downloadsCap, new Promise(r => setTimeout(() => r(null), 1500))]);
@@ -7116,7 +7117,7 @@ async function exportFindings(kind) {
    shortcut sheet, About, focus keys for each system, the tour and
    presentation mode
    ===================================================================== */
-const APP_VERSION = '1.8 preview, workbench layout (November 2026)';
+const APP_VERSION = '1.8 preview, workbench layout, on 1.7.2 (November 2026)';
 const CITE_YEAR = 2026;
 const modals = ['welcome', 'keysSheet', 'about'];
 let modalReturn = null;
@@ -7165,6 +7166,13 @@ $('#wMap').addEventListener('click', () => {
   requestAnimationFrame(() => { const n = $('#levelName'); n.focus(); n.select(); });
 });
 
+// Close the Loop Studio, the home of this explorer and the other tools: the same tab when served
+// under studio.closetheloop.gr/vsm/, a new tab anywhere else (vsm.closetheloop.gr, the artifact, a file).
+function openStudio() {
+  const m = /^https?:$/.test(location.protocol) && location.pathname.match(/^(.*\/)vsm(\/|$)/);
+  if (m) location.href = m[1];
+  else window.open('https://studio.closetheloop.gr/', '_blank', 'noopener');
+}
 // More menu: theme, shortcuts, about, start again
 $('#btnMore').addEventListener('click', () => {
   if (!ctx.hidden && ctxAt && ctxAt.more) { closeCtx(); return; }
@@ -7178,6 +7186,7 @@ $('#btnMore').addEventListener('click', () => {
     { ic: '⌨', text: 'Keyboard shortcuts', kbd: '?', fn: () => openModalById('keysSheet') },
     { ic: '▭', text: 'Presentation mode', kbd: 'P', fn: () => setPresenting(true) },
     { ic: '⌂', text: 'Start screen', fn: () => openModalById('welcome') },
+    { ic: '↗', text: 'Close the Loop Studio', fn: openStudio },
     { ic: 'i', text: 'About and licence', fn: () => openModalById('about') }
   ], null);
   ctxAt.more = true;

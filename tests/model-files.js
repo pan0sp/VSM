@@ -6,7 +6,7 @@ const ok = (c, m) => console.log((c ? 'ok   ' : 'FAIL ') + m);
   await cx.route('https://fonts.**/**', r => r.abort());
   const pg = await cx.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.stack));
   await pg.goto(PAGE); await pg.waitForTimeout(2500); await settingsOpen(pg);
-  const crumbs = () => pg.textContent('#crumbs');
+  const crumbs = () => pg.evaluate(() => document.getElementById('crumbs').textContent + ' ' + document.getElementById('levelName').value);
   const menu = async t => { await pg.click('#btnModel'); await pg.waitForTimeout(150); await pg.click('#ctx button:has-text("' + t + '")'); await pg.waitForTimeout(700); };
   ok(!(await pg.$('#preset')), 'labels preset dropdown removed');
   await pg.click('#btnModel'); await pg.waitForTimeout(200);

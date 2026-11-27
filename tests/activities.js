@@ -39,8 +39,7 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   ok(errs.length === 0 || errs.every(e => /font/i.test(e)), 'no page errors');
   // the VSM: Dine-in's details carry the prompts, hidden for other elements
   await pg.click('#dVsm'); await pg.waitForTimeout(900);
-  await pg.click('#btnSide'); await pg.waitForTimeout(300);
-  await pg.click('#tab-details'); await pg.waitForTimeout(200); // the panel opens on the Register; these checks use Settings
+  await pg.evaluate(() => { if (document.getElementById('app').classList.contains('side-closed')) document.getElementById('btnSide').click(); document.getElementById('tab-details').click(); }); await pg.waitForTimeout(300); // the panel opens on the Register; these checks use Settings
   await pg.$eval('.erow[data-id="o0"] .ecode', e => e.click()); await pg.waitForTimeout(400);
   ok(await pg.isVisible('#iBoundarySec') && !(await pg.getAttribute('#iBoundarySec', 'open')), 'an operation\'s details offer the prompts, closed by default');
   const fl = await pg.textContent('#insp');

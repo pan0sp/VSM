@@ -15,7 +15,7 @@ const lblAt = (pg, code, dy) => pg.evaluate(([code, dy]) => { const l = [...docu
   for (let i = 0; i < 16; i++) { await pg.mouse.wheel(0, -160); await pg.waitForTimeout(60); }
   await pg.waitForTimeout(500);
   await pg.screenshot({ path: process.env.SP + '/shots/h-zoom.png' });
-  ok(!/Brewing/.test(await pg.textContent('#crumbs')), 'zooming does not jump levels in the Orthogonal view');
+  ok(!/Brewing/.test(await pg.evaluate(() => document.getElementById('crumbs').textContent + ' ' + document.getElementById('levelName').value)), 'zooming does not jump levels in the Orthogonal view');
   await pg.click('#btnRecentre'); await pg.waitForTimeout(900);
   const q = await lblAt(pg, '1C', 6);
   await pg.mouse.click(q[0], q[1]); await pg.waitForTimeout(500);
@@ -23,7 +23,7 @@ const lblAt = (pg, code, dy) => pg.evaluate(([code, dy]) => { const l = [...docu
   await pg.screenshot({ path: process.env.SP + '/shots/h-click.png' });
   await pg.keyboard.press('Escape'); await pg.waitForTimeout(300);
   await pg.mouse.dblclick(q[0], q[1]); await pg.waitForTimeout(1600);
-  ok(/Brewing/.test(await pg.textContent('#crumbs')), 'double-click opens the lower level: ' + await pg.textContent('#crumbs'));
+  ok(/Brewing/.test(await pg.evaluate(() => document.getElementById('crumbs').textContent + ' ' + document.getElementById('levelName').value)), 'double-click opens the lower level: ' + await pg.evaluate(() => document.getElementById('crumbs').textContent + ' ' + document.getElementById('levelName').value));
   await pg.screenshot({ path: process.env.SP + '/shots/h-l1.png' });
   await pg.click('#upBtn'); await pg.waitForTimeout(1600);
   ok(!/Brewing/.test(await pg.textContent('#levelChip')), 'Up returns');

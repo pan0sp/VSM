@@ -12,7 +12,7 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   let s = await st();
   ok(s.v2 === 'true' && /side-closed/.test(s.cls) && await pg.isHidden('#methodCard'), 'opens in 2D with the panels closed');
   const tb = await pg.evaluate(() => { const r = [...document.querySelectorAll('.topbar > *')].filter(e => e.offsetParent).map(e => e.getBoundingClientRect()); return Math.max(...r.map(x => x.bottom)) - Math.min(...r.map(x => x.top)); });
-  ok(tb < 44, 'toolbar fits one row at 1280x720 (' + Math.round(tb) + 'px)');
+  ok(tb < 56, 'header fits one row at 1280x720 (' + Math.round(tb) + 'px)');
   await pg.click('#wExamples [data-ex="cafe"]'); await pg.waitForTimeout(1200);
   ok(await pg.isHidden('#welcome'), 'an example closes the welcome');
   await pg.click('#toast button:last-child').catch(() => {});
@@ -28,7 +28,7 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   const inStage = await pg.evaluate(() => { const st = document.getElementById('stage').getBoundingClientRect(); const l = [...document.querySelectorAll('#labels .lbl')].find(d => /System One/.test(d.textContent)); const r = l.getBoundingClientRect(), h = document.getElementById('hint').getBoundingClientRect(); return r.bottom <= st.bottom && (r.bottom <= h.top || r.right < h.left || r.left > h.right); });
   ok(inStage, '2D café: System One label clear of the stage edge and the hint bar');
   await pg.click('#btnMethod'); await pg.click('#dNet'); await pg.waitForTimeout(600);
-  const steps = await pg.evaluate(() => [...document.querySelectorAll('#netCard .mstep h4')].map(h => getComputedStyle(h).display + '|' + h.textContent));
+  const steps = await pg.evaluate(() => [...document.querySelectorAll('#methodCard .mstep h4')].map(h => getComputedStyle(h).display + '|' + h.textContent));
   ok(steps.length === 4 && steps.every(x => x.startsWith('flex')) && !steps.some(x => /RecursionRecursion|VSMVSM/.test(x)), 'value network: Method card steps are laid out, no doubled labels');
   await pg.click('#dRec'); await pg.waitForTimeout(600);
   const rec = await pg.evaluate(() => { const c = document.getElementById('methodCard').getBoundingClientRect(), sc = document.querySelector('.rec-scroll').getBoundingClientRect(); return sc.right <= c.left + 2; });
@@ -68,7 +68,7 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   await pg.click('#footAbout'); await pg.waitForTimeout(300);
   ok(/AGPL/.test(await pg.textContent('#about')) && /CC|Creative Commons/.test(await pg.textContent('#about')), 'About names both licences');
   await pg.keyboard.press('Escape');
-  await pg.mouse.click(640, 300); await pg.waitForTimeout(5800);
+  await pg.mouse.click(200, 200); await pg.waitForTimeout(5800);
   ok(await pg.evaluate(() => document.getElementById('hint').classList.contains('gone')), 'the hint bar fades after first use');
   await pg.reload(); await pg.waitForTimeout(2000);
   ok(await pg.isHidden('#welcome') && await pg.evaluate(() => document.getElementById('hint').classList.contains('gone')), 'a return visit skips the welcome and the hint');

@@ -25,8 +25,7 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   ok(await pg.isHidden('#focusBar'), 'Esc shows everything again');
   // details pane
   await pg.keyboard.press('l'); await pg.waitForTimeout(400);
-  await pg.click('#btnSide'); await pg.waitForTimeout(300);
-  await pg.click('#tab-details'); await pg.waitForTimeout(200); // the panel opens on the Register; these checks use Settings
+  await pg.evaluate(() => { if (document.getElementById('app').classList.contains('side-closed')) document.getElementById('btnSide').click(); document.getElementById('tab-details').click(); }); await pg.waitForTimeout(300); // the panel opens on the Register; these checks use Settings
   await pg.$eval('.erow[data-id="s4"] .ecode', e => e.click()); await pg.waitForTimeout(600);
   const ins = await pg.evaluate(() => [...document.querySelectorAll('#iLaws [data-law]')].map(b => b.dataset.law));
   ok(ins.includes('a2') && ins.includes('gr'), 'System Four lists the laws that apply to it (' + ins.join(',') + ')');

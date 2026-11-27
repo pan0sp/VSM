@@ -16,7 +16,7 @@ const ok = (c, m) => console.log((c ? 'ok   ' : 'FAIL ') + m);
   ok(!(await pg.isChecked('#extS4cmd')) && !(await pg.isChecked('#extS14')), 'a first visit shows Beer\'s canonical wiring: both extensions off');
   ok(await pg.evaluate(() => !document.querySelector('#labels .lbl[data-id="s14"], #labels .lbl[data-id="s4cmd"]')), 'no extension channel is labelled');
   // mapping by copy and paste
-  await pg.click('#tab-flows'); await pg.waitForTimeout(300);
+  await pg.click('#tab-reg'); await pg.waitForTimeout(300);
   ok(await pg.isHidden('#aiBlock') && await pg.isVisible('#aiManual'), 'off claude.ai, the copy-and-paste mapping replaces the Claude block');
   await pg.evaluate(() => { document.getElementById('aiManual').open = true; });
   await pg.click('#amCopy'); await pg.waitForTimeout(200);

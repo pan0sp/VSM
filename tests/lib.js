@@ -11,7 +11,7 @@ module.exports = {
   // the older checks expect the Settings tab open with its advanced conventions showing, so close the card and open both
   settingsOpen: async pg => {
     await pg.keyboard.press('Escape');
-    await pg.evaluate(() => { if (document.getElementById('app').classList.contains('side-closed')) document.getElementById('btnSide').click(); document.getElementById('tab-model').click(); document.getElementById('advanced').open = true; });
+    await pg.evaluate(() => { if (document.getElementById('app').classList.contains('side-closed')) document.getElementById('btnSide').click(); document.getElementById('tab-details').click(); });
     await pg.waitForTimeout(300);
   },
   PAGE: 'file://' + path.resolve(__dirname, '..', 'index.html')

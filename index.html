@@ -43,7 +43,7 @@
   --f-brand: 'Comfortaa', 'Helvetica Neue', Arial, sans-serif;
   --f-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
   --left: 304px;
-  --right: 0px;
+  --right: 360px;
   --radius: 8px;
 }
 /* Dark: a black stage so the model stands out, neutral near-black panels; navy stays for the brand panels (About, welcome) */
@@ -104,8 +104,8 @@ button { cursor: pointer; }
   height: 100%;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
-  grid-template-columns: 84px var(--left) minmax(0, 1fr) var(--right);
-  grid-template-areas: "rail top top top" "rail side sbar insp" "rail side stage insp" "rail side foot insp";
+  grid-template-columns: 84px minmax(0, 1fr) var(--right);
+  grid-template-areas: "rail top top" "rail sbar side" "rail stage side" "rail foot side";
 }
 /* ---------- Footer: attribution ---------- */
 .foot {
@@ -119,8 +119,7 @@ button { cursor: pointer; }
 .foot a:hover { text-decoration: underline; }
 .foot .foot-about { font-size: 11.5px; font-weight: 500; color: var(--ink-2); }
 .foot .foot-about:hover { color: var(--ink); text-decoration: underline; }
-.app.insp-open { --right: 368px; }
-.app.side-closed { --left: 0px; }
+.app.side-closed { --right: 0px; }
 
 /* ---------- Value network ---------- */
 .app.hemi #labels, .app.hemi .depth, .app:not(.hemi) #hlabels { display: none !important; }
@@ -599,9 +598,6 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 /* Recursion view: a top-down hierarchy of viable systems */
 .rec { position: absolute; inset: 0; background: var(--stage); display: flex; flex-direction: column; }
 .method-card { z-index: 3; }
-.app.insp-open .method-card { display: none; }
-.app.method-on .rec { right: 308px; }
-@media (max-width: 700px) { .app.method-on .rec { right: 0; } }
 /* the method steps, in the VSM's floating card and in the value network's side card */
 .mstep { border-top: 1px solid var(--rule); padding: 8px 0 6px; }
 .mstep h4 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 0; font-size: 12.5px; }
@@ -1043,7 +1039,6 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
   .app { grid-template-rows: auto auto auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "rail" "sbar" "stage" "foot"; }
   .foot { padding-inline: 12px; }
   .foot .fx { display: none; }
-  .app.insp-open { --right: 0px; }
   .topbar { gap: 8px 10px; padding-inline: 12px; }
   .brand-sub { display: none; }
   .crumbs { order: 5; flex-basis: 100%; border-left: 0; padding-left: 0; }
@@ -1055,14 +1050,14 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
   .depth input { width: 90px; }
   .side {
     position: fixed;
-    left: 0;
+    right: 0;
     top: 0;
     bottom: 0;
     width: min(88vw, 340px);
     z-index: 20;
     box-shadow: var(--shadow);
     padding-top: env(safe-area-inset-top, 0px);
-    transform: translateX(-102%);
+    transform: translateX(102%);
     transition: transform .22s ease;
   }
   .app.side-closed .side { display: flex; }
@@ -1241,8 +1236,7 @@ details.adv > .block + .block { margin-top: 20px; }
 .rl[aria-pressed="true"] .pic { color: var(--ctl-gold); }
 .rail .sp { flex: 1; min-height: 8px; }
 .rl-sm .pic { width: 21px; height: 21px; }
-.rl[aria-expanded="true"], .app:not(.side-closed) #tab-model[aria-selected="true"] { background: var(--chrome-2); color: var(--chrome-ink); }
-.app:not(.side-closed) #tab-model[aria-selected="true"] .pic { color: var(--ctl-gold); }
+.rl[aria-expanded="true"] #tab-model[aria-expanded="true"] .pic { color: var(--ctl-gold); }
 .ctl-lock { display: inline-flex; align-items: center; gap: 8px; color: var(--chrome-ink); text-decoration: none; padding: 3px 12px 3px 0; border-right: 1px solid var(--chrome-line); flex: none; }
 .ctl-lock svg { width: 24px; height: 24px; flex: none; }
 .ctl-lock .arc, .ctl-lock .arc-c { fill: none; stroke: currentColor; stroke-linecap: round; }
@@ -1263,6 +1257,28 @@ details.adv > .block + .block { margin-top: 20px; }
 /* one background for every view, as on every studio tool: the dotted grey wall in light, black in dark (Panos, Nov 27) */
 .stage { background: transparent; margin: 0; border-radius: 0; box-shadow: none; }
 .net, .rec { background: transparent; }
+/* One panel on the right (Guide, Details, Coach) and Settings as a menu, after the FBC Explorer (Nov 27 2026) */
+.side .insp { grid-area: auto; position: static; background: transparent; border: 0; border-radius: 0; box-shadow: none; margin: 0; max-height: none; overflow: visible; display: block; z-index: auto; }
+.side .insp-head { padding: 0 0 12px; position: static; }
+.side .insp-body { overflow: visible; padding: 14px 0 0; }
+.pane.det { gap: 14px; }
+.side .tabs { align-items: center; }
+.side .side-x { margin-left: auto; width: 30px; height: 30px; }
+@media (max-width: 860px) { .side .side-x { display: none; } }
+.pane.guide .method-card { position: static; width: auto; max-height: none; overflow: visible; box-shadow: none; border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; background: var(--surface-2); }
+.coach-flows { display: flex; flex-direction: column; gap: 20px; padding-top: 6px; border-top: 1px solid var(--rule); }
+.brand-mark { border: 0; background: transparent; padding: 0; display: grid; place-items: center; cursor: pointer; flex: none; }
+.hdr-name { background: transparent; border: 0; border-bottom: 1px solid transparent; color: var(--chrome-ink); font: 800 17px/1.2 var(--f-display); letter-spacing: -.005em; padding: 2px 2px; width: 18ch; min-width: 6ch; max-width: 32vw; text-overflow: ellipsis; }
+.hdr-name:hover { border-bottom-color: var(--chrome-ink-2); }
+.hdr-name:focus { outline: 0; border-bottom-color: var(--ctl-gold); }
+.setmenu { position: fixed; z-index: 60; background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; }
+.setmenu .sm-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 12px 10px 16px; border-bottom: 3px solid var(--ctl-gold); background: var(--chrome); color: var(--chrome-ink); }
+.setmenu .sm-head b { font: 700 15px/1 var(--f-display); }
+.setmenu .sm-head .icon-btn { color: var(--chrome-ink); background: transparent; border-color: transparent; width: 28px; height: 28px; }
+.setmenu .sm-body { overflow-y: auto; padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 20px; min-height: 0; }
+.setmenu details.adv > summary { display: none; }
+.setmenu details.adv { display: flex; flex-direction: column; gap: 20px; }
+@media (max-width: 860px) { .hdr-name { width: 12ch; font-size: 15px; } }
 /* the credit line, as on the FBC's sheet: sources on the left, the maker's mark on the right */
 .foot { font-size: 11px; line-height: 1.35; color: var(--ink-2); gap: 24px; }
 .foot .foot-about { flex: none; margin-left: -18px; }
@@ -1379,15 +1395,14 @@ details.adv > .block + .block { margin-top: 20px; }
     </button>
     <a class="ctl-lock" href="/" id="ctlLock" title="Close the Loop Studio"><svg viewBox="0 0 800 800" aria-hidden="true"><circle class="arc" cx="400" cy="400" r="297" pathLength="360" transform="rotate(-36 400 400)"/><circle class="arc-c" cx="395" cy="399" r="75.6" pathLength="360" transform="rotate(25.4 395 399)"/><circle class="dot" cx="573" cy="168" r="16"/></svg><span class="wm">close the loop</span></a>
     <div class="brand">
+      <button class="brand-mark" id="brandAbout" type="button" title="Viable System Explorer: about and licence" aria-label="About the Viable System Explorer">
       <svg class="eom" viewBox="0 0 32 32" aria-hidden="true"><!-- Environment, Operations, Management, nested -->
         <path class="e" d="M-1.8-6.4C.6-7.2 3.4-6.2 3.6-4.2 3.8-2.6 3-1.8 3.9-.6 4.9.8 4.8 3 4.1 4.6 3.2 6.6.8 6.9-1 6.3-2.4 5.8-2.6 4.6-3.8 4-5 3.4-4.9 1.4-4 .2-3.2-.8-4.3-1.8-4.4-3.2-4.6-4.9-3.4-5.9-1.8-6.4z" transform="translate(16 16) scale(3 2.1)"/>
         <circle class="o" r="9.4" cx="16" cy="16.8"/>
         <rect class="m" x="10.8" y="11.6" width="10.4" height="10.4" rx=".8"/>
       </svg>
-      <div class="brand-text">
-        <span class="brand-name">Viable System Explorer</span>
-        <span class="brand-sub">Stafford Beer's VSM, in 2D and 3D</span>
-      </div>
+      </button>
+      <input class="hdr-name" id="levelName" type="text" spellcheck="false" aria-label="Name of the system in focus">
     </div>
     <input type="file" id="fileOpen" accept=".json,application/json" hidden>
     <nav class="crumbs" id="crumbs" aria-label="Recursion trail"></nav>
@@ -1436,14 +1451,15 @@ details.adv > .block + .block { margin-top: 20px; }
         </button>
       </div>
   </div>
-  <aside class="side" id="side" aria-label="Settings">
+  <aside class="side" id="side" aria-label="Guide, details and coach">
     <div class="tabs" role="tablist">
       <button class="icon-btn only-narrow" id="sideClose" type="button" aria-label="Close panel" style="margin:0 6px 6px 0;width:30px;height:30px">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
-      <button class="tab" role="tab" id="tab-reg" aria-controls="pane-reg" aria-selected="true">Register</button>
-      <button class="tab" role="tab" id="tab-flows" aria-controls="pane-flows" aria-selected="false">Flows</button>
       <button class="tab" role="tab" id="tab-guide" aria-controls="pane-guide" aria-selected="false">Guide</button>
+      <button class="tab" role="tab" id="tab-details" aria-controls="pane-details" aria-selected="false">Details</button>
+      <button class="tab" role="tab" id="tab-reg" aria-controls="pane-reg" aria-selected="true">Coach</button>
+      <button class="icon-btn side-x" id="sideX" type="button" aria-label="Close panel" title="Close panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
 
     <section class="pane reg" id="pane-reg" role="tabpanel" aria-labelledby="tab-reg">
@@ -1463,119 +1479,7 @@ details.adv > .block + .block { margin-top: 20px; }
         <label class="chk"><input type="checkbox" id="diagShow"><span>Show diagnosis marks<small>Badges beside flagged elements; missing ones are greyed and struck through</small></span></label>
         <ul class="dlist" id="diagList"></ul>
       </div>
-    </section>
-
-    <section class="pane" id="pane-model" role="tabpanel" aria-labelledby="tab-model" hidden>
-      <div class="block">
-        <div class="eyebrow" id="focusEyebrow">System in focus, level 0</div>
-        <input class="focus-name" id="levelName" type="text" aria-label="Name of the system in focus">
-        <label class="fld"><span>Purpose</span><textarea id="levelPurpose" rows="3" placeholder="The purpose of … is to (verbs) … for …"></textarea></label>
-        <div class="row">
-          <span>Operations in System One<small style="display:block;font-size:11.5px">− removes the last; right-click any operation to remove it</small></span>
-          <div class="stepper">
-            <button id="opMinus" type="button" aria-label="Remove an operation">−</button>
-            <output id="opCount" aria-live="polite">3</output>
-            <button id="opPlus" type="button" aria-label="Add an operation">+</button>
-          </div>
-        </div>
-        <label class="fld"><span>System One unfolds by <small style="font-size:11.5px">(optional)</small></span><select class="inp" id="levelUnfold"></select></label>
-        <label class="fld" id="levelUnfoldWhyF" hidden><span>Why this criterion</span><textarea id="levelUnfoldWhy" rows="2" placeholder="Why it carries more variety than the others at this level"></textarea></label>
-        <p class="src" id="levelUnfoldSrc" hidden>Organising criteria after Espejo and Bowling (1999) and Panagiotakopoulos (2005, 2008): the criterion carrying more variety partitions at the higher level.</p>
-        <p class="opmax" id="opMax" hidden>Six operations is the most this explorer draws on one level. With more, group them into fewer, larger units that could each stand on their own, or open one and map what it contains on the level below.</p>
-      </div>
-
-
-      <div class="block">
-        <div class="eyebrow">Group colours</div>
-        <div class="row">
-          <span>Colour scheme</span>
-          <select class="inp" id="scheme" aria-label="Apply a colour scheme to every level">
-            <option value="">Choose…</option>
-            <option value="eom">Environment–Operation–Management</option>
-            <option value="systems">One colour per system</option>
-            <option value="default">Default (by domain)</option>
-          </select>
-        </div>
-        <div class="src" id="schemeNote" style="margin-top:-4px">Applies to every level, including ones you open later. You can still recolour anything afterwards.</div>
-        <div class="groups" id="groups"></div>
-      </div>
-
-      <div class="block">
-        <div class="eyebrow">Elements · rename and recolour</div>
-        <div class="elist" id="elist"></div>
-      </div>
-
-      <details class="adv" id="advanced">
-        <summary>Advanced: drawing conventions and recursion</summary>
-        <div class="block">
-          <div class="eyebrow">Diagram</div>
-          <div class="row wrap">
-            <span>Drawing convention</span>
-            <div class="seg small" role="group" aria-label="Drawing convention">
-              <button id="stSquare" type="button" aria-pressed="true" title="Metasystem as a square box holding 3, 3*, 4, 5 and System Two; local managements as tilted squares">Square</button>
-              <button id="stDiamond" type="button" aria-pressed="false" title="Metasystem as a rhombus; local managements as upright squares (Jon Walker's preference)">Diamond</button>
-            </div>
-          </div>
-          <div class="row">
-            <span>System Two centre</span>
-            <div class="seg small" role="group" aria-label="Where the System Two regulatory centre sits">
-              <button id="s2Inside" type="button" aria-pressed="true" title="Inside the metasystem, as usually drawn">Inside</button>
-              <button id="s2Bridge" type="button" aria-pressed="false" title="On the metasystem boundary, bridging management and operations">Bridge</button>
-            </div>
-          </div>
-          <div class="row">
-            <span>Value flows</span>
-            <div class="seg small" role="group" aria-label="How value flows are drawn">
-              <button id="vfRibbon" type="button" aria-pressed="true" title="Wide pale ribbons with broad arrowheads, after value-stream maps">Ribbons</button>
-              <button id="vfLine" type="button" aria-pressed="false" title="Thin lines, the same as every other channel">Lines</button>
-            </div>
-          </div>
-          <div class="row">
-            <span>Attenuators and amplifiers</span>
-            <div class="seg small" role="group" aria-label="How attenuators and amplifiers are drawn">
-              <button id="vnBeer" type="button" aria-pressed="true" title="Beer's notation: a resistor zigzag attenuates, a triangle pointing at the receiver amplifies">Beer's symbols</button>
-              <button id="vnWords" type="button" aria-pressed="false" title="Plain words on the channel">Words</button>
-            </div>
-          </div>
-          <label class="chk"><input type="checkbox" id="extS4cmd"><span>System Four into the Resource Bargain<small>Not in Beer's diagram: reads the command axis as anticipatory</small></span></label>
-          <label class="chk"><input type="checkbox" id="localS2"><span>Local regulatory centres<small>System Two's centre beside each local management; some diagrams omit them</small></span></label>
-          <label class="chk"><input type="checkbox" id="extS14"><span>System One ↔ System Four<small>Not in Beer's diagram: operations and System Four exchange signals directly, advisory only</small></span></label>
-        </div>
-
-        <div class="block">
-          <div class="eyebrow">Recursion</div>
-          <label class="chk"><input type="checkbox" id="autoLevels"><span>Create levels by zooming in<small>Off: zooming into an operation without lower levels asks first. Double-click always creates them.</small></span></label>
-        </div>
-      </details>
-
-      <div class="block" id="appBlock">
-        <div class="eyebrow">This explorer</div>
-        <div class="row">
-          <span>Theme</span>
-          <div class="seg small" role="group" aria-label="Theme">
-            <button id="thAuto" type="button" aria-pressed="false" title="Follow the system's light or dark setting">Automatic</button>
-            <button id="thLight" type="button" aria-pressed="true">Light</button>
-            <button id="thDark" type="button" aria-pressed="false">Dark</button>
-          </div>
-        </div>
-        <div class="btn-row wrap">
-          <button class="btn" id="setKeys" type="button" title="Key ?">Keyboard shortcuts</button>
-          <button class="btn" id="setStart" type="button">Start screen</button>
-          <button class="btn" id="setAbout" type="button">About and licence</button>
-          <button class="btn" id="setStudio" type="button">Close the Loop Studio</button>
-        </div>
-      </div>
-
-      <div class="block">
-        <div class="btn-row">
-          <button class="btn" id="resetLevel" type="button">Reset this level</button>
-        </div>
-        <div class="src" id="saveNote">Changes are saved in this browser.</div>
-        <div class="src">Examples, files and starting again are in the <b>File</b> menu, on the left.</div>
-      </div>
-    </section>
-
-    <section class="pane" id="pane-flows" role="tabpanel" aria-labelledby="tab-flows" hidden>
+      <div class="coach-flows" id="coachFlows">
       <div class="block">
         <div class="eyebrow" id="flowsEyebrow">Data flows, level 0</div>
         <div class="cov">
@@ -1614,14 +1518,71 @@ details.adv > .block + .block { margin-top: 20px; }
         <div class="eyebrow">Channels and their flows</div>
         <div id="flowList"></div>
       </div>
+      </div>
     </section>
 
+    <section class="pane det" id="pane-details" role="tabpanel" aria-labelledby="tab-details" hidden>
+      <div class="block" id="focusBlock">
+        <div class="eyebrow" id="focusEyebrow">System in focus, level 0</div>
+        <label class="fld"><span>Purpose</span><textarea id="levelPurpose" rows="3" placeholder="The purpose of … is to (verbs) … for …"></textarea></label>
+        <div class="row">
+          <span>Operations in System One<small style="display:block;font-size:11.5px">− removes the last; right-click any operation to remove it</small></span>
+          <div class="stepper">
+            <button id="opMinus" type="button" aria-label="Remove an operation">−</button>
+            <output id="opCount" aria-live="polite">3</output>
+            <button id="opPlus" type="button" aria-label="Add an operation">+</button>
+          </div>
+        </div>
+        <label class="fld"><span>System One unfolds by <small style="font-size:11.5px">(optional)</small></span><select class="inp" id="levelUnfold"></select></label>
+        <label class="fld" id="levelUnfoldWhyF" hidden><span>Why this criterion</span><textarea id="levelUnfoldWhy" rows="2" placeholder="Why it carries more variety than the others at this level"></textarea></label>
+        <p class="src" id="levelUnfoldSrc" hidden>Organising criteria after Espejo and Bowling (1999) and Panagiotakopoulos (2005, 2008): the criterion carrying more variety partitions at the higher level.</p>
+        <p class="opmax" id="opMax" hidden>Six operations is the most this explorer draws on one level. With more, group them into fewer, larger units that could each stand on their own, or open one and map what it contains on the level below.</p>
+        <div class="btn-row"><button class="btn" id="resetLevel" type="button">Reset this level</button></div>
+      </div>
+      <div class="insp" id="insp" hidden>
+        <div class="insp-head">
+          <div class="code-chip" id="iCode">4</div>
+          <div class="insp-kind"><span class="k" id="iKind">System 4</span><span class="r" id="iRole">Intelligence</span></div>
+          <button class="icon-btn" id="iClose" type="button" aria-label="Back to the system in focus" title="Back to the system in focus">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+          </button>
+        </div>
+        <div class="insp-body">
+          <div class="isec isec-diag" id="iDiagSec"><h4>What did you find?</h4><div id="iDiag"></div></div>
+          <label class="fld"><span>Label in this model</span><input type="text" id="iName"></label>
+          <div class="fld">
+            <span>Colour</span>
+            <div class="color-row">
+              <input type="color" class="sw" id="iColor" aria-label="Element colour">
+              <small id="iColorNote">Using the group colour</small>
+              <button class="linkish" id="iColorReset" type="button">Use group colour</button>
+            </div>
+      </div>
+          <p class="summary" id="iSummary"></p>
+          <div class="isec" id="iLawsSec" hidden><h4>Laws that apply here</h4><ul class="lawlist" id="iLaws"></ul></div>
+          <div class="isec" id="iFlowSec"><h4>Data flows</h4><div id="iFlows"></div></div>
+          <div class="isec" id="iNetSec" hidden><h4>In the value network</h4><div id="iNet"></div></div>
+          <div class="isec" id="iVarSec" hidden><h4>Attenuation and amplification</h4><div id="iVar"></div></div>
+          <div class="isec" id="iTixSec" hidden><h4>Triple Index</h4><div id="iTix"></div></div>
+          <div class="isec" id="iIsecSec" hidden><h4>Environmental intersects</h4><div id="iIsec"></div></div>
+          <div class="isec" id="iIOSec"><h4>Information in and out</h4><ul class="io" id="iIO"></ul></div>
+          <div id="iRecur"></div>
+          <div class="isec" id="iLinksSec"><h4>Connected</h4><ul class="links" id="iLinks"></ul></div>
+          <div class="isec" id="iPracticeSec"><h4>In practice</h4><ul id="iPractice"></ul></div>
+          <div class="isec" id="iQuestionsSec"><h4>Diagnostic questions</h4><ul id="iQuestions"></ul></div>
+          <details class="isec bq" id="iBoundarySec" hidden><summary>Where to draw System One (optional)</summary><p class="src">Prompts for when the cut is unclear. How fine to go is the modeller's call.</p><ul id="iBoundary"></ul></details>
+          <div class="isec" id="iWatchSec"><h4>Watch for</h4><ul id="iWatch"></ul></div>
+          <label class="fld"><span>Notes for your organization</span><textarea id="iNotes" placeholder="Who or what performs this function here? What works, what doesn't?"></textarea></label>
+        </div>
+      </div>
+    </section>
 
     <section class="pane guide" id="pane-guide" role="tabpanel" aria-labelledby="tab-guide" hidden>
+      <div class="method-card" id="methodCard" hidden></div>
       <div class="block">
         <h3>Three views of one model</h3>
         <p>The <b>File</b> menu on the left starts a blank model, opens one from a file, saves this one to a file (Ctrl S), and opens the worked examples as complete models. Each replaces the whole model and offers Undo.</p>
-        <p>The toolbar switches between three views. <b>VSM</b> draws Beer's diagram in 2D or 3D. <b>Value network</b> maps the primary activities of System One, the actors around them and the flows between them. <b>Recursion</b> shows the hierarchy of viable systems, with the System-in-Focus marked. All three edit the same model, and the System-in-Focus is the same in each. This panel holds the settings and data: the Settings tab for the level, labels, conventions and colours, the Flows tab for what travels on each channel. <b>Method</b> in the toolbar shows the four steps (purpose, value network, recursion, VSM) beside whichever view is open. In every view, wide pale ribbons with broad arrowheads are value flows (operational linkages, and exchanges between an operation and its environment); thin lines are Beer's cybernetic channels. <b>Value flows</b> in Settings draws them as thin lines like every other channel instead. Environmental intersects are left undrawn for now.</p>
+        <p>The rail on the left switches between three views. <b>VSM</b> draws Beer's diagram in 2D, 3D or the Orthogonal view. <b>Value network</b> maps the primary activities of System One, the actors around them and the flows between them. <b>Recursion</b> shows the hierarchy of viable systems, with the System-in-Focus marked. All three edit the same model, and the System-in-Focus is the same in each. This panel has three tabs: <b>Guide</b> explains, <b>Details</b> edits what you select (or the System-in-Focus, when nothing is), and <b>Coach</b> shows what has been assessed and what travels on each channel. <b>Settings</b>, at the foot of the rail, holds the theme, colours and drawing conventions. <b>Method</b> in the header adds the four steps (purpose, value network, recursion, VSM) to this Guide. In every view, wide pale ribbons with broad arrowheads are value flows (operational linkages, and exchanges between an operation and its environment); thin lines are Beer's cybernetic channels. <b>Value flows</b> in Settings draws them as thin lines like every other channel instead.</p>
       </div>
       <div class="block">
         <h3>What the model describes</h3>
@@ -1649,7 +1610,7 @@ details.adv > .block + .block { margin-top: 20px; }
       </div>
       <div class="block">
         <h3>Data flows and recursion</h3>
-        <p>The Flows tab names what travels along each channel and in which direction; the moving dots follow those directions. The coverage bar shows how many channels carry something. An empty channel is worth asking about: in a real organization it often marks a missing function.</p>
+        <p>Each channel's details, and Coach for the whole level, name what travels along each channel and in which direction; the moving dots follow those directions. The coverage bar shows how many channels carry something. An empty channel is worth asking about: in a real organization it often marks a missing function.</p>
         <p>Load the model company to see a bicycle maker mapped across three levels. Fill gaps with standard flows gives any level a neutral starting point. In a Claude artifact you can also describe an organization and let Claude map it, then map each operation one level down from the inspector.</p>
         <p>When you open an operation, its environment becomes the environment one level down and its local management becomes the metasystem, following Beer's recursion. Scroll toward any operation to zoom into it: the next recursion sits inside each circle, turned 45 degrees, and becomes the System-in-Focus as you arrive. Zoom far out to rise a level.</p>
       </div>
@@ -1693,7 +1654,7 @@ details.adv > .block + .block { margin-top: 20px; }
   <div class="scrim" id="scrim"></div>
 
   <main class="stage" id="stage">
-    <canvas id="gl" tabindex="0" aria-label="Viable System Model view. Use the Register list in the left panel for keyboard access."></canvas>
+    <canvas id="gl" tabindex="0" aria-label="Viable System Model view. Use the list in Coach, in the panel on the right, for keyboard access."></canvas>
     <div class="labels" id="labels" aria-hidden="true"></div>
     <div class="labels" id="hlabels" aria-hidden="true"></div>
     <div class="net" id="net" hidden>
@@ -1713,7 +1674,6 @@ details.adv > .block + .block { margin-top: 20px; }
       </div>
       <div class="net-card" id="netCard" aria-live="polite"></div>
     </div>
-    <div class="net-card method-card" id="methodCard" hidden></div>
     <div class="net-card method-card laws-card" id="lawsCard" role="region" aria-label="Laws" hidden></div>
     <div class="rec" id="rec" hidden>
       <div class="rec-head">
@@ -1888,42 +1848,87 @@ details.adv > .block + .block { margin-top: 20px; }
   </div>
   <div class="ctx" id="ctx" role="menu" hidden></div>
 
-  <aside class="insp" id="insp" aria-label="Element details" hidden>
-    <div class="insp-head">
-      <div class="code-chip" id="iCode">4</div>
-      <div class="insp-kind"><span class="k" id="iKind">System 4</span><span class="r" id="iRole">Intelligence</span></div>
-      <button class="icon-btn" id="iClose" type="button" aria-label="Close details">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
-      </button>
-    </div>
-    <div class="insp-body">
-      <div class="isec isec-diag" id="iDiagSec"><h4>What did you find?</h4><div id="iDiag"></div></div>
-      <label class="fld"><span>Label in this model</span><input type="text" id="iName"></label>
-      <div class="fld">
-        <span>Colour</span>
-        <div class="color-row">
-          <input type="color" class="sw" id="iColor" aria-label="Element colour">
-          <small id="iColorNote">Using the group colour</small>
-          <button class="linkish" id="iColorReset" type="button">Use group colour</button>
+  <div class="setmenu" id="setMenu" role="dialog" aria-label="Settings" hidden>
+    <div class="sm-head"><b>Settings</b><button class="icon-btn" id="setClose" type="button" aria-label="Close settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="sm-body">
+      <div class="block">
+        <div class="eyebrow">Look</div>
+        <div class="row">
+          <span>Theme</span>
+          <div class="seg small" role="group" aria-label="Theme">
+            <button id="thAuto" type="button" aria-pressed="false" title="Follow the system's light or dark setting">Automatic</button>
+            <button id="thLight" type="button" aria-pressed="true">Light</button>
+            <button id="thDark" type="button" aria-pressed="false">Dark</button>
+          </div>
         </div>
       </div>
-      <p class="summary" id="iSummary"></p>
-      <div class="isec" id="iLawsSec" hidden><h4>Laws that apply here</h4><ul class="lawlist" id="iLaws"></ul></div>
-      <div class="isec" id="iFlowSec"><h4>Data flows</h4><div id="iFlows"></div></div>
-      <div class="isec" id="iNetSec" hidden><h4>In the value network</h4><div id="iNet"></div></div>
-      <div class="isec" id="iVarSec" hidden><h4>Attenuation and amplification</h4><div id="iVar"></div></div>
-      <div class="isec" id="iTixSec" hidden><h4>Triple Index</h4><div id="iTix"></div></div>
-      <div class="isec" id="iIsecSec" hidden><h4>Environmental intersects</h4><div id="iIsec"></div></div>
-      <div class="isec" id="iIOSec"><h4>Information in and out</h4><ul class="io" id="iIO"></ul></div>
-      <div id="iRecur"></div>
-      <div class="isec" id="iLinksSec"><h4>Connected</h4><ul class="links" id="iLinks"></ul></div>
-      <div class="isec" id="iPracticeSec"><h4>In practice</h4><ul id="iPractice"></ul></div>
-      <div class="isec" id="iQuestionsSec"><h4>Diagnostic questions</h4><ul id="iQuestions"></ul></div>
-      <details class="isec bq" id="iBoundarySec" hidden><summary>Where to draw System One (optional)</summary><p class="src">Prompts for when the cut is unclear. How fine to go is the modeller's call.</p><ul id="iBoundary"></ul></details>
-      <div class="isec" id="iWatchSec"><h4>Watch for</h4><ul id="iWatch"></ul></div>
-      <label class="fld"><span>Notes for your organization</span><textarea id="iNotes" placeholder="Who or what performs this function here? What works, what doesn't?"></textarea></label>
+
+
+      <div class="block">
+        <div class="eyebrow">Group colours</div>
+        <div class="row">
+          <span>Colour scheme</span>
+          <select class="inp" id="scheme" aria-label="Apply a colour scheme to every level">
+            <option value="">Choose…</option>
+            <option value="eom">Environment–Operation–Management</option>
+            <option value="systems">One colour per system</option>
+            <option value="default">Default (by domain)</option>
+          </select>
+        </div>
+        <div class="src" id="schemeNote" style="margin-top:-4px">Applies to every level, including ones you open later. You can still recolour anything afterwards.</div>
+        <div class="groups" id="groups"></div>
+      </div>
+
+      <div class="block" hidden>
+        <div class="eyebrow">Elements, rename and recolour</div>
+        <div class="elist" id="elist"></div>
+      </div>
+
+      <details class="adv" id="advanced" open>
+        <summary>Advanced: drawing conventions and recursion</summary>
+        <div class="block">
+          <div class="eyebrow">Diagram</div>
+          <div class="row wrap">
+            <span>Drawing convention</span>
+            <div class="seg small" role="group" aria-label="Drawing convention">
+              <button id="stSquare" type="button" aria-pressed="true" title="Metasystem as a square box holding 3, 3*, 4, 5 and System Two; local managements as tilted squares">Square</button>
+              <button id="stDiamond" type="button" aria-pressed="false" title="Metasystem as a rhombus; local managements as upright squares (Jon Walker's preference)">Diamond</button>
+            </div>
+          </div>
+          <div class="row">
+            <span>System Two centre</span>
+            <div class="seg small" role="group" aria-label="Where the System Two regulatory centre sits">
+              <button id="s2Inside" type="button" aria-pressed="true" title="Inside the metasystem, as usually drawn">Inside</button>
+              <button id="s2Bridge" type="button" aria-pressed="false" title="On the metasystem boundary, bridging management and operations">Bridge</button>
+            </div>
+          </div>
+          <div class="row">
+            <span>Value flows</span>
+            <div class="seg small" role="group" aria-label="How value flows are drawn">
+              <button id="vfRibbon" type="button" aria-pressed="true" title="Wide pale ribbons with broad arrowheads, after value-stream maps">Ribbons</button>
+              <button id="vfLine" type="button" aria-pressed="false" title="Thin lines, the same as every other channel">Lines</button>
+            </div>
+          </div>
+          <div class="row">
+            <span>Attenuators and amplifiers</span>
+            <div class="seg small" role="group" aria-label="How attenuators and amplifiers are drawn">
+              <button id="vnBeer" type="button" aria-pressed="true" title="Beer's notation: a resistor zigzag attenuates, a triangle pointing at the receiver amplifies">Beer's symbols</button>
+              <button id="vnWords" type="button" aria-pressed="false" title="Plain words on the channel">Words</button>
+            </div>
+          </div>
+          <label class="chk"><input type="checkbox" id="extS4cmd"><span>System Four into the Resource Bargain<small>Not in Beer's diagram: reads the command axis as anticipatory</small></span></label>
+          <label class="chk"><input type="checkbox" id="localS2"><span>Local regulatory centres<small>System Two's centre beside each local management; some diagrams omit them</small></span></label>
+          <label class="chk"><input type="checkbox" id="extS14"><span>System One ↔ System Four<small>Not in Beer's diagram: operations and System Four exchange signals directly, advisory only</small></span></label>
+        </div>
+
+        <div class="block">
+          <div class="eyebrow">Recursion</div>
+          <label class="chk"><input type="checkbox" id="autoLevels"><span>Create levels by zooming in<small>Off: zooming into an operation without lower levels asks first. Double-click always creates them.</small></span></label>
+        </div>
+      </details>
+      <div class="src" id="saveNote">Changes are saved in this browser.</div>
     </div>
-  </aside>
+  </div>
   <footer class="foot">
     <span class="cred"><span class="fx">The Viable System Model after Stafford Beer. </span>Explorer by <a href="https://www.linkedin.com/in/panagio" target="_blank" rel="noopener">Panagiotis Panagiotakopoulos</a>, code AGPL-3.0, text CC BY-SA 4.0.</span>
     <button class="linkish foot-about" type="button" id="footAbout">About and licence</button>
@@ -2487,7 +2492,7 @@ const GROUP_INFO = {
   env: { name: 'Environment', hint: 'Total, future and operational environments' },
   ops: { name: 'System One', hint: 'Operational elements and their local management' },
   meta: { name: 'Metasystem', hint: 'Systems Two, Three, Three-Star, Four and Five' },
-  chan: { name: 'Channels', hint: 'Name and colour each connection. What travels along them is in the Flows tab.' }
+  chan: { name: 'Channels', hint: 'Name and colour each connection. What travels along them is in each channel’s details and in Coach.' }
 };
 const STORE_KEY = 'vsm-explorer:v1';
 
@@ -3669,7 +3674,7 @@ function setCam(s) {
 function stageCover() {
   const w = stage.clientWidth || 800, narrow = matchMedia('(max-width: 860px)').matches;
   const present = $('#app').classList.contains('presenting');
-  const card = ['#methodCard', '#lawsCard'].map(s => $(s)).find(c => c && !c.hidden && c.offsetWidth);
+  const card = ['#lawsCard'].map(s => $(s)).find(c => c && !c.hidden && c.offsetWidth);
   const right = !narrow && !present && card && w > 760 ? card.offsetWidth + 24 : 0;
   const top = narrow ? 0 : present ? 16 : 56;
   // the hint bar can wrap to two lines on a narrower sheet, so keep clear of its real height
@@ -4844,15 +4849,17 @@ function openRecCtx(x, y, lvId, fromId, el) {
 
 /* ---------- inspector ---------- */
 const insp = $('#insp');
+let inspShown = null; // the element whose details were last opened, so a refresh does not switch tabs
 function renderInspector() {
   const app = $('#app');
   if (!selected || inspDismissed || (!L.byId[selected] && !L.chanById[selected])) {
-    insp.hidden = true; app.classList.remove('insp-open');
+    insp.hidden = true; app.classList.remove('insp-open'); $('#focusBlock').hidden = false; inspShown = null;
     return;
   }
   const lv = level(), id = selected, t = typeOfId(L, id), kb = KB[t] || {};
   const wasHidden = insp.hidden;
-  insp.hidden = false; app.classList.add('insp-open');
+  insp.hidden = false; app.classList.add('insp-open'); $('#focusBlock').hidden = true;
+  if (inspShown !== id) { inspShown = id; if (!$('#app').classList.contains('presenting')) openPanel('details'); }
   const code = codeOf(lv, id);
   $('#iCode').textContent = code || '↔';
   $('#iKind').textContent = kb.kind || '';
@@ -5787,7 +5794,13 @@ function openModelMenu() {
     { ic: '▤', text: 'Findings table (CSV)', fn: () => exportFindings('csv') },
     { ic: '▤', text: 'Findings report (HTML)', fn: () => exportFindings('html') },
     { sep: true }, { sub: 'Examples' }
-  ].concat(Object.keys(EXAMPLES).map(k => ({ ic: '◇', text: EXAMPLES[k].name, fn: () => loadModel(k) })));
+  ].concat(Object.keys(EXAMPLES).map(k => ({ ic: '◇', text: EXAMPLES[k].name, fn: () => loadModel(k) })), [
+    { sep: true },
+    { ic: '⌂', text: 'Start screen', fn: () => openModalById('welcome') },
+    { ic: '⌨', text: 'Keyboard shortcuts', kbd: '?', fn: () => openModalById('keysSheet') },
+    { ic: '↗', text: 'Close the Loop Studio', fn: openStudio },
+    { ic: 'i', text: 'About and licence', fn: () => openModalById('about') }
+  ]);
   if (narrowQ.matches) showCtxMenu(b.left, b.bottom + 6, head, items, null); else showCtxMenu(b.right + 8, b.top, head, items, null);
   $('#btnModel').setAttribute('aria-expanded', 'true');
 }
@@ -5853,7 +5866,7 @@ function renderRegister() {
   const lv = level(), cv = assessment(lv, L);
   $('#regName').textContent = levelName(lv);
   $('#regPurpose').innerHTML = lv.purpose ? esc(lv.purpose) : 'No purpose stated yet. <button class="linkish" type="button" id="regPurposeBtn">State the purpose</button>';
-  const pb = $('#regPurposeBtn'); if (pb) pb.addEventListener('click', () => { $('#tab-model').click(); requestAnimationFrame(() => $('#levelPurpose').focus()); });
+  const pb = $('#regPurposeBtn'); if (pb) pb.addEventListener('click', () => { select(null); openPanel('details'); requestAnimationFrame(() => $('#levelPurpose').focus()); });
   $('#regCov').innerHTML = '<div><b>' + cv.assessed + '</b><span>of ' + cv.total + ' assessed</span></div><div><b>' + cv.findings + '</b><span>' + (cv.findings === 1 ? 'finding' : 'findings') + '</span></div><div><b>' + (cv.total - cv.assessed) + '</b><span>still to look at</span></div>';
   const has = new Set(L.els.map(e => e.id)), used = new Set();
   const stateOf = id => { const d = lv.diag && lv.diag[id]; if (!d) return null; return d.s === 'ok' ? DIAG_OK : DIAG[d.s] || null; };
@@ -5882,15 +5895,36 @@ $('#regFilter').querySelectorAll('button').forEach(b => b.addEventListener('clic
 }));
 
 // tabs
-const tabs = ['reg', 'model', 'flows', 'guide'];
-tabs.forEach(t => $('#tab-' + t).addEventListener('click', () => {
-  tabs.forEach(o => { $('#tab-' + o).setAttribute('aria-selected', String(o === t)); $('#pane-' + o).hidden = o !== t; });
-}));
-// Settings sits on the rail (after the FBC Explorer's Look button) and opens the panel on its pane
-$('#tab-model').addEventListener('click', () => {
+// one panel, as on the FBC Explorer: Guide explains, Details edits the selection (or the system in focus), Coach shows progress
+const tabs = ['guide', 'details', 'reg'];
+const showTab = t => tabs.forEach(o => { $('#tab-' + o).setAttribute('aria-selected', String(o === t)); $('#pane-' + o).hidden = o !== t; });
+tabs.forEach(t => $('#tab-' + t).addEventListener('click', () => showTab(t)));
+function openPanel(t) {
   if (narrowQ.matches) app.classList.add('drawer-open'); else if (!prefs.side) { prefs.side = true; save(); }
   syncSide();
-});
+  if (t) showTab(t);
+}
+$('#sideX').addEventListener('click', () => { if (narrowQ.matches) app.classList.remove('drawer-open'); else { prefs.side = false; save(); } syncSide(); });
+// Settings: a menu from the rail, like the FBC Explorer's Look; only how the tool looks and draws
+const setMenu = $('#setMenu');
+function placeSetMenu() {
+  const b = $('#tab-model').getBoundingClientRect(), W = innerWidth, H = innerHeight;
+  const mw = Math.min(360, W - 16);
+  setMenu.style.width = mw + 'px';
+  if (narrowQ.matches) { setMenu.style.left = Math.max(8, Math.min(b.left, W - mw - 8)) + 'px'; setMenu.style.top = (b.bottom + 6) + 'px'; setMenu.style.bottom = 'auto'; setMenu.style.maxHeight = (H - b.bottom - 14) + 'px'; }
+  else { setMenu.style.left = (b.right + 8) + 'px'; setMenu.style.top = 'auto'; setMenu.style.bottom = Math.max(8, H - b.bottom) + 'px'; setMenu.style.maxHeight = (H - 70) + 'px'; }
+}
+function toggleSettings(on) {
+  on = on == null ? setMenu.hidden : on;
+  setMenu.hidden = !on; $('#tab-model').setAttribute('aria-expanded', String(on));
+  if (on) { placeSetMenu(); closeCtx(); }
+}
+$('#tab-model').addEventListener('click', e => { e.stopPropagation(); toggleSettings(); });
+$('#setClose').addEventListener('click', () => toggleSettings(false));
+document.addEventListener('pointerdown', e => { if (!setMenu.hidden && !setMenu.contains(e.target) && !e.target.closest('#tab-model')) toggleSettings(false); });
+window.addEventListener('keydown', e => { if (e.key === 'Escape' && !setMenu.hidden) { toggleSettings(false); e.stopImmediatePropagation(); } }, true);
+window.addEventListener('resize', () => { if (!setMenu.hidden) placeSetMenu(); });
+$('#brandAbout').addEventListener('click', () => openModalById('about'));
 
 // side panel: docked on wide screens, a drawer on narrow ones
 const app = $('#app');
@@ -6367,7 +6401,6 @@ const methodOn = () => !!prefs.method;
 function renderMethod() {
   const view = ['net', 'rec'].includes(prefs.diagram) ? prefs.diagram : 'vsm', on = methodOn();
   $('#btnMethod').setAttribute('aria-pressed', String(on));
-  app.classList.toggle('method-on', on && view === 'rec');
   const card = $('#methodCard');
   card.hidden = !on || view === 'net' || (view === 'vsm' && !!prefs.laws);
   if (!card.hidden && !card.contains(document.activeElement)) { card.innerHTML = methodHTML(view); wireMethod(card, view); }
@@ -6817,7 +6850,7 @@ netSvg.addEventListener('pointerdown', e => {
 $('#dVsm').addEventListener('click', () => setDiagram('vsm'));
 $('#dNet').addEventListener('click', () => setDiagram('net'));
 $('#dRec').addEventListener('click', () => setDiagram('rec'));
-$('#btnMethod').addEventListener('click', () => setMethod(!methodOn()));
+$('#btnMethod').addEventListener('click', () => { const on = !methodOn(); setMethod(on); if (on && prefs.diagram !== 'net') openPanel('guide'); });
 $('#recVsm').addEventListener('click', () => setDiagram('vsm'));
 $('#recUp').addEventListener('click', addLevelAbove);
 $('#recNet').addEventListener('click', () => setDiagram('net'));
@@ -7231,10 +7264,7 @@ $('#wExamples').addEventListener('click', e => { const b = e.target.closest('[da
 $('#wExplore').addEventListener('click', () => closeModal());
 $('#wMap').addEventListener('click', () => {
   closeModal();
-  prefs.side = true; save();
-  if (narrowQ.matches) app.classList.add('drawer-open');
-  syncSide();
-  $('#tab-model').click();
+  openPanel('details');
   if (!methodOn()) setMethod(true);
   requestAnimationFrame(() => { const n = $('#levelName'); n.focus(); n.select(); });
 });
@@ -7252,10 +7282,6 @@ $('#ctlLock').addEventListener('click', e => { e.preventDefault(); openStudio();
 const syncThemeSeg = () => { const t = prefs.theme || 'light'; [['thAuto', 'auto'], ['thLight', 'light'], ['thDark', 'dark']].forEach(([id, v]) => $('#' + id).setAttribute('aria-pressed', String(t === v))); };
 [['thAuto', 'auto'], ['thLight', 'light'], ['thDark', 'dark']].forEach(([id, v]) => $('#' + id).addEventListener('click', () => { setThemePref(v); syncThemeSeg(); }));
 syncThemeSeg();
-$('#setKeys').addEventListener('click', () => openModalById('keysSheet'));
-$('#setStart').addEventListener('click', () => openModalById('welcome'));
-$('#setAbout').addEventListener('click', () => openModalById('about'));
-$('#setStudio').addEventListener('click', openStudio);
 
 /* ---------- focus keys: one key per system, after Beer's numbering ---------- */
 const opIds = pre => Array.from({ length: level().opCount }, (_, i) => pre + i);

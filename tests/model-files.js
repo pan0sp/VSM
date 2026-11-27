@@ -31,7 +31,7 @@ const ok = (c, m) => console.log((c ? 'ok   ' : 'FAIL ') + m);
   ok(/Café/.test(await crumbs()), 'undo restores café');
   // new, then open the saved file
   await menu('New blank model');
-  await pg.click('#stDiamond'); await pg.waitForTimeout(400);
+  await pg.$eval('#stDiamond', e => e.click()); await pg.waitForTimeout(400);
   await pg.setInputFiles('#fileOpen', path); await pg.waitForTimeout(900);
   ok(/Café/.test(await crumbs()), 'opening the file restores café');
   ok(await pg.$eval('#stSquare', e => e.getAttribute('aria-pressed') === 'true'), 'conventions come back with the file');

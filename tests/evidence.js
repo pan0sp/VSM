@@ -13,16 +13,16 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   const pick = async text => { await pg.click('#btnModel'); await pg.waitForTimeout(250); await pg.locator('.ctx button, [role=menuitem]').filter({ hasText: text }).first().click({ force: true }); };
   const grab = async text => { const [d] = await Promise.all([pg.waitForEvent('download', { timeout: 15000 }), pick(text)]); const p = path.join(OUT, 'ev-' + d.suggestedFilename()); await d.saveAs(p); return fs.readFileSync(p, 'utf8'); };
   await pg.click('#btnSide'); await pg.waitForTimeout(300);
-  await pg.click('#tab-model'); await pg.waitForTimeout(200); // the panel opens on the Register; these checks use Settings
+  await pg.click('#tab-details'); await pg.waitForTimeout(200); // the panel opens on the Register; these checks use Settings
   ok(/Nothing assessed yet/.test(await pg.textContent('#diagList')), 'a fresh level says nothing has been assessed');
   // System Five: assessed, no issue
-  await pg.click('.erow[data-id="s5"] .ecode'); await pg.waitForTimeout(400);
+  await pg.$eval('.erow[data-id="s5"] .ecode', e => e.click()); await pg.waitForTimeout(400);
   ok(/Not assessed/.test(await pg.textContent('#iDiag')) && await pg.getAttribute('#iDiag .dchip[data-k=""]', 'aria-pressed') === 'true', 'details start at "Not assessed"');
   await pg.click('#iDiag .dchip[data-k="ok"]'); await pg.waitForTimeout(200);
   await pg.fill('#iDiagNote', 'Board minutes for 2025 reviewed'); await pg.selectOption('#iDiagSrc', 'document');
   ok(await pg.isHidden('#iDiagCons'), '"No issue" asks for evidence, not a consequence');
   // System Four: a finding with its grounds
-  await pg.click('.erow[data-id="s4"] .ecode'); await pg.waitForTimeout(400);
+  await pg.$eval('.erow[data-id="s4"] .ecode', e => e.click()); await pg.waitForTimeout(400);
   await pg.click('#iDiag .dchip[data-k="weak"]'); await pg.waitForTimeout(200);
   await pg.fill('#iDiagNote', 'Two of six people on warranty fixes'); await pg.selectOption('#iDiagSrc', 'interview');
   await pg.click('#iDiag [data-conf="medium"]'); await pg.fill('#iDiagCons', 'No one scans battery rules ahead'); await pg.selectOption('#iDiagSt', 'review');
@@ -49,7 +49,7 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   ok(/Not yet assessed/.test(html) && /Assessed, no issue found/.test(html) && /Tentative/.test(html), 'the report lists findings, what held up and what nobody has assessed');
   // suggested flows, on a blank model where every channel is empty
   await pick('New blank model'); await pg.waitForTimeout(1200);
-  await pg.click('#tab-flows'); await pg.waitForTimeout(300);
+  await pg.click('#tab-reg'); await pg.waitForTimeout(300);
   await pg.click('#btnSuggest'); await pg.waitForTimeout(300);
   r = await stored();
   const sugCh = Object.keys(r.flows).find(k => r.flows[k].every(f => f.sug));

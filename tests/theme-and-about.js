@@ -19,9 +19,9 @@ const theme = pg => pg.evaluate(() => document.documentElement.getAttribute('dat
   await pg.screenshot({ path: process.env.SP + '/shots/about-light.png' });
   await pg.keyboard.press('Escape');
   await pg.evaluate(() => { window.__opened = null; window.open = u => { window.__opened = u; return null; }; });
-  await pg.click('#tab-model'); await pg.waitForTimeout(300); await pg.click('#setStudio');
-  ok(await pg.evaluate(() => window.__opened) === 'https://studio.closetheloop.gr/', 'off the site, Settings opens Close the Loop Studio in a new tab');
-  await pg.click('#thDark'); await pg.waitForTimeout(300);
+  await pg.click('#btnModel'); await pg.waitForTimeout(300); await pg.click('#ctx >> text=Close the Loop Studio');
+  ok(await pg.evaluate(() => window.__opened) === 'https://studio.closetheloop.gr/', 'off the site, File opens Close the Loop Studio in a new tab');
+  await pg.click('#tab-model'); await pg.waitForTimeout(300); await pg.click('#thDark'); await pg.keyboard.press('Escape'); await pg.waitForTimeout(300);
   await pg.click('#footAbout'); await pg.waitForTimeout(2200);
   await pg.screenshot({ path: process.env.SP + '/shots/about-dark.png' });
   await pg.keyboard.press('Escape'); await pg.waitForTimeout(400);
@@ -31,7 +31,7 @@ const theme = pg => pg.evaluate(() => document.documentElement.getAttribute('dat
   await pg.evaluate(() => { const k = 'vsm-explorer:v1', d = JSON.parse(localStorage.getItem(k)); d.prefs.theme = 'auto'; delete d.prefs.themeChosen; localStorage.setItem(k, JSON.stringify(d)); });
   await pg.reload(); await pg.waitForTimeout(1500);
   ok(await theme(pg) === 'light', 'older storage with the old automatic default opens light');
-  await pg.setViewportSize({ width: 390, height: 760 }); await pg.click('#tab-model'); await pg.waitForTimeout(400); await pg.click('#setAbout'); await pg.waitForTimeout(2200);
+  await pg.setViewportSize({ width: 390, height: 760 }); await pg.click('#btnModel'); await pg.waitForTimeout(400); await pg.click('#ctx >> text=About and licence'); await pg.waitForTimeout(2200);
   await pg.screenshot({ path: process.env.SP + '/shots/about-phone.png' });
   console.log('errors', errs);
   await b.close();

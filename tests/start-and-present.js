@@ -19,7 +19,7 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   // review bugs
   await pg.click('#btnSide'); await pg.waitForTimeout(300);
   ok(await pg.isVisible('#regList .rrow'), 'the panel opens on the register of elements');
-  await pg.click('#tab-model'); await pg.waitForTimeout(200);
+  await pg.click('#tab-details'); await pg.waitForTimeout(200);
   const plus = await pg.evaluate(() => { const p = document.getElementById('opPlus').getBoundingClientRect(), side = document.getElementById('side').getBoundingClientRect(); return p.width > 20 && p.right <= side.right - 4; });
   ok(plus, 'operations stepper: + is whole and inside the panel');
   ok(await pg.isVisible('#levelPurpose'), 'Settings lead with name, purpose and operations');

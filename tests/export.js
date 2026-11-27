@@ -15,8 +15,8 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   ok(/Nothing has been assessed/.test(await pg.textContent('#toast')), 'with no findings, export says so instead of saving an empty table');
   // flag System Four with evidence
   await pg.click('#btnSide'); await pg.waitForTimeout(300);
-  await pg.click('#tab-model'); await pg.waitForTimeout(200); // the panel opens on the Register; these checks use Settings
-  await pg.click('.erow[data-id="s4"] .ecode'); await pg.waitForTimeout(400);
+  await pg.click('#tab-details'); await pg.waitForTimeout(200); // the panel opens on the Register; these checks use Settings
+  await pg.$eval('.erow[data-id="s4"] .ecode', e => e.click()); await pg.waitForTimeout(400);
   await pg.click('#iDiag .dchip[data-k="weak"]'); await pg.waitForTimeout(200);
   await pg.fill('#iDiagNote', 'Six people, "R&D" mostly fire-fighting, per COO interview'); await pg.waitForTimeout(200);
   await pg.click('#iClose');

@@ -40,15 +40,15 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   // the VSM: Dine-in's details carry the prompts, hidden for other elements
   await pg.click('#dVsm'); await pg.waitForTimeout(900);
   await pg.click('#btnSide'); await pg.waitForTimeout(300);
-  await pg.click('#tab-model'); await pg.waitForTimeout(200); // the panel opens on the Register; these checks use Settings
-  await pg.click('.erow[data-id="o0"] .ecode'); await pg.waitForTimeout(400);
+  await pg.click('#tab-details'); await pg.waitForTimeout(200); // the panel opens on the Register; these checks use Settings
+  await pg.$eval('.erow[data-id="o0"] .ecode', e => e.click()); await pg.waitForTimeout(400);
   ok(await pg.isVisible('#iBoundarySec') && !(await pg.getAttribute('#iBoundarySec', 'open')), 'an operation\'s details offer the prompts, closed by default');
   const fl = await pg.textContent('#insp');
-  await pg.click('.erow[data-id="s3"] .ecode'); await pg.waitForTimeout(400);
+  await pg.$eval('.erow[data-id="s3"] .ecode', e => e.click()); await pg.waitForTimeout(400);
   ok(await pg.isHidden('#iBoundarySec'), 'other elements do not show them');
   await pg.screenshot({ path: OUT + '/shots/activities-vsm.png' });
   // the organising criterion: a label on the level, shown on the recursion tree
-  await pg.click('#tab-model').catch(() => {}); await pg.waitForTimeout(200);
+  await pg.click('#iClose').catch(() => {}); await pg.waitForTimeout(300);
   ok(await pg.inputValue('#levelUnfold') === 'customer' && await pg.isVisible('#levelUnfoldSrc'), 'the café by service unfolds by customers, with the source named');
   await pg.selectOption('#levelUnfold', 'geo'); await pg.waitForTimeout(600);
   r = await stored();

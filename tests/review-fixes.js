@@ -13,18 +13,18 @@ const menuPick = async (pg, text) => { await pg.click('#btnModel'); await pg.wai
   const codes = await pg.evaluate(() => [...document.querySelectorAll('#labels .lbl .code')].map(c => c.textContent));
   ok(codes.filter(c => c === 'EF').length <= 1 && codes.includes('FE'), 'the future environment is FE, so EF only names a local environment');
   await pg.click('#btnSide'); await pg.waitForTimeout(300);
-  await pg.click('#tab-model'); await pg.waitForTimeout(200);
+  await pg.click('#tab-details'); await pg.waitForTimeout(200);
   ok(await pg.isVisible('#opMax') && await pg.isDisabled('#opPlus'), 'at six operations, + is off and a note says why');
   ok(await pg.isHidden('#aiBlock'), 'off claude.ai the Claude mapping block is hidden');
   // the details pane: closed stays closed through view and model changes; a new choice opens it
-  await pg.click('.erow[data-id="s3"] .ecode'); await pg.waitForTimeout(400);
+  await pg.$eval('.erow[data-id="s3"] .ecode', e => e.click()); await pg.waitForTimeout(400);
   ok(await pg.isVisible('#insp'), 'choosing an element opens its details');
   await pg.click('#iClose'); await pg.waitForTimeout(300);
   for (const v of ['#v3d', '#vHemi', '#v2d', '#dNet', '#dVsm']) { await pg.click(v); await pg.waitForTimeout(1400); }
   ok(await pg.isHidden('#insp'), 'a closed details pane stays closed through view changes');
   await menuPick(pg, 'Model company');
   ok(await pg.isHidden('#insp'), 'and through opening another model');
-  await pg.click('.erow[data-id="s4"] .ecode'); await pg.waitForTimeout(400);
+  await pg.$eval('.erow[data-id="s4"] .ecode', e => e.click()); await pg.waitForTimeout(400);
   ok(await pg.isVisible('#insp'), 'after a model change, choosing an element opens its details again');
   // the model company has a value network now
   await pg.click('#dNet'); await pg.waitForTimeout(900);

@@ -17,7 +17,7 @@ const ok = (c, m) => console.log((c ? 'ok   ' : 'FAIL ') + m);
   // the café by service: Dine-in, Takeaway, Catering, with a value network
   await pg.click('#wExamples [data-ex="cafeServices"]'); await pg.waitForTimeout(1500);
   await settingsOpen(pg);
-  await pg.click('.erow[data-id="e0"] .ecode'); await pg.waitForTimeout(500);
+  await pg.$eval('.erow[data-id="e0"] .ecode', e => e.click()); await pg.waitForTimeout(500);
   ok(await pg.isVisible('#iIsecSec'), 'a local environment\'s details list its intersects');
   const rows = await pg.$$eval('#iIsec .isx-row', rs => rs.map(r => r.textContent));
   ok(rows.length === 2, 'one row for each other operation (' + rows.length + ')');
@@ -40,7 +40,7 @@ const ok = (c, m) => console.log((c ? 'ok   ' : 'FAIL ') + m);
   // no value network: neighbours overlap symbolically
   await pg.click('#btnModel'); await pg.waitForTimeout(300);
   await pg.locator('.ctx button, [role=menuitem]').filter({ hasText: 'Regional hospital' }).first().click({ force: true }); await pg.waitForTimeout(1500);
-  await pg.click('.erow[data-id="e1"] .ecode'); await pg.waitForTimeout(500);
+  await pg.$eval('.erow[data-id="e1"] .ecode', e => e.click()); await pg.waitForTimeout(500);
   const hr = await pg.$$eval('#iIsec .isx-row', rs => rs.map(r => r.textContent.replace(/\s+/g, ' ')));
   console.log('     ' + hr.join('\n     '));
   ok(hr.length === 3 && hr.filter(r => /Symbolic/.test(r) && /IntersectAs found/.test(r)).length === 2, 'without a network, neighbours intersect symbolically and others stay apart');

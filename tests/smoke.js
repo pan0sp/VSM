@@ -7,14 +7,14 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   const pg = await cx.newPage(); pg.on('pageerror', e => errs.push(e.stack));
   await pg.goto(PAGE); await pg.waitForTimeout(2500); await settingsOpen(pg);
   for (const st of ['Square', 'Diamond']) {
-    await pg.click('text=' + st); await pg.waitForTimeout(500);
+    await pg.$eval('#st' + st, e => e.click()); await pg.waitForTimeout(500);
     for (const v of ['2', '3']) {
       await pg.click(v === '2' ? '#v2d' : '#v3d'); await pg.waitForTimeout(1500);
       const y = await pg.evaluate(() => { const g = id => { const n = [...document.querySelectorAll('.lbl')].find(d => d.querySelector('.code') && d.querySelector('.code').textContent === id); const r = n.getBoundingClientRect(); return r.y + r.height / 2; }; return [g('FE'), g('4')]; });
       if (v === '2') ok(Math.abs(y[0] - y[1]) < 14, st + ' 2D: future environment level with System Four (' + y.map(Math.round).join(' vs ') + ')');
     }
   }
-  await pg.click('text=Square'); await pg.click('#v2d'); await pg.waitForTimeout(1400);
+  await pg.$eval('#stSquare', e => e.click()); await pg.click('#v2d'); await pg.waitForTimeout(1400);
   const p = await pg.evaluate(() => { const n = [...document.querySelectorAll('.lbl')].find(d => d.querySelector('.code') && d.querySelector('.code').textContent === 'FE'); const r = n.getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2 + 6]; });
   await pg.mouse.click(p[0], p[1]); await pg.waitForTimeout(500);
   ok(/Outside-and-then link/.test(await pg.textContent('#iLinks')), 'future environment details list the System Four link');

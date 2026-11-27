@@ -18,6 +18,9 @@ const theme = pg => pg.evaluate(() => document.documentElement.getAttribute('dat
   ok(/AGPL/.test(await pg.textContent('#about')), 'About still names the licence');
   await pg.screenshot({ path: process.env.SP + '/shots/about-light.png' });
   await pg.keyboard.press('Escape');
+  await pg.evaluate(() => { window.__opened = null; window.open = u => { window.__opened = u; return null; }; });
+  await pg.click('#btnMore'); await pg.click('#ctx >> text=Close the Loop Studio');
+  ok(await pg.evaluate(() => window.__opened) === 'https://studio.closetheloop.gr/', 'off the site, the menu opens Close the Loop Studio in a new tab');
   await pg.click('#btnMore'); await pg.click('#ctx >> text=Dark'); await pg.waitForTimeout(300);
   await pg.click('#footAbout'); await pg.waitForTimeout(2200);
   await pg.screenshot({ path: process.env.SP + '/shots/about-dark.png' });

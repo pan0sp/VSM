@@ -23,7 +23,7 @@ const route = async cx => { await cx.route('https://cdn.jsdelivr.net/**', r => {
   const buf = fs.readFileSync(png);
   ok(/\.png$/.test(png) && buf.slice(1, 4).toString() === 'PNG' && buf.readUInt32BE(16) >= 1900, 'PNG of the 2D view at twice the size (' + path.basename(png) + ', ' + buf.readUInt32BE(16) + ' px wide)');
   const svg = fs.readFileSync(await grab('(SVG)'), 'utf8');
-  ok(/<svg/.test(svg) && /<image/.test(svg) && />City</.test(svg) && /vsm\.closetheloop\.gr/.test(svg), 'SVG keeps the labels as text, over the picture, with the credit');
+  ok(/<svg/.test(svg) && /<image/.test(svg) && />City</.test(svg) && /studio\.closetheloop\.gr\/vsm/.test(svg), 'SVG keeps the labels as text, over the picture, with the credit');
   const csv = fs.readFileSync(await grab('(CSV)'), 'utf8');
   ok(/^﻿Level,System in focus,Code,Element,Kind,Finding,Evidence/.test(csv) && /Lacks requisite variety/.test(csv) && /"Six people, ""R&D"" mostly fire-fighting, per COO interview"/.test(csv), 'CSV lists the finding with its evidence, quoted safely');
   const html = fs.readFileSync(await grab('(HTML)'), 'utf8');

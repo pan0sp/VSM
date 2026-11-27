@@ -1336,6 +1336,10 @@ details.adv > .block + .block { margin-top: 20px; }
 .mini .ib { width: 30px; height: 30px; border-radius: 50%; border: 0; background: transparent; color: var(--ink); display: grid; place-items: center; }
 .mini .ib:hover { background: var(--surface-2); }
 .mini .ib svg { width: 16px; height: 16px; }
+.topbar .hist { display: flex; gap: 4px; }
+.topbar .hist .icon-btn:disabled { opacity: .35; cursor: default; }
+.topbar .hist .icon-btn svg { width: 17px; height: 17px; }
+.app.presenting .topbar .hist { display: none; }
 /* the credit line, as on the FBC's sheet: sources on the left, the maker's mark on the right */
 .foot { font-size: 11px; line-height: 1.35; color: var(--ink-2); gap: 24px; }
 .foot .foot-about { flex: none; margin-left: -18px; }
@@ -1447,6 +1451,10 @@ details.adv > .block + .block { margin-top: 20px; }
     <input type="file" id="fileOpen" accept=".json,application/json" hidden>
     <nav class="crumbs" id="crumbs" aria-label="Recursion trail"></nav>
     <div class="tools">
+      <div class="tgroup hist" role="group" aria-label="History">
+        <button class="icon-btn" id="btnUndo" type="button" title="Undo (Ctrl Z)" aria-label="Undo" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+        <button class="icon-btn" id="btnRedo" type="button" title="Redo (Ctrl Shift Z)" aria-label="Redo" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+      </div>
       <div class="tgroup" role="group" aria-label="Present">
         <button class="tool" id="btnMethod" type="button" aria-pressed="true" title="Show the method for this view">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h9M19 18h.01"/></svg>
@@ -1600,7 +1608,7 @@ details.adv > .block + .block { margin-top: 20px; }
         <div class="method-card laws-card" id="lawsCard" role="region" aria-label="Laws" hidden></div>
       <div class="block">
         <h3>Three views of one model</h3>
-        <p>The <b>File</b> menu on the left starts a blank model, opens one from a file, saves this one to a file (Ctrl S), and opens the worked examples as complete models. Each replaces the whole model and offers Undo.</p>
+        <p>The <b>File</b> menu on the left starts a blank model, opens one from a file, saves this one to a file (Ctrl S), and opens the worked examples as complete models. Every change can be undone with the arrows in the header or Ctrl Z.</p>
         <p>The rail on the left switches between three views. <b>VSM</b> draws Beer's diagram in 2D, 3D or the Orthogonal view. <b>Value network</b> maps the primary activities of System One, the actors around them and the flows between them. <b>Recursion</b> shows the hierarchy of viable systems, with the System-in-Focus marked. All three edit the same model, and the System-in-Focus is the same in each. This panel has three tabs: <b>Guide</b> explains, <b>Details</b> edits what you select (or the System-in-Focus, when nothing is), and <b>Coach</b> shows what has been assessed and what travels on each channel. <b>Settings</b>, at the foot of the rail, holds the theme, colours and drawing conventions. <b>Method</b> in the header adds the four steps (purpose, value network, recursion, VSM) to this Guide. In every view, wide pale ribbons with broad arrowheads are value flows (operational linkages, and exchanges between an operation and its environment); thin lines are Beer's cybernetic channels. <b>Value flows</b> in Settings draws them as thin lines like every other channel instead.</p>
       </div>
       <div class="block">
@@ -1826,6 +1834,7 @@ details.adv > .block + .block { margin-top: 20px; }
           <div class="keys sheet">
             <kbd>L</kbd><span>Draw a flow</span>
             <kbd>Delete</kbd><span>Remove the selected flow or element</span>
+            <kbd>Ctrl Z</kbd><span>Undo any change to the model (Ctrl Shift Z redoes)</span>
             <kbd>Ctrl S</kbd><span>Save the model to a file</span>
             <kbd>Ctrl O</kbd><span>Open a saved model</span>
           </div>
@@ -2731,8 +2740,11 @@ function load() {
   freshDb();
   return false;
 }
+const hist = { undo: [], redo: [], last: null, at: 0, field: null, restoring: false };
+const histKey = () => JSON.stringify(Object.assign({}, db, { currentId: null }));
 let saveTimer = 0;
 function save() {
+  noteChange();
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     try { localStorage.setItem(STORE_KEY, JSON.stringify({ db, prefs })); $('#saveNote').textContent = 'Changes are saved in this browser.'; }
@@ -4499,6 +4511,46 @@ function removeOperation(lv, k) {
   retag(lv);
   return true;
 }
+/* Undo for everything (Nov 27 2026): every change to the model is one step, noticed when it is saved.
+   Typing in one field is one step until you pause or move on. Moving between levels is not a change. */
+function noteChange() {
+  if (hist.restoring || !db) return;
+  const now = histKey();
+  if (hist.last === null || now === hist.last) { hist.last = now; return; }
+  const t = performance.now(), a = document.activeElement;
+  const f = a && a.matches && a.matches('input[type="text"], input:not([type]), textarea') ? a : null;
+  if (!(f && f === hist.field && t - hist.at < 1500)) { hist.undo.push(hist.last); if (hist.undo.length > 100) hist.undo.shift(); }
+  hist.redo = []; hist.last = now; hist.at = t; hist.field = f;
+  syncUndo();
+}
+function syncUndo() {
+  const u = $('#btnUndo'), r = $('#btnRedo');
+  if (u) u.disabled = !hist.undo.length;
+  if (r) r.disabled = !hist.redo.length;
+}
+function restoreSnap(snap) {
+  const cur = db.currentId, cam = camState();
+  hist.restoring = true;
+  try {
+    db = JSON.parse(snap);
+    db.currentId = db.levels[cur] ? cur : db.rootId;
+    selected = null; selSet = new Set(); focusSet = null; netSel = null;
+    if (focusMode) exitFocus();
+    save(); syncDiagramControls();
+    buildScene(); setCam(cam); renderAllPanels();
+  } finally { hist.restoring = false; }
+  hist.last = snap; hist.field = null;
+  syncUndo();
+}
+function undo() {
+  if (busy || !hist.undo.length) return;
+  hist.redo.push(hist.last); restoreSnap(hist.undo.pop());
+  showToast('Undone. Ctrl Shift Z redoes it.', null, null, 2200);
+}
+function redo() {
+  if (busy || !hist.redo.length) return;
+  hist.undo.push(hist.last); restoreSnap(hist.redo.pop());
+}
 let lastRemoved = null;
 function offerUndo(msg) {
   showToast(msg, 'Undo', () => {
@@ -5647,6 +5699,8 @@ function recentre() {
   camTween(isHemi() ? f : Object.assign(f, { az: 0, el: 0 }), 650);
 }
 $('#btnRecentre').addEventListener('click', recentre);
+$('#btnUndo').addEventListener('click', () => undo());
+$('#btnRedo').addEventListener('click', () => redo());
 // the dock's zoom buttons: towards the middle of the view, in the VSM and the value network alike
 function zoomBy(f) {
   if (prefs.diagram === 'net') {
@@ -5902,6 +5956,11 @@ window.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   if (k === 's') { e.preventDefault(); saveToFile(); }
   else if (k === 'o') { e.preventDefault(); openPicker(); }
+  else if ((k === 'z' || k === 'y') && !e.target.closest('input, textarea, select, [contenteditable]')) {
+    // in a text field the browser's own undo works on the text; elsewhere it steps through the model's history
+    e.preventDefault();
+    if (k === 'y' || e.shiftKey) redo(); else undo();
+  }
 });
 // drop a saved model anywhere on the page to open it
 window.addEventListener('dragover', e => { if (e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')) e.preventDefault(); });
@@ -7696,6 +7755,7 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 
+noteChange(); syncUndo();
 if (!hadSaved) openModalById('welcome');
 canvas.addEventListener('pointerdown', fadeHint, { once: true });
 })();

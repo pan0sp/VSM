@@ -1,0 +1,30 @@
+// Undo for everything: each change to the model is one step; typing in one field is one step; Ctrl Z outside a text field
+const { chromium } = require('playwright'); const fs = require('fs'); const { DEP, PAGE } = require('./lib');
+const ok = (c, m) => console.log((c ? 'ok   ' : 'FAIL ') + m);
+(async () => {
+  const b = await chromium.launch(), errs = [];
+  const cx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+  await cx.route('https://cdn.jsdelivr.net/**', r => { const u = new URL(r.request().url()); r.fulfill({ body: fs.readFileSync(DEP + u.pathname.replace('/npm/three@0.128.0', '')), contentType: 'application/javascript' }); }); await cx.route('https://fonts.**/**', r => r.abort());
+  const pg = await cx.newPage(); pg.on('pageerror', e => errs.push(e.message));
+  await pg.goto(PAGE); await pg.waitForTimeout(2000);
+  await pg.click('#wExamples [data-ex="cafe"]'); await pg.waitForTimeout(1500);
+  const st = () => pg.evaluate(() => { const d = JSON.parse(localStorage.getItem('vsm-explorer:v1')).db, lv = d.levels[d.currentId]; return { s3: lv.diag && lv.diag.s3 && lv.diag.s3.s, ops: lv.opCount, name: lv.labels.s3, u: !document.getElementById('btnUndo').disabled, r: !document.getElementById('btnRedo').disabled }; });
+  await pg.$eval('.erow[data-id="s3"] .ecode', e => e.click()); await pg.waitForTimeout(600);
+  ok(await pg.isVisible('#mini'), 'a selected element shows its toolbar');
+  await pg.click('#mini [data-d="weak"]'); await pg.waitForTimeout(400);
+  ok((await st()).s3 === 'weak', 'the toolbar records a finding in one tap');
+  await pg.click('#iName'); await pg.keyboard.press('End'); await pg.keyboard.type(' X'); await pg.waitForTimeout(400);
+  await pg.click('#btnUndo'); await pg.waitForTimeout(600);
+  let s = await st();
+  ok(s.name === 'Shift manager' && s.s3 === 'weak', 'Undo takes back the whole typed name in one step');
+  await pg.click('#btnUndo'); await pg.waitForTimeout(600);
+  ok((await st()).s3 === undefined, 'a second Undo takes back the finding');
+  await pg.click('#gl', { position: { x: 30, y: 30 } }); await pg.keyboard.press('Control+Shift+Z'); await pg.waitForTimeout(600);
+  s = await st();
+  ok(s.s3 === 'weak' && s.r, 'Ctrl Shift Z redoes it');
+  await pg.keyboard.press('Control+z'); await pg.waitForTimeout(400); await pg.keyboard.press('Control+z'); await pg.waitForTimeout(600);
+  s = await st();
+  ok(s.ops === 3 && !s.u, 'opening an example is a step too: Undo goes back to the model before it');
+  console.log('errors', errs);
+  await b.close();
+})();

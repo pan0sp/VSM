@@ -24,7 +24,7 @@
 :root {
   /* Close the Loop brand: navy #141b38, gold #eeba2b (gold text on light is #a07a0e), off-white #f5f4f0 */
   --bg: #e5e7ed;
-  --stage: #eef0f4;
+  --stage: #e5e7ed;
   --stage-hi: #f6f7f9;
   --surface: #fbfbf8;
   --surface-2: #eceef3;
@@ -34,7 +34,7 @@
   --accent: #a07a0e;
   --accent-ink: #ffffff;
   --accent-soft: rgba(238, 186, 43, 0.16);
-  --halo: rgba(238, 240, 244, 0.94);
+  --halo: rgba(229, 231, 237, 0.94);
   --shadow: 0 1px 2px rgba(20, 27, 56, 0.06), 0 10px 30px rgba(20, 27, 56, 0.10);
   --gold: #eeba2b;
   --eom-e: #c8cedf; --eom-o: #3d4f80; --eom-m: #eeba2b;
@@ -1099,10 +1099,10 @@ ul.io { list-style: none; padding: 0; display: flex; flex-direction: column; gap
 
 /* ---------- Settings: advanced conventions folded away ---------- */
 details.adv { border-top: 1px solid var(--rule); padding-top: 12px; }
-details.adv > summary { cursor: pointer; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2); list-style-position: outside; margin-left: 14px; }
+details.adv > summary { cursor: pointer; font-family: var(--f-body); font-size: 12.5px; font-weight: 600; color: var(--ink-2); list-style-position: outside; margin-left: 14px; }
 details.adv[open] > summary { margin-bottom: 14px; }
 .rtree .uf { display: block; margin-top: 3px; font-family: var(--f-mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
-details.bq > summary { cursor: pointer; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2); }
+details.bq > summary { cursor: pointer; font-family: var(--f-body); font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
 details.bq[open] > summary { margin-bottom: 8px; }
 details.bq ul { margin: 6px 0 0; padding-left: 18px; }
 details.adv > .block + .block { margin-top: 20px; }
@@ -1251,7 +1251,6 @@ details.adv > .block + .block { margin-top: 20px; }
 .ctl-lock:hover .wm { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
 .topbar .brand-name { font-weight: 800; font-size: 17px; letter-spacing: -.005em; }
 /* the drawing is a sheet on the wall; panels are cards beside it */
-.stage { margin: 0 12px 0 12px; border-radius: 12px; box-shadow: var(--sheet-shadow); }
 .side, .insp { margin: 12px; border: 0; border-radius: 14px; box-shadow: var(--shadow); }
 .side { margin-right: 0; } .insp { margin-left: 0; }
 .stagebar { background: transparent; border-bottom: 0; padding: 12px 12px 10px; }
@@ -1261,20 +1260,13 @@ details.adv > .block + .block { margin-top: 20px; }
 .side .tab:hover { color: var(--ink); }
 .side .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
 .side .tabs .icon-btn { border-color: var(--rule); color: var(--ink-2); }
-/* recursion reads as one of Business Model's navy pages, with its systems as cream cards */
-.rec { background: var(--chrome); color: var(--chrome-ink); }
-.rec-head > div:first-child { color: var(--chrome-ink-2); }
-.rec-head b { font: 800 22px/1.15 var(--f-display); color: var(--chrome-ink); }
-.rec .rtree li::before, .rec .rtree li::after, .rec .rtree ul::before { border-color: var(--chrome-line); }
-.rec .rcard { color: var(--ink); border-color: transparent; }
-.rec .rcard.current { border-color: var(--ctl-gold); box-shadow: 0 0 0 2px rgba(238, 186, 43, .35), var(--shadow); }
-.rec .rcard.ghost { color: var(--chrome-ink); border-color: var(--chrome-line); }
-.rec .rcard.ghost .tn { color: var(--chrome-ink-2); }
-.rec .rcard.ghost .sub { color: var(--ctl-gold); }
-.rec .btn { background: transparent; color: var(--chrome-ink); border-color: var(--chrome-line); }
-.rec .btn:hover { border-color: var(--chrome-ink-2); background: var(--chrome-2); }
+/* one background for every view, as on every studio tool: the dotted grey wall in light, black in dark (Panos, Nov 27) */
+.stage { background: transparent; margin: 0; border-radius: 0; box-shadow: none; }
+.net, .rec { background: transparent; }
 /* the credit line, as on the FBC's sheet: sources on the left, the maker's mark on the right */
 .foot { font-size: 11px; line-height: 1.35; color: var(--ink-2); gap: 24px; }
+.foot .foot-about { flex: none; margin-left: -18px; }
+.foot .foot-sp { flex: 1; }
 .foot .cred { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .foot .cred a { color: inherit; text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--rule); }
 .foot .foot-about { font-size: 11px; font-weight: 500; color: var(--ink-2); text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--rule); }
@@ -1284,14 +1276,6 @@ details.adv > .block + .block { margin-top: 20px; }
 .foot .ctl-foot .arc, .foot .ctl-foot .arc-c { fill: none; stroke: currentColor; stroke-linecap: round; }
 .foot .ctl-foot .arc { stroke-width: 29; stroke-dasharray: 325.6 34.4; } .foot .ctl-foot .arc-c { stroke-width: 37.4; stroke-dasharray: 304.7 55.3; } .foot .ctl-foot .dot { fill: #eeba2b; }
 .foot .ctl-foot .wm { font: 500 14px/1 var(--f-brand); letter-spacing: .02em; }
-/* the value network is a navy page too, as the FBC's tool pages are; its card stays paper */
-.net { background: var(--chrome); }
-.net svg, .net .net-bar { --stage: var(--chrome); --stage-hi: var(--chrome-2); --surface: #192040; --surface-2: #232a4d; --ink: var(--chrome-ink); --ink-2: var(--chrome-ink-2); --rule: var(--chrome-line); --accent: var(--ctl-gold); --accent-ink: #141b38; --accent-soft: rgba(238, 186, 43, .18); --halo: rgba(20, 27, 56, .88); color: var(--ink); }
-.net .net-bar .btn { background: transparent; color: var(--chrome-ink); border-color: var(--chrome-line); }
-.net .net-bar .btn:hover { border-color: var(--chrome-ink-2); background: var(--chrome-2); }
-.net .net-bar .seg { background: var(--chrome-2); border-color: var(--chrome-line); }
-.net .net-bar .seg button { color: var(--chrome-ink-2); }
-.net .net-bar .seg button[aria-pressed="true"] { background: var(--chrome-ink); color: var(--chrome); }
 @media (max-width: 860px) {
   .rail { flex-direction: row; justify-content: center; padding: 4px 8px; border-right: 0; border-bottom: 1px solid var(--chrome-line); }
   .rl { flex-direction: row; gap: 6px; padding: 6px 10px; }
@@ -1299,7 +1283,6 @@ details.adv > .block + .block { margin-top: 20px; }
   .rail .sp { display: none; }
   .rail .rl-sm { padding-inline: 8px; }
   .rail { overflow-x: auto; }
-  .stage { margin: 0 8px; }
   .ctl-lock .wm { display: none; }
   .ctl-lock { padding-right: 8px; }
   .side, .insp { margin: 0; border-radius: 0; }
@@ -1418,9 +1401,6 @@ details.adv > .block + .block { margin-top: 20px; }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5h18v12H3zM12 16.5V20M8 20h8"/></svg>
           <span class="t">Present</span>
         </button>
-        <button class="icon-btn" id="btnMore" type="button" aria-haspopup="menu" aria-label="More: theme, keyboard shortcuts, about" title="Theme, keyboard shortcuts (?) and about">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg>
-        </button>
       </div>
     </div>
   </header>
@@ -1430,7 +1410,7 @@ details.adv > .block + .block { margin-top: 20px; }
     <button class="rl" id="dNet" type="button" aria-pressed="false" title="Value network of System One: activities, actors and flows (key N switches)"><svg class="pic" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 14a4.5 4.5 0 1 0 0-9 4.5 4.5 0 1 0 0 9zM38 18a4.5 4.5 0 1 0 0-9 4.5 4.5 0 1 0 0 9zM10 43a4.5 4.5 0 1 0 0-9 4.5 4.5 0 1 0 0 9zM36 43a4.5 4.5 0 1 0 0-9 4.5 4.5 0 1 0 0 9z"/><path d="M24 29a5.5 5.5 0 1 0 0-11 5.5 5.5 0 1 0 0 11z"/><path d="M14.5 12l5.5 5M34 16l-5.5 4M13 34l6-6M32 34l-4-5"/></svg><span>Network</span></button>
     <button class="rl" id="dRec" type="button" aria-pressed="false" title="Recursion: the hierarchy of viable systems, with the System-in-Focus marked (key R)"><svg class="pic" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 45a21 21 0 1 0 0-42 21 21 0 1 0 0 42z"/><path d="M24 37a13 13 0 1 0 0-26 13 13 0 1 0 0 26z"/><path d="M24 29a5 5 0 1 0 0-10 5 5 0 1 0 0 10z"/></svg><span>Recursion</span></button>
     <span class="sp" aria-hidden="true"></span>
-    <button class="rl rl-sm" id="btnModel" type="button" aria-label="Model" aria-haspopup="menu" title="New, open, save, export and example models (Ctrl+O opens, Ctrl+S saves)"><svg class="pic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6.5h6.2l1.6 2.2H21V19H3z"/></svg><span>Model</span></button>
+    <button class="rl rl-sm" id="btnModel" type="button" aria-label="File" aria-haspopup="menu" title="New, open, save, export and examples (Ctrl+O opens, Ctrl+S saves)"><svg class="pic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6.5h6.2l1.6 2.2H21V19H3z"/></svg><span>File</span></button>
     <button class="rl rl-sm" id="tab-model" type="button" aria-label="Settings" aria-controls="pane-model" aria-selected="false" title="Settings: this level, conventions and display"><svg class="pic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8M14 4.5v5M8 14.5v5"/></svg><span>Settings</span></button>
   </nav>
   <div class="stagebar" id="stagebar" role="toolbar" aria-label="View and layers">
@@ -1568,12 +1548,30 @@ details.adv > .block + .block { margin-top: 20px; }
         </div>
       </details>
 
+      <div class="block" id="appBlock">
+        <div class="eyebrow">This explorer</div>
+        <div class="row">
+          <span>Theme</span>
+          <div class="seg small" role="group" aria-label="Theme">
+            <button id="thAuto" type="button" aria-pressed="false" title="Follow the system's light or dark setting">Automatic</button>
+            <button id="thLight" type="button" aria-pressed="true">Light</button>
+            <button id="thDark" type="button" aria-pressed="false">Dark</button>
+          </div>
+        </div>
+        <div class="btn-row wrap">
+          <button class="btn" id="setKeys" type="button" title="Key ?">Keyboard shortcuts</button>
+          <button class="btn" id="setStart" type="button">Start screen</button>
+          <button class="btn" id="setAbout" type="button">About and licence</button>
+          <button class="btn" id="setStudio" type="button">Close the Loop Studio</button>
+        </div>
+      </div>
+
       <div class="block">
         <div class="btn-row">
           <button class="btn" id="resetLevel" type="button">Reset this level</button>
         </div>
         <div class="src" id="saveNote">Changes are saved in this browser.</div>
-        <div class="src">Examples, files and starting again are in the <b>Model</b> menu.</div>
+        <div class="src">Examples, files and starting again are in the <b>File</b> menu, on the left.</div>
       </div>
     </section>
 
@@ -1622,7 +1620,7 @@ details.adv > .block + .block { margin-top: 20px; }
     <section class="pane guide" id="pane-guide" role="tabpanel" aria-labelledby="tab-guide" hidden>
       <div class="block">
         <h3>Three views of one model</h3>
-        <p>The <b>Model</b> menu at the top left starts a blank model, opens one from a file, saves this one to a file (Ctrl S), and opens the worked examples as complete models. Each replaces the whole model and offers Undo.</p>
+        <p>The <b>File</b> menu on the left starts a blank model, opens one from a file, saves this one to a file (Ctrl S), and opens the worked examples as complete models. Each replaces the whole model and offers Undo.</p>
         <p>The toolbar switches between three views. <b>VSM</b> draws Beer's diagram in 2D or 3D. <b>Value network</b> maps the primary activities of System One, the actors around them and the flows between them. <b>Recursion</b> shows the hierarchy of viable systems, with the System-in-Focus marked. All three edit the same model, and the System-in-Focus is the same in each. This panel holds the settings and data: the Settings tab for the level, labels, conventions and colours, the Flows tab for what travels on each channel. <b>Method</b> in the toolbar shows the four steps (purpose, value network, recursion, VSM) beside whichever view is open. In every view, wide pale ribbons with broad arrowheads are value flows (operational linkages, and exchanges between an operation and its environment); thin lines are Beer's cybernetic channels. <b>Value flows</b> in Settings draws them as thin lines like every other channel instead. Environmental intersects are left undrawn for now.</p>
       </div>
       <div class="block">
@@ -1646,7 +1644,7 @@ details.adv > .block + .block { margin-top: 20px; }
         <h3>Channels in this model</h3>
         <p>Beer lists six vertical channels in <i>Diagnosing the System</i>: Corporate Intervention, the Resource Bargain (with accountability), operational linkages, environmental intersects, System Two, and audit. The central command axis is drawn as two lines, Corporate Intervention and the Resource Bargain, running from System Three to each local management, which is the operation's own metasystem. The Three-Star audit is the sporadic exception that reaches the operations directly, from the environment side. The algedonic signal rises from every local management parallel to the Resource Bargain, behind Systems Three, Four and Five, to System Five; in 3D it runs on a plane behind the model.</p>
         <p>System Five links to System Four and monitors the Three–Four homeostat; it has no direct line to System Three.</p>
-        <p>Two extensions can be switched on or off in the Model panel: System Four feeding the Resource Bargain, which reads the command axis as anticipatory, and a direct link between System One and System Four. Neither appears in the commonly reproduced diagram.</p>
+        <p>Two extensions can be switched on or off in Settings: System Four feeding the Resource Bargain, which reads the command axis as anticipatory, and a direct link between System One and System Four. Neither appears in the commonly reproduced diagram.</p>
         <p>The drawing convention switches between a square metasystem box holding 3, 3*, 4, 5 and the System Two centre, with local managements tilted 45 degrees, and a rhombus metasystem with upright local managements. The System Two centre sits inside the metasystem; the Bridge option draws it on the boundary and, in 3D, puts all of System Two on its own plane between operations and metasystem. It is an interpretive option, prompted by a Stanford Medicine study (<i>Nature Neuroscience</i>, September 2026) reporting that the forebrain and midbrain arise from one progenitor lineage and the hindbrain from another.</p>
       </div>
       <div class="block">
@@ -1695,7 +1693,7 @@ details.adv > .block + .block { margin-top: 20px; }
   <div class="scrim" id="scrim"></div>
 
   <main class="stage" id="stage">
-    <canvas id="gl" tabindex="0" aria-label="Viable System Model view. Use the Model panel's element list for keyboard access."></canvas>
+    <canvas id="gl" tabindex="0" aria-label="Viable System Model view. Use the Register list in the left panel for keyboard access."></canvas>
     <div class="labels" id="labels" aria-hidden="true"></div>
     <div class="labels" id="hlabels" aria-hidden="true"></div>
     <div class="net" id="net" hidden>
@@ -1927,7 +1925,9 @@ details.adv > .block + .block { margin-top: 20px; }
     </div>
   </aside>
   <footer class="foot">
-    <span class="cred"><span class="fx">The Viable System Model after Stafford Beer. </span>Explorer by <a href="https://www.linkedin.com/in/panagio" target="_blank" rel="noopener">Panagiotis Panagiotakopoulos</a>, code AGPL-3.0, text CC BY-SA 4.0. <button class="linkish foot-about" type="button" id="footAbout">About and licence</button></span>
+    <span class="cred"><span class="fx">The Viable System Model after Stafford Beer. </span>Explorer by <a href="https://www.linkedin.com/in/panagio" target="_blank" rel="noopener">Panagiotis Panagiotakopoulos</a>, code AGPL-3.0, text CC BY-SA 4.0.</span>
+    <button class="linkish foot-about" type="button" id="footAbout">About and licence</button>
+    <span class="foot-sp" aria-hidden="true"></span>
     <a class="ctl-foot" href="https://closetheloop.gr" target="_blank" rel="noopener" aria-label="Explorer © 2026 close the loop"><svg viewBox="0 0 800 800" aria-hidden="true"><circle class="arc" cx="400" cy="400" r="297" pathLength="360" transform="rotate(-36 400 400)"/><circle class="arc-c" cx="395" cy="399" r="75.6" pathLength="360" transform="rotate(25.4 395 399)"/><circle class="dot" cx="573" cy="168" r="16"/></svg><span class="fx">Explorer ©&nbsp;2026</span><span class="wm">close the loop</span></a>
   </footer>
 </div>
@@ -7248,24 +7248,14 @@ function openStudio() {
 }
 $('#ctlLock').href = 'https://studio.closetheloop.gr/';
 $('#ctlLock').addEventListener('click', e => { e.preventDefault(); openStudio(); });
-// More menu: theme, shortcuts, about, start again
-$('#btnMore').addEventListener('click', () => {
-  if (!ctx.hidden && ctxAt && ctxAt.more) { closeCtx(); return; }
-  const b = $('#btnMore').getBoundingClientRect(), t = prefs.theme || 'light';
-  showCtxMenu(Math.max(8, b.right - 240), b.bottom + 6, '', [
-    { sub: 'Theme' },
-    { ic: '◐', text: 'Automatic', checked: t === 'auto', fn: () => setThemePref('auto') },
-    { ic: '○', text: 'Light', checked: t === 'light', fn: () => setThemePref('light') },
-    { ic: '●', text: 'Dark', checked: t === 'dark', fn: () => setThemePref('dark') },
-    { sep: true },
-    { ic: '⌨', text: 'Keyboard shortcuts', kbd: '?', fn: () => openModalById('keysSheet') },
-    { ic: '▭', text: 'Presentation mode', kbd: 'P', fn: () => setPresenting(true) },
-    { ic: '⌂', text: 'Start screen', fn: () => openModalById('welcome') },
-    { ic: '↗', text: 'Close the Loop Studio', fn: openStudio },
-    { ic: 'i', text: 'About and licence', fn: () => openModalById('about') }
-  ], null);
-  ctxAt.more = true;
-});
+// The explorer's own settings sit in Settings (Panos, Nov 27: no separate ⋯ menu)
+const syncThemeSeg = () => { const t = prefs.theme || 'light'; [['thAuto', 'auto'], ['thLight', 'light'], ['thDark', 'dark']].forEach(([id, v]) => $('#' + id).setAttribute('aria-pressed', String(t === v))); };
+[['thAuto', 'auto'], ['thLight', 'light'], ['thDark', 'dark']].forEach(([id, v]) => $('#' + id).addEventListener('click', () => { setThemePref(v); syncThemeSeg(); }));
+syncThemeSeg();
+$('#setKeys').addEventListener('click', () => openModalById('keysSheet'));
+$('#setStart').addEventListener('click', () => openModalById('welcome'));
+$('#setAbout').addEventListener('click', () => openModalById('about'));
+$('#setStudio').addEventListener('click', openStudio);
 
 /* ---------- focus keys: one key per system, after Beer's numbering ---------- */
 const opIds = pre => Array.from({ length: level().opCount }, (_, i) => pre + i);
